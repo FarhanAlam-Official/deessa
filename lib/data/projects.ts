@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { createClient as createStaticClient } from "@/lib/supabase/static"
 
 export async function getPublishedProjects() {
   const supabase = await createClient()
@@ -13,6 +14,21 @@ export async function getPublishedProjects() {
     return []
   }
   return data || []
+}
+
+export function getPublishedProjectsStatic() {
+  const supabase = createStaticClient()
+  return supabase
+    .from("projects")
+    .select("slug")
+    .eq("is_published", true)
+    .then(({ data, error }) => {
+      if (error) {
+        console.error("Error fetching projects:", error)
+        return []
+      }
+      return data || []
+    })
 }
 
 export async function getProjectsByCategory(category: string) {
