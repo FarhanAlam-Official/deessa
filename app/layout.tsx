@@ -12,15 +12,7 @@ export const metadata: Metadata = {
     "We are dedicated to sustainable development, quality education, and social upliftment for the most vulnerable in Nepal.",
   generator: "v0.app",
   icons: {
-    icon: [
-      {
-        url: "/favicon.png",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
+    icon: "/favicon.png",
     apple: "/favicon.png",
   },
 }
