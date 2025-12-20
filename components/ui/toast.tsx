@@ -1,129 +1,257 @@
-'use client'
+import { toast, type ToastT } from 'sonner';
+import { cn } from '@/lib/utils';
 
-import * as React from 'react'
-import * as ToastPrimitives from '@radix-ui/react-toast'
-import { cva, type VariantProps } from 'class-variance-authority'
-import { X } from 'lucide-react'
-
-import { cn } from '@/lib/utils'
-
-const ToastProvider = ToastPrimitives.Provider
-
-const ToastViewport = React.forwardRef<
-  React.ElementRef<typeof ToastPrimitives.Viewport>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>
->(({ className, ...props }, ref) => (
-  <ToastPrimitives.Viewport
-    ref={ref}
-    className={cn(
-      'fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]',
-      className,
-    )}
-    {...props}
-  />
-))
-ToastViewport.displayName = ToastPrimitives.Viewport.displayName
-
-const toastVariants = cva(
-  'group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full',
-  {
-    variants: {
-      variant: {
-        default: 'border bg-background text-foreground',
-        destructive:
-          'destructive group border-destructive bg-destructive text-destructive-foreground',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-    },
-  },
-)
-
-const Toast = React.forwardRef<
-  React.ElementRef<typeof ToastPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
-    VariantProps<typeof toastVariants>
->(({ className, variant, ...props }, ref) => {
-  return (
-    <ToastPrimitives.Root
-      ref={ref}
-      className={cn(toastVariants({ variant }), className)}
-      {...props}
-    />
-  )
-})
-Toast.displayName = ToastPrimitives.Root.displayName
-
-const ToastAction = React.forwardRef<
-  React.ElementRef<typeof ToastPrimitives.Action>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Action>
->(({ className, ...props }, ref) => (
-  <ToastPrimitives.Action
-    ref={ref}
-    className={cn(
-      'inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive',
-      className,
-    )}
-    {...props}
-  />
-))
-ToastAction.displayName = ToastPrimitives.Action.displayName
-
-const ToastClose = React.forwardRef<
-  React.ElementRef<typeof ToastPrimitives.Close>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close>
->(({ className, ...props }, ref) => (
-  <ToastPrimitives.Close
-    ref={ref}
-    className={cn(
-      'absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600',
-      className,
-    )}
-    toast-close=""
-    {...props}
-  >
-    <X className="h-4 w-4" />
-  </ToastPrimitives.Close>
-))
-ToastClose.displayName = ToastPrimitives.Close.displayName
-
-const ToastTitle = React.forwardRef<
-  React.ElementRef<typeof ToastPrimitives.Title>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Title>
->(({ className, ...props }, ref) => (
-  <ToastPrimitives.Title
-    ref={ref}
-    className={cn('text-sm font-semibold', className)}
-    {...props}
-  />
-))
-ToastTitle.displayName = ToastPrimitives.Title.displayName
-
-const ToastDescription = React.forwardRef<
-  React.ElementRef<typeof ToastPrimitives.Description>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Description>
->(({ className, ...props }, ref) => (
-  <ToastPrimitives.Description
-    ref={ref}
-    className={cn('text-sm opacity-90', className)}
-    {...props}
-  />
-))
-ToastDescription.displayName = ToastPrimitives.Description.displayName
-
-type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>
-
-type ToastActionElement = React.ReactElement<typeof ToastAction>
-
-export {
-  type ToastProps,
-  type ToastActionElement,
-  ToastProvider,
-  ToastViewport,
-  Toast,
-  ToastTitle,
-  ToastDescription,
-  ToastClose,
-  ToastAction,
+// Types for toast options
+export interface ToastOptions extends Partial<ToastT> {
+  title?: string;
+  description?: string;
+  duration?: number;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
 }
+
+// Toast types and their configurations
+const toastStyles = {
+  success: {
+    icon: (
+      <div className="rounded-full bg-gradient-to-br from-green-400 to-green-600 p-2 shadow-lg shadow-green-500/30">
+        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+    ),
+    className: 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-100 dark:border-green-800',
+    progressBarClass: 'bg-gradient-to-r from-green-400 to-emerald-500',
+    shadowClass: 'shadow-green-500/30',
+  },
+  error: {
+    icon: (
+      <div className="rounded-full bg-gradient-to-br from-red-400 to-red-600 p-2 shadow-lg shadow-red-500/30">
+        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </div>
+    ),
+    className: 'bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-100 dark:border-red-800',
+    progressBarClass: 'bg-gradient-to-r from-red-400 to-rose-500',
+    shadowClass: 'shadow-red-500/30',
+  },
+  warning: {
+    icon: (
+      <div className="rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 p-2 shadow-lg shadow-yellow-500/30">
+        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+    ),
+    className: 'bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border-yellow-100 dark:border-yellow-800',
+    progressBarClass: 'bg-gradient-to-r from-yellow-400 to-amber-500',
+    shadowClass: 'shadow-yellow-500/30',
+  },
+  info: {
+    icon: (
+      <div className="rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 p-2 shadow-lg shadow-blue-500/30">
+        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+    ),
+    className: 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-100 dark:border-blue-800',
+    progressBarClass: 'bg-gradient-to-r from-blue-400 to-indigo-500',
+    shadowClass: 'shadow-blue-500/30',
+  },
+} as const;
+
+// Custom toast component with progress bar
+const ToastMessage = ({ 
+  title, 
+  description, 
+  type = 'info',
+  duration = 2500,
+  onAutoClose 
+}: { 
+  title: string; 
+  description?: string; 
+  type: keyof typeof toastStyles;
+  duration: number;
+  onAutoClose?: () => void;
+}) => {
+  const style = toastStyles[type];
+
+  return (
+    <div className={cn(
+      "relative flex w-full items-start gap-4 overflow-hidden rounded-xl p-4",
+      "border border-opacity-50 backdrop-blur-sm",
+      "shadow-lg transition-all duration-300 hover:shadow-xl",
+      "animate-in slide-in-from-top-2 fade-in-0 zoom-in-95",
+      style.className,
+      style.shadowClass
+    )}>
+      {/* Icon with animated gradient background */}
+      <div className="flex-shrink-0 animate-in zoom-in-50 duration-300">
+        {style.icon}
+      </div>
+
+      {/* Content with animated entrance */}
+      <div className="flex-1 min-w-0 animate-in slide-in-from-right-1 duration-300">
+        <h3 className="font-semibold leading-5 tracking-tight mb-1">
+          {title}
+        </h3>
+        {description && (
+          <p className="text-sm opacity-90 leading-relaxed">
+            {description}
+          </p>
+        )}
+      </div>
+
+      {/* Animated progress bar */}
+      <div 
+        className={cn(
+          "absolute bottom-0 left-0 h-1",
+          style.progressBarClass
+        )}
+        style={{
+          width: '100%',
+          transition: `width ${duration}ms linear`,
+        }}
+        ref={(el) => {
+          if (el) {
+            // Trigger the animation by setting width to 0 after a short delay
+            setTimeout(() => {
+              el.style.width = '0%';
+            }, 10);
+          }
+        }}
+        onTransitionEnd={onAutoClose}
+      />
+    </div>
+  );
+};
+
+// Main toast functions
+export const showToast = {
+  /**
+   * Show a success toast notification
+   */
+  success: (options: ToastOptions) => {
+    return toast.custom((t) => (
+      <ToastMessage
+        type="success"
+        title={options.title || 'Success'}
+        description={options.description}
+        duration={options.duration || 2500}
+        onAutoClose={() => toast.dismiss(t)}
+      />
+    ), {
+      duration: options.duration || 2500,
+      ...options,
+    });
+  },
+
+  /**
+   * Show an error toast notification
+   */
+  error: (options: ToastOptions) => {
+    return toast.custom((t) => (
+      <ToastMessage
+        type="error"
+        title={options.title || 'Error'}
+        description={options.description}
+        duration={options.duration || 2500}
+        onAutoClose={() => toast.dismiss(t)}
+      />
+    ), {
+      duration: options.duration || 2500,
+      ...options,
+    });
+  },
+
+  /**
+   * Show a warning toast notification
+   */
+  warning: (options: ToastOptions) => {
+    return toast.custom((t) => (
+      <ToastMessage
+        type="warning"
+        title={options.title || 'Warning'}
+        description={options.description}
+        duration={options.duration || 2500}
+        onAutoClose={() => toast.dismiss(t)}
+      />
+    ), {
+      duration: options.duration || 2500,
+      ...options,
+    });
+  },
+
+  /**
+   * Show an info toast notification
+   */
+  info: (options: ToastOptions) => {
+    return toast.custom((t) => (
+      <ToastMessage
+        type="info"
+        title={options.title || 'Info'}
+        description={options.description}
+        duration={options.duration || 2500}
+        onAutoClose={() => toast.dismiss(t)}
+      />
+    ), {
+      duration: options.duration || 2500,
+      ...options,
+    });
+  },
+
+  /**
+   * Dismiss all currently visible toasts
+   */
+  dismiss: () => toast.dismiss(),
+
+  /**
+   * Show a promise-based toast that updates based on the promise state
+   */
+  promise: <T,>(
+    promise: Promise<T>,
+    messages: {
+      loading: string;
+      success: string | ((data: T) => string);
+      error: string | ((error: unknown) => string);
+    },
+    options?: ToastOptions
+  ) => {
+    const loadingToast = (
+      <ToastMessage
+        type="info"
+        title="Loading"
+        description={messages.loading}
+        duration={options?.duration || 2500}
+      />
+    );
+
+    return toast.promise(promise, {
+      loading: loadingToast,
+      success: (data) => (
+        <ToastMessage
+          type="success"
+          title="Success"
+          description={typeof messages.success === 'function' 
+            ? messages.success(data)
+            : messages.success}
+          duration={options?.duration || 4000}
+        />
+      ),
+      error: (error) => (
+        <ToastMessage
+          type="error"
+          title="Error"
+          description={typeof messages.error === 'function'
+            ? messages.error(error)
+            : messages.error}
+          duration={options?.duration || 5000}
+        />
+      ),
+    });
+  },
+};
