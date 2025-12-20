@@ -18,7 +18,13 @@ import {
   ArrowRight,
   Download,
   Copy,
-  Check
+  Check,
+  Leaf,
+  GraduationCap,
+  Droplet,
+  Sparkles,
+  Loader2,
+  Mail
 } from "lucide-react"
 import { useState } from "react"
 
@@ -31,13 +37,28 @@ export default function BrandToolkitDemo() {
     setTimeout(() => setCopiedColor(null), 2000)
   }
 
-  const colors = [
-    { name: "Primary", var: "--primary", value: "oklch(0.55 0.22 25)", hex: "#EA2A33", desc: "Main brand color - Vibrant Red" },
+  const brandColors = [
+    { name: "Ocean Blue", var: "--brand-primary", rgb: "63 171 222", hex: "#3FABDE", desc: "Primary brand color - Trust & Hope", icon: Droplet },
+    { name: "Deep Ocean", var: "--brand-primary-dark", rgb: "11 95 138", hex: "#0B5F8A", desc: "Hover states & emphasis", icon: Droplet },
+  ]
+
+  const pillarColors = [
+    { name: "Empowerment", var: "--accent-empowerment", rgb: "214 51 108", hex: "#D6336C", desc: "Women & Community", icon: Heart },
+    { name: "Environment", var: "--accent-environment", rgb: "149 193 31", hex: "#95C11F", desc: "Sustainability", icon: Leaf },
+    { name: "Education", var: "--accent-education", rgb: "245 158 11", hex: "#F59E0B", desc: "Learning & Growth", icon: GraduationCap },
+  ]
+
+  const semanticColors = [
+    { name: "Success", var: "--success", rgb: "22 163 74", hex: "#16A34A", desc: "Success messages & confirmations" },
+    { name: "Warning", var: "--warning", rgb: "245 158 11", hex: "#F59E0B", desc: "Warnings & attention needed" },
+    { name: "Danger", var: "--danger", rgb: "220 38 38", hex: "#DC2626", desc: "Errors & critical actions" },
+    { name: "Info", var: "--info", rgb: "37 99 235", hex: "#2563EB", desc: "Informational content" },
+  ]
+
+  const neutralColors = [
     { name: "Background", var: "--background", value: "oklch(0.98 0.005 20)", hex: "#FAFAFA", desc: "Page background" },
     { name: "Foreground", var: "--foreground", value: "oklch(0.15 0.02 20)", hex: "#1A1A1A", desc: "Primary text" },
-    { name: "Secondary", var: "--secondary", value: "oklch(0.97 0.005 20)", hex: "#F5F5F5", desc: "Secondary backgrounds" },
     { name: "Muted", var: "--muted", value: "oklch(0.97 0.005 20)", hex: "#F5F5F5", desc: "Muted backgrounds" },
-    { name: "Accent", var: "--accent", value: "oklch(0.97 0.005 20)", hex: "#F5F5F5", desc: "Accent elements" },
     { name: "Border", var: "--border", value: "oklch(0.93 0.005 20)", hex: "#E8E8E8", desc: "Borders and dividers" },
   ]
 
@@ -68,37 +89,175 @@ export default function BrandToolkitDemo() {
 
       <div className="container mx-auto px-4 py-12 space-y-16">
         
-        {/* Color Palette */}
-        <section id="colors">
+        {/* Hero Section */}
+        <section className="text-center py-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-light rounded-full mb-6">
+            <Sparkles className="h-4 w-4 text-brand-primary" />
+            <span className="text-sm font-medium text-brand-primary-dark">Ocean Blue Theme</span>
+          </div>
+          <h2 className="text-4xl font-bold mb-4">Deesha Foundation Design System</h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            A refreshed identity that embodies trust, hope, and progress. 
+            Our new color palette reflects our commitment to sustainable change.
+          </p>
+        </section>
+
+        {/* Brand Colors */}
+        <section id="brand-colors">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-2">Color Palette</h2>
-            <p className="text-muted-foreground">Our brand colors using modern OKLCH color space for consistent, vibrant colors across all displays</p>
+            <h2 className="text-2xl font-bold mb-2">Primary Brand Colors</h2>
+            <p className="text-muted-foreground">Our core ocean blue palette - representing trust, hope, and progress</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {colors.map((color) => (
-              <Card key={color.name} className="overflow-hidden hover:shadow-lg transition-shadow">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {brandColors.map((color) => {
+              const Icon = color.icon
+              return (
+                <Card key={color.name} className="overflow-hidden hover:shadow-lg transition-all">
+                  <div 
+                    className="h-40 w-full relative group cursor-pointer flex items-center justify-center"
+                    style={{ backgroundColor: `rgb(${color.rgb})` }}
+                    onClick={() => copyToClipboard(color.rgb, color.name)}
+                  >
+                    <Icon className="h-16 w-16 text-white opacity-80" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                      {copiedColor === color.name ? (
+                        <Check className="h-8 w-8 text-white" />
+                      ) : (
+                        <Copy className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      )}
+                    </div>
+                  </div>
+                  <CardContent className="p-6">
+                    <h3 className="font-bold text-lg mb-2">{color.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-4">{color.desc}</p>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Hex:</span>
+                        <code className="font-mono font-semibold">{color.hex}</code>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">RGB:</span>
+                        <code className="font-mono font-semibold">{color.rgb}</code>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">CSS Var:</span>
+                        <code className="font-mono text-xs">{color.var}</code>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* Pillar Colors */}
+        <section id="pillar-colors">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-2">Three Pillar Colors</h2>
+            <p className="text-muted-foreground">Accent colors representing our core programs: Empowerment, Environment, Education</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {pillarColors.map((color) => {
+              const Icon = color.icon
+              return (
+                <Card key={color.name} className="overflow-hidden hover:shadow-lg transition-all">
+                  <div 
+                    className="h-32 w-full relative group cursor-pointer flex items-center justify-center"
+                    style={{ backgroundColor: `rgb(${color.rgb})` }}
+                    onClick={() => copyToClipboard(color.rgb, color.name)}
+                  >
+                    <Icon className="h-12 w-12 text-white" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                      {copiedColor === color.name ? (
+                        <Check className="h-6 w-6 text-white" />
+                      ) : (
+                        <Copy className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      )}
+                    </div>
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-bold mb-1">{color.name}</h3>
+                    <p className="text-xs text-muted-foreground mb-3">{color.desc}</p>
+                    <div className="space-y-1 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Hex:</span>
+                        <code className="font-mono font-semibold">{color.hex}</code>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">RGB:</span>
+                        <code className="font-mono">{color.rgb}</code>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* Semantic Colors */}
+        <section id="semantic-colors">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-2">Semantic Colors</h2>
+            <p className="text-muted-foreground">Functional colors for UI states and feedback</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {semanticColors.map((color) => (
+              <Card key={color.name} className="overflow-hidden hover:shadow-lg transition-all">
                 <div 
-                  className="h-32 w-full relative group cursor-pointer"
-                  style={{ backgroundColor: `var(${color.var})` }}
-                  onClick={() => copyToClipboard(color.value, color.name)}
+                  className="h-24 w-full relative group cursor-pointer"
+                  style={{ backgroundColor: `rgb(${color.rgb})` }}
+                  onClick={() => copyToClipboard(color.rgb, color.name)}
                 >
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                     {copiedColor === color.name ? (
-                      <Check className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <Check className="h-6 w-6 text-white" />
                     ) : (
-                      <Copy className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <Copy className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                     )}
                   </div>
                 </div>
                 <CardContent className="p-4">
                   <h3 className="font-semibold mb-1">{color.name}</h3>
                   <p className="text-xs text-muted-foreground mb-2">{color.desc}</p>
-                  <div className="space-y-1 text-xs font-mono">
-                    <div className="text-muted-foreground">{color.var}</div>
-                    <div className="text-muted-foreground">{color.value}</div>
-                    <div className="text-muted-foreground">{color.hex}</div>
+                  <code className="text-xs font-mono">{color.hex}</code>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Neutral Colors */}
+        <section id="neutral-colors">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-2">Neutral Colors</h2>
+            <p className="text-muted-foreground">Foundation colors for backgrounds, text, and borders</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {neutralColors.map((color) => (
+              <Card key={color.name} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div 
+                  className="h-20 w-full relative group cursor-pointer"
+                  style={{ backgroundColor: `var(${color.var})` }}
+                  onClick={() => copyToClipboard(color.value, color.name)}
+                >
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
+                    {copiedColor === color.name ? (
+                      <Check className="h-6 w-6 text-foreground" />
+                    ) : (
+                      <Copy className="h-6 w-6 text-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    )}
                   </div>
+                </div>
+                <CardContent className="p-4">
+                  <h3 className="font-semibold mb-1">{color.name}</h3>
+                  <p className="text-xs text-muted-foreground mb-2">{color.desc}</p>
+                  <code className="text-xs font-mono">{color.hex}</code>
                 </CardContent>
               </Card>
             ))}
@@ -177,16 +336,63 @@ export default function BrandToolkitDemo() {
         <section id="buttons">
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-2">Buttons</h2>
-            <p className="text-muted-foreground">Interactive buttons with hover states and variants</p>
+            <p className="text-muted-foreground">Interactive elements with brand colors and various states</p>
           </div>
 
-          <Tabs defaultValue="variants">
+          <Tabs defaultValue="brand">
             <TabsList>
+              <TabsTrigger value="brand">Brand Colors</TabsTrigger>
+              <TabsTrigger value="pillars">Pillars</TabsTrigger>
               <TabsTrigger value="variants">Variants</TabsTrigger>
               <TabsTrigger value="sizes">Sizes</TabsTrigger>
               <TabsTrigger value="states">States</TabsTrigger>
-              <TabsTrigger value="icons">With Icons</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="brand" className="mt-6">
+              <Card>
+                <CardContent className="p-6 space-y-4">
+                  <div>
+                    <h3 className="text-sm font-semibold mb-3">Primary Brand</h3>
+                    <div className="flex flex-wrap gap-3">
+                      <Button className="bg-brand-primary hover:bg-brand-primary-dark text-white">
+                        <Droplet className="h-4 w-4 mr-2" />
+                        Ocean Blue
+                      </Button>
+                      <Button className="bg-brand-primary-dark hover:bg-brand-primary text-white">
+                        Deep Ocean
+                      </Button>
+                      <Button variant="outline" className="border-brand-primary text-brand-primary hover:bg-primary-light">
+                        Outline
+                      </Button>
+                      <Button variant="ghost" className="text-brand-primary hover:text-brand-primary-dark hover:bg-primary-light">
+                        Ghost
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="pillars" className="mt-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex flex-wrap gap-3">
+                    <Button className="bg-empowerment hover:opacity-90 text-white">
+                      <Heart className="h-4 w-4 mr-2" />
+                      Empowerment
+                    </Button>
+                    <Button className="bg-environment hover:opacity-90 text-white">
+                      <Leaf className="h-4 w-4 mr-2" />
+                      Environment
+                    </Button>
+                    <Button className="bg-education hover:opacity-90 text-white">
+                      <GraduationCap className="h-4 w-4 mr-2" />
+                      Education
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
             <TabsContent value="variants" className="mt-6">
               <Card>
@@ -207,17 +413,11 @@ export default function BrandToolkitDemo() {
               <Card>
                 <CardContent className="p-6">
                   <div className="flex flex-wrap items-center gap-4">
-                    <Button size="sm">Small</Button>
-                    <Button size="default">Default</Button>
-                    <Button size="lg">Large</Button>
-                    <Button size="icon">
+                    <Button size="sm" className="bg-brand-primary hover:bg-brand-primary-dark text-white">Small</Button>
+                    <Button size="default" className="bg-brand-primary hover:bg-brand-primary-dark text-white">Default</Button>
+                    <Button size="lg" className="bg-brand-primary hover:bg-brand-primary-dark text-white">Large</Button>
+                    <Button size="icon" className="bg-brand-primary hover:bg-brand-primary-dark text-white">
                       <Heart className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon-sm">
-                      <Heart className="h-3 w-3" />
-                    </Button>
-                    <Button size="icon-lg">
-                      <Heart className="h-5 w-5" />
                     </Button>
                   </div>
                 </CardContent>
@@ -228,34 +428,11 @@ export default function BrandToolkitDemo() {
               <Card>
                 <CardContent className="p-6">
                   <div className="flex flex-wrap gap-4">
-                    <Button>Normal</Button>
-                    <Button className="hover:bg-primary/90">Hover (hover over me)</Button>
-                    <Button disabled>Disabled</Button>
-                    <Button className="focus-visible:ring-2">Focused</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="icons" className="mt-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex flex-wrap gap-4">
-                    <Button>
-                      <Heart className="mr-2 h-4 w-4" />
-                      With Icon
-                    </Button>
-                    <Button>
-                      Next
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                    <Button variant="outline">
-                      <Download className="mr-2 h-4 w-4" />
-                      Download
-                    </Button>
-                    <Button variant="secondary">
-                      <Users className="mr-2 h-4 w-4" />
-                      Team
+                    <Button className="bg-brand-primary hover:bg-brand-primary-dark text-white">Normal</Button>
+                    <Button disabled className="bg-brand-primary text-white">Disabled</Button>
+                    <Button className="bg-brand-primary hover:bg-brand-primary-dark text-white">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Loading
                     </Button>
                   </div>
                 </CardContent>
@@ -264,23 +441,103 @@ export default function BrandToolkitDemo() {
           </Tabs>
         </section>
 
+        {/* Gradients */}
+        <section id="gradients">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-2">Gradients</h2>
+            <p className="text-muted-foreground">Pre-built gradient utilities for visual interest</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="overflow-hidden">
+              <div className="gradient-ocean h-48 flex items-center justify-center">
+                <div className="text-white text-center">
+                  <Droplet className="h-12 w-12 mx-auto mb-2 opacity-90" />
+                  <h3 className="font-bold text-lg">Ocean Gradient</h3>
+                  <code className="text-xs opacity-90">.gradient-ocean</code>
+                </div>
+              </div>
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground">
+                  Primary to dark - perfect for hero sections and CTAs
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="overflow-hidden">
+              <div className="gradient-pillars h-48 flex items-center justify-center">
+                <div className="text-white text-center">
+                  <Sparkles className="h-12 w-12 mx-auto mb-2 opacity-90" />
+                  <h3 className="font-bold text-lg">Pillars Gradient</h3>
+                  <code className="text-xs opacity-90">.gradient-pillars</code>
+                </div>
+              </div>
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground">
+                  Empowerment → Environment → Education
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
         {/* Badges */}
         <section id="badges">
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-2">Badges</h2>
-            <p className="text-muted-foreground">Status indicators and labels</p>
+            <p className="text-muted-foreground">Status indicators and labels with brand colors</p>
           </div>
 
           <Card>
-            <CardContent className="p-6">
-              <div className="flex flex-wrap gap-3">
-                <Badge>Default</Badge>
-                <Badge variant="secondary">Secondary</Badge>
-                <Badge variant="outline">Outline</Badge>
-                <Badge variant="destructive">Destructive</Badge>
-                <Badge className="bg-green-500 text-white hover:bg-green-600">Success</Badge>
-                <Badge className="bg-blue-500 text-white hover:bg-blue-600">Info</Badge>
-                <Badge className="bg-yellow-500 text-white hover:bg-yellow-600">Warning</Badge>
+            <CardContent className="p-6 space-y-6">
+              <div>
+                <h3 className="text-sm font-semibold mb-3">Brand Badges</h3>
+                <div className="flex flex-wrap gap-3">
+                  <Badge className="bg-brand-primary text-white">Primary</Badge>
+                  <Badge className="bg-brand-primary-dark text-white">Primary Dark</Badge>
+                  <Badge variant="outline" className="border-brand-primary text-brand-primary">Outline</Badge>
+                  <Badge className="bg-primary-light text-brand-primary-dark">Soft</Badge>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold mb-3">Pillar Badges</h3>
+                <div className="flex flex-wrap gap-3">
+                  <Badge className="bg-empowerment text-white">
+                    <Heart className="h-3 w-3 mr-1" />
+                    Empowerment
+                  </Badge>
+                  <Badge className="bg-environment text-white">
+                    <Leaf className="h-3 w-3 mr-1" />
+                    Environment
+                  </Badge>
+                  <Badge className="bg-education text-white">
+                    <GraduationCap className="h-3 w-3 mr-1" />
+                    Education
+                  </Badge>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold mb-3">Semantic Badges</h3>
+                <div className="flex flex-wrap gap-3">
+                  <Badge className="bg-green-500 text-white hover:bg-green-600">
+                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                    Success
+                  </Badge>
+                  <Badge className="bg-blue-500 text-white hover:bg-blue-600">
+                    <Info className="h-3 w-3 mr-1" />
+                    Info
+                  </Badge>
+                  <Badge className="bg-yellow-500 text-white hover:bg-yellow-600">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    Warning
+                  </Badge>
+                  <Badge variant="destructive">
+                    <XCircle className="h-3 w-3 mr-1" />
+                    Danger
+                  </Badge>
+                </div>
               </div>
             </CardContent>
           </Card>

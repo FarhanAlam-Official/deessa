@@ -4,39 +4,77 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Custom Dessa Foundation color palette - red primary */
+  /* ================================
+     DEESHA FOUNDATION - OCEAN BLUE THEME
+  ================================= */
+  
+  /* Primary Brand Colors */
+  --brand-primary: 63 171 222;           /* #3FABDE - Ocean Blue */
+  --brand-primary-dark: 11 95 138;       /* #0B5F8A - Deep Ocean */
+  --primary-light: 232 246 252;          /* #E8F6FC - Light blue bg */
+  
+  /* Pillar Accent Colors */
+  --accent-empowerment: 214 51 108;      /* #D6336C - Women & Community */
+  --accent-environment: 149 193 31;      /* #95C11F - Sustainability */
+  --accent-education: 245 158 11;        /* #F59E0B - Learning */
+  
+  /* Semantic Colors */
+  --success: 22 163 74;                  /* #16A34A - green-600 */
+  --warning: 245 158 11;                 /* #F59E0B - amber-500 */
+  --danger: 220 38 38;                   /* #DC2626 - red-600 */
+  --info: 37 99 235;                     /* #2563EB - blue-600 */
+  
+  /* Neutrals */
+  --bg-white: 255 255 255;
+  --bg-soft: 248 249 250;
+  --text-main: 33 37 41;
+  --text-muted: 108 117 125;
+  
+  /* Core UI Tokens (converted to oklch for compatibility) */
   --background: oklch(0.98 0.005 20);
   --foreground: oklch(0.15 0.02 20);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.15 0.02 20);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0.02 20);
-  --primary: oklch(0.55 0.22 25);
+  
+  /* Primary - Ocean Blue */
+  --primary: oklch(0.68 0.11 230);       /* Ocean Blue #3FABDE */
   --primary-foreground: oklch(1 0 0);
+  
   --secondary: oklch(0.97 0.005 20);
   --secondary-foreground: oklch(0.15 0.02 20);
   --muted: oklch(0.97 0.005 20);
   --muted-foreground: oklch(0.5 0.05 20);
   --accent: oklch(0.97 0.005 20);
   --accent-foreground: oklch(0.15 0.02 20);
-  --destructive: oklch(0.55 0.22 25);
+  
+  /* Destructive - keep red for errors */
+  --destructive: oklch(0.55 0.22 25);    /* Red for errors/danger */
   --destructive-foreground: oklch(1 0 0);
+  
   --border: oklch(0.93 0.005 20);
   --input: oklch(0.93 0.005 20);
-  --ring: oklch(0.55 0.22 25);
-  --radius: 1rem;
+  
+  /* Ring - Ocean Blue */
+  --ring: oklch(0.68 0.11 230);
+  --radius: 0.75rem;
 
   /* Custom semantic tokens */
   --surface: oklch(1 0 0);
   --foreground-muted: oklch(0.5 0.05 20);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  
+  /* Chart colors - updated with new theme */
+  --chart-1: oklch(0.68 0.11 230);       /* Ocean Blue */
+  --chart-2: oklch(0.65 0.15 345);       /* Empowerment Pink */
+  --chart-3: oklch(0.75 0.15 120);       /* Environment Green */
+  --chart-4: oklch(0.75 0.15 75);        /* Education Amber */
+  --chart-5: oklch(0.55 0.22 25);        /* Accent Red */
+  
+  /* Sidebar - Ocean Blue theme */
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary: oklch(0.68 0.11 230);     /* Ocean Blue */
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
@@ -45,36 +83,46 @@
 }
 
 .dark {
+  /* Dark mode adjustments */
   --background: oklch(0.18 0.02 20);
   --foreground: oklch(0.98 0.005 20);
   --card: oklch(0.22 0.02 20);
   --card-foreground: oklch(0.98 0.005 20);
   --popover: oklch(0.22 0.02 20);
   --popover-foreground: oklch(0.98 0.005 20);
-  --primary: oklch(0.55 0.22 25);
+  
+  /* Primary - slightly adjusted for dark mode */
+  --primary: oklch(0.65 0.10 230);       /* Slightly darker ocean blue */
   --primary-foreground: oklch(1 0 0);
+  
   --secondary: oklch(0.25 0.02 20);
   --secondary-foreground: oklch(0.98 0.005 20);
   --muted: oklch(0.25 0.02 20);
   --muted-foreground: oklch(0.7 0.02 20);
   --accent: oklch(0.25 0.02 20);
   --accent-foreground: oklch(0.98 0.005 20);
+  
+  /* Destructive stays red */
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(1 0 0);
+  
   --border: oklch(0.3 0.02 20);
   --input: oklch(0.3 0.02 20);
-  --ring: oklch(0.55 0.22 25);
+  --ring: oklch(0.65 0.10 230);
 
   --surface: oklch(0.22 0.02 20);
   --foreground-muted: oklch(0.6 0.02 20);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  
+  /* Chart colors for dark mode */
+  --chart-1: oklch(0.65 0.10 230);       /* Ocean Blue */
+  --chart-2: oklch(0.62 0.14 345);       /* Empowerment Pink */
+  --chart-3: oklch(0.72 0.14 120);       /* Environment Green */
+  --chart-4: oklch(0.72 0.14 75);        /* Education Amber */
+  --chart-5: oklch(0.55 0.22 25);        /* Accent Red */
+  
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary: oklch(0.65 0.10 230);       /* Ocean Blue */
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
@@ -136,5 +184,69 @@
 
 /* Custom utility classes */
 .editorial-shadow {
-  box-shadow: 20px 20px 0px 0px rgba(234, 42, 51, 0.1);
+  box-shadow: 20px 20px 0px 0px rgba(63, 171, 222, 0.1);
+}
+
+/* Brand color utilities */
+.bg-brand-primary {
+  background-color: rgb(var(--brand-primary));
+}
+
+.bg-brand-primary-dark {
+  background-color: rgb(var(--brand-primary-dark));
+}
+
+.text-brand-primary {
+  color: rgb(var(--brand-primary));
+}
+
+.text-brand-primary-dark {
+  color: rgb(var(--brand-primary-dark));
+}
+
+.border-brand-primary {
+  border-color: rgb(var(--brand-primary));
+}
+
+/* Pillar accent utilities */
+.bg-empowerment {
+  background-color: rgb(var(--accent-empowerment));
+}
+
+.bg-environment {
+  background-color: rgb(var(--accent-environment));
+}
+
+.bg-education {
+  background-color: rgb(var(--accent-education));
+}
+
+.text-empowerment {
+  color: rgb(var(--accent-empowerment));
+}
+
+.text-environment {
+  color: rgb(var(--accent-environment));
+}
+
+.text-education {
+  color: rgb(var(--accent-education));
+}
+
+/* Hover effects */
+.hover-ocean:hover {
+  background-color: rgb(var(--brand-primary-dark));
+}
+
+/* Gradient utilities */
+.gradient-ocean {
+  background: linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-primary-dark)) 100%);
+}
+
+.gradient-pillars {
+  background: linear-gradient(135deg, 
+    rgb(var(--accent-empowerment)) 0%, 
+    rgb(var(--accent-education)) 50%, 
+    rgb(var(--accent-environment)) 100%
+  );
 }
