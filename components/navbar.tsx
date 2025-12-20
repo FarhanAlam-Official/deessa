@@ -1,8 +1,9 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Heart, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -21,18 +22,41 @@ const navLinks = [
 export function Navbar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [hideNavbarLogo, setHideNavbarLogo] = useState(false)
+
+  useEffect(() => {
+    const handleLogoFlying = () => setHideNavbarLogo(true)
+    const handleLogoLanded = () => setHideNavbarLogo(false)
+    
+    window.addEventListener("intro-logo-flying", handleLogoFlying)
+    window.addEventListener("intro-logo-landed", handleLogoLanded)
+    
+    return () => {
+      window.removeEventListener("intro-logo-flying", handleLogoFlying)
+      window.removeEventListener("intro-logo-landed", handleLogoLanded)
+    }
+  }, [])
 
   return (
     <header className="sticky top-0 z-50 w-full bg-surface/95 backdrop-blur-md border-b border-border transition-all duration-300">
       <div className="px-4 md:px-8 py-4 flex items-center justify-between mx-auto max-w-[1400px] w-full">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3">
-          <div className="size-10 flex items-center justify-center bg-primary rounded-xl text-white shadow-lg shadow-primary/30">
-            <Heart className="size-5 fill-current" />
-          </div>
-          <div>
-            <h2 className="text-foreground text-lg font-black leading-none tracking-tight">Dessa</h2>
-            <span className="text-xs font-bold text-foreground-muted uppercase tracking-widest">Foundation</span>
+        <Link href="/" className="flex items-center">
+          <div 
+            data-navbar-logo
+            className={cn(
+              "w-52 h-10 flex items-center justify-center relative overflow-hidden transition-opacity duration-300",
+              hideNavbarLogo ? "opacity-0" : "opacity-100"
+            )}
+          >
+            <Image
+              src="/logo.png"
+              alt="Deesha Foundation Logo"
+              width={80}
+              height={80}
+              className="object-contain scale-[250%]"
+              priority
+            />
           </div>
         </Link>
 
