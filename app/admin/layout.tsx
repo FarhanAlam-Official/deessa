@@ -6,8 +6,8 @@ import { AdminHeader } from "@/components/admin/admin-header"
 import type { AdminUser } from "@/lib/types/admin"
 
 export const metadata = {
-  title: "Admin Panel | Deesha Foundation",
-  description: "Manage Deesha Foundation website content",
+  title: "Admin Panel | deessa Foundation",
+  description: "Manage deessa Foundation website content",
 }
 
 export default async function AdminLayout({

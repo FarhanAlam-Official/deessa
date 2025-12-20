@@ -1,5 +1,5 @@
 -- =============================================
--- DEESHA FOUNDATION ADMIN PANEL DATABASE SCHEMA
+-- deessa FOUNDATION ADMIN PANEL DATABASE SCHEMA
 -- =============================================
 
 -- Admin Users Table with Roles

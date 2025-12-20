@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Heart className="h-8 w-8 text-primary fill-primary" />
-            <span className="text-2xl font-bold">Deesha Foundation</span>
+            <span className="text-2xl font-bold">deessa Foundation</span>
           </div>
           <CardTitle className="text-xl">Admin Panel</CardTitle>
           <CardDescription>Sign in to manage the website</CardDescription>
@@ -67,7 +67,7 @@ export default function AdminLoginPage() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="admin@deeshafoundation.org"
+                placeholder="admin@deessafoundation.org"
                 required
                 disabled={isLoading}
               />

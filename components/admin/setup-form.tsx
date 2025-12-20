@@ -53,7 +53,7 @@ export function SetupForm() {
 
       <div className="space-y-2">
         <Label htmlFor="email">Email Address</Label>
-        <Input id="email" name="email" type="email" placeholder="admin@deeshafoundation.org" required />
+        <Input id="email" name="email" type="email" placeholder="admin@deessafoundation.org" required />
       </div>
 
       <div className="space-y-2">
@@ -98,7 +98,7 @@ export function SetupForm() {
           </button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Default key: <code className="bg-muted px-1 rounded">deesha-foundation-2024</code>
+          Default key: <code className="bg-muted px-1 rounded">deessa-foundation-2024</code>
         </p>
       </div>
 

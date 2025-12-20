@@ -56,7 +56,7 @@ export default function DemoIndex() {
         <div className="container mx-auto px-4 py-12">
           <h1 className="text-4xl font-bold text-foreground mb-3">Design System Demos</h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            Explore interactive examples of all components, patterns, and design elements used in the Deesha Foundation website.
+            Explore interactive examples of all components, patterns, and design elements used in the deessa Foundation website.
           </p>
         </div>
       </div>
@@ -128,7 +128,7 @@ export default function DemoIndex() {
       {/* Footer */}
       <div className="border-t mt-16 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>Deesha Foundation Design System • v1.0</p>
+          <p>deessa Foundation Design System • v1.0</p>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-# Deesha Foundation - New Brand Theme Implementation Plan
+# deessa Foundation - New Brand Theme Implementation Plan
 
 ## 🎨 Theme Transition Overview
 

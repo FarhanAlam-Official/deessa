@@ -51,7 +51,7 @@ export function Navbar() {
           >
             <Image
               src="/logo.png"
-              alt="Deesha Foundation Logo"
+              alt="deessa Foundation Logo"
               width={80}
               height={80}
               className="object-contain scale-[250%]"

@@ -132,7 +132,7 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col border-r bg-background lg:flex">
       <div className="flex h-16 items-center gap-2 border-b px-6">
         <Heart className="h-6 w-6 text-primary fill-primary" />
-        <span className="font-semibold">Deesha Admin</span>
+        <span className="font-semibold">deessa Admin</span>
       </div>
 
       <nav className="flex-1 overflow-y-auto p-4 space-y-6">

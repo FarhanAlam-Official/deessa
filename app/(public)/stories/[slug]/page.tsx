@@ -23,11 +23,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const story = await getStoryBySlug(slug)
 
   if (!story) {
-    return { title: "Story Not Found - Deesha Foundation" }
+    return { title: "Story Not Found - deessa Foundation" }
   }
 
   return {
-    title: `${story.title} - Deesha Foundation`,
+    title: `${story.title} - deessa Foundation`,
     description: story.excerpt,
   }
 }

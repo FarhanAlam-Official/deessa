@@ -8,7 +8,7 @@ import "./globals.css"
 const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-sans" })
 
 export const metadata: Metadata = {
-  title: "Deesha Foundation - Empowering Nepal",
+  title: "deessa Foundation - Empowering Nepal",
   description:
     "We are dedicated to sustainable development, quality education, and social upliftment for the most vulnerable in Nepal.",
   generator: "v0.app",

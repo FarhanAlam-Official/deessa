@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="/public/logo.png" alt="Deesha Foundation Logo" width="200"/>
+  <img src="/public/logo.png" alt="deessa Foundation Logo" width="200"/>
   
-# Deesha Foundation
+# deessa Foundation
   
   **Empowering Nepal Through Sustainable Development**
   
@@ -9,11 +9,11 @@
   [![Supabase](https://img.shields.io/badge/Supabase-2.0-green?style=flat&logo=supabase)](https://supabase.com/)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
   
-  **Website:** [deesha.org](https://deesha.org) | **Since:** 2015 | **Location:** Kathmandu, Nepal
+  **Website:** [deessa.org](https://deessa.org) | **Since:** 2015 | **Location:** Kathmandu, Nepal
   
   ---
   
-  Deesha Foundation is a non-profit organization dedicated to sustainable development, quality education, and social upliftment for the most vulnerable communities in Nepal.
+  deessa Foundation is a non-profit organization dedicated to sustainable development, quality education, and social upliftment for the most vulnerable communities in Nepal.
   
   [Demo](#demo) • [Features](#features) • [Tech Stack](#tech-stack) • [Getting Started](#getting-started) • [Contributing](#contributing) • [License](#license)
   
@@ -21,7 +21,7 @@
 
 ## 🌟 About
 
-Founded in 2015, Deesha Foundation works to bridge the gap between potential and opportunity in Nepal's most remote communities. We focus on holistic community development through:
+Founded in 2015, deessa Foundation works to bridge the gap between potential and opportunity in Nepal's most remote communities. We focus on holistic community development through:
 
 - **Education:** Building schools and providing educational resources
 - **Healthcare:** Delivering medical supplies and health camps
@@ -97,8 +97,8 @@ Our approach is community-driven, ensuring sustainable change that comes from wi
 1. **Clone the repository:**
 
 ```bash
-git clone https://github.com/your-username/deesha-foundation.git
-cd deesha-foundation
+git clone https://github.com/your-username/deessa-foundation.git
+cd deessa-foundation
 ```
 
 1. **Install dependencies:**
@@ -248,10 +248,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-**Deesha Foundation**
+**deessa Foundation**
 
 - **Address:** Kathmandu, Nepal
-- **Email:** <info@deesha.org>
+- **Email:** <info@deessa.org>
 - **Phone:** +977-XXXXXXXXX
 - **Social Media:** [Facebook](#) | [Twitter](#) | [Instagram](#)
 
@@ -261,6 +261,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
   
   Made with ❤️ for Nepal
   
-  [Back to Top](#deesha-foundation)
+  [Back to Top](#deessa-foundation)
   
 </div>

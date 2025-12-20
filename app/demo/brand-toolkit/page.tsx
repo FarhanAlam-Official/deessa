@@ -77,7 +77,7 @@ export default function BrandToolkitDemo() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-foreground">Brand Toolkit</h1>
-              <p className="text-muted-foreground mt-1">Deesha Foundation Design System</p>
+              <p className="text-muted-foreground mt-1">deessa Foundation Design System</p>
             </div>
             <Button variant="outline" size="sm">
               <Download className="mr-2 h-4 w-4" />
@@ -95,7 +95,7 @@ export default function BrandToolkitDemo() {
             <Sparkles className="h-4 w-4 text-brand-primary" />
             <span className="text-sm font-medium text-brand-primary-dark">Ocean Blue Theme</span>
           </div>
-          <h2 className="text-4xl font-bold mb-4">Deesha Foundation Design System</h2>
+          <h2 className="text-4xl font-bold mb-4">deessa Foundation Design System</h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             A refreshed identity that embodies trust, hope, and progress. 
             Our new color palette reflects our commitment to sustainable change.
@@ -808,7 +808,7 @@ export default function BrandToolkitDemo() {
       {/* Footer */}
       <div className="border-t mt-16 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>Deesha Foundation Brand Toolkit • Design System v1.0</p>
+          <p>deessa Foundation Brand Toolkit • Design System v1.0</p>
         </div>
       </div>
     </div>

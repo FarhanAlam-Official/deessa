@@ -99,7 +99,7 @@ export function SiteSettingsForm({ settings }: SiteSettingsFormProps) {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="siteName">Site Name</Label>
-                    <Input id="siteName" name="siteName" defaultValue={general.siteName || "Deesha Foundation"} />
+                    <Input id="siteName" name="siteName" defaultValue={general.siteName || "deessa Foundation"} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="tagline">Tagline</Label>
@@ -303,7 +303,7 @@ export function SiteSettingsForm({ settings }: SiteSettingsFormProps) {
                     id="metaTitle"
                     name="metaTitle"
                     defaultValue={seo.metaTitle || ""}
-                    placeholder="Deesha Foundation - Empowering Communities"
+                    placeholder="deessa Foundation - Empowering Communities"
                   />
                 </div>
                 <div className="space-y-2">

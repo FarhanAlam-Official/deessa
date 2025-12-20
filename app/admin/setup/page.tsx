@@ -3,7 +3,7 @@ import { checkSetupRequired } from "@/lib/actions/admin-setup"
 import { SetupForm } from "@/components/admin/setup-form"
 
 export const metadata = {
-  title: "Admin Setup | Deesha Foundation",
+  title: "Admin Setup | deessa Foundation",
   description: "Set up your first admin account",
 }
 
