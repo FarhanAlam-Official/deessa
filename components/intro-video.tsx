@@ -227,7 +227,7 @@ export function IntroVideo() {
           >
             <Image
               src="/logo.png"
-              alt="Deesha Foundation Logo"
+              alt="deessa Foundation Logo"
               width={900}
               height={900}
               className="object-contain drop-shadow-2xl"

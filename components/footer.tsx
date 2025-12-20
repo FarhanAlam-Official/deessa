@@ -39,7 +39,7 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="bg-foreground text-white">
+    <footer className="relative bg-foreground text-white [&]:before:hidden [&]:after:hidden">
       {/* Newsletter Section */}
       <div className="border-b border-gray-800">
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-12">
@@ -63,7 +63,7 @@ export function Footer() {
                 <Heart className="size-5 fill-current" />
               </div>
               <div>
-                <h2 className="text-lg font-black leading-none">Dessa</h2>
+                <h2 className="text-lg font-black leading-none">deessa</h2>
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Foundation</span>
               </div>
             </Link>
@@ -79,7 +79,7 @@ export function Footer() {
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-400">
                 <Mail className="size-4 text-primary" />
-                <span>info@dessafoundation.org</span>
+                <span>info@deessafoundation.org</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-400">
                 <Phone className="size-4 text-primary" />
@@ -134,7 +134,7 @@ export function Footer() {
       <div className="border-t border-gray-800">
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-4">
-            <p className="text-gray-500 text-sm">© {new Date().getFullYear()} Dessa Foundation. All rights reserved.</p>
+            <p className="text-gray-500 text-sm">© {new Date().getFullYear()} deessa Foundation. All rights reserved.</p>
             <Link
               href="/admin"
               target="_blank"

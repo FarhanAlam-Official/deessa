@@ -46,7 +46,7 @@ export function AdminHeader({ adminUser }: AdminHeaderProps) {
         <SheetContent side="left" className="w-64 p-0">
           <div className="flex h-16 items-center gap-2 border-b px-6">
             <Heart className="h-6 w-6 text-primary fill-primary" />
-            <span className="font-semibold">Deesha Admin</span>
+            <span className="font-semibold">deessa Admin</span>
           </div>
           <nav className="grid gap-1 p-4">
             <Link

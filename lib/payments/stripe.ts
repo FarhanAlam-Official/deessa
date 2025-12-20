@@ -71,7 +71,7 @@ export async function startStripeCheckout(
           currency: donation.currency.toLowerCase(),
           product_data: {
             name: donation.isMonthly ? "Monthly Donation" : "One-time Donation",
-            description: `Donation to Deesha Foundation from ${donation.donorName}`,
+            description: `Donation to deessa Foundation from ${donation.donorName}`,
           },
           unit_amount: amountInMinorUnits,
         },

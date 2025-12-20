@@ -1,5 +1,5 @@
 /**
- * Deesha Foundation - Ocean Blue Theme
+ * deessa Foundation - Ocean Blue Theme
  * Tailwind CSS Configuration Extension
  * 
  * This file contains the Tailwind configuration for the new Ocean Blue theme.

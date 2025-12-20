@@ -1,6 +1,6 @@
 # Toast Notification System - Integration Complete ✅
 
-The notification system has been successfully integrated into the Deesha Foundation project!
+The notification system has been successfully integrated into the deessa Foundation project!
 
 ## 📦 What Was Integrated
 

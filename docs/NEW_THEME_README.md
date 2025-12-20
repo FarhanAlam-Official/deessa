@@ -1,6 +1,6 @@
 # 🎨 New Brand Theme - Ocean Blue
 
-This folder contains all resources for the new Deesha Foundation brand theme transition from red to ocean blue.
+This folder contains all resources for the new deessa Foundation brand theme transition from red to ocean blue.
 
 ## 📁 Files Included
 

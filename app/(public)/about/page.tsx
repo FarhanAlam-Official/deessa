@@ -119,7 +119,7 @@ export default async function AboutPage() {
       </Section>
 
       {/* Timeline / Journey */}
-      <Section className="bg-surface overflow-hidden" id="journey">
+      <Section className="bg-surface" id="journey">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground">Our Journey</h2>

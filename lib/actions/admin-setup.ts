@@ -25,7 +25,7 @@ export async function setupFirstAdmin(formData: FormData) {
   const setupKey = formData.get("setupKey") as string
 
   // Validate setup key (optional extra security - use a secret from env)
-  const expectedKey = process.env.ADMIN_SETUP_KEY || "deesha-foundation-2024"
+  const expectedKey = process.env.ADMIN_SETUP_KEY || "deessa-foundation-2024"
   if (setupKey !== expectedKey) {
     return { error: "Invalid setup key" }
   }

@@ -1,4 +1,4 @@
-# Deesha Foundation – Payments Architecture & Go-Live Guide
+# deessa Foundation – Payments Architecture & Go-Live Guide
 
 This document explains how the donation payment system works (Stripe + Khalti + eSewa), how to configure it per environment, and how to safely go live.
 
@@ -132,7 +132,7 @@ Admin UI:
 - `PAYMENT_MODE`  
   - `"mock"` (default-safe for local dev) or `"live"`.
 - `NEXT_PUBLIC_SITE_URL`  
-  - Base site URL for building return URLs (e.g. `https://deesha.org`).
+  - Base site URL for building return URLs (e.g. `https://deessa.org`).
 
 ### 4.2 Stripe
 
@@ -143,9 +143,9 @@ Required for live mode:
 - `STRIPE_WEBHOOK_SECRET`  
   - Provided by Stripe when you configure a webhook endpoint.
 - `STRIPE_SUCCESS_URL`  
-  - e.g. `https://deesha.org/donate/success`
+  - e.g. `https://deessa.org/donate/success`
 - `STRIPE_CANCEL_URL`  
-  - e.g. `https://deesha.org/donate/cancel`
+  - e.g. `https://deessa.org/donate/cancel`
 
 Used files:
 
@@ -164,7 +164,7 @@ Required for live mode:
 - `KHALTI_BASE_URL`  
   - e.g. `https://khalti.com/api/v2`
 - `KHALTI_RETURN_URL`  
-  - e.g. `https://deesha.org/payments/khalti/return` (this URL should call the verify endpoint server-side).
+  - e.g. `https://deessa.org/payments/khalti/return` (this URL should call the verify endpoint server-side).
 
 Used files:
 
@@ -185,9 +185,9 @@ Required for live mode:
 - `ESEWA_BASE_URL`  
   - e.g. `https://esewa.com.np`
 - `ESEWA_SUCCESS_URL`  
-  - e.g. `https://deesha.org/api/payments/esewa/success`
+  - e.g. `https://deessa.org/api/payments/esewa/success`
 - `ESEWA_FAILURE_URL`  
-  - e.g. `https://deesha.org/api/payments/esewa/failure`
+  - e.g. `https://deessa.org/api/payments/esewa/failure`
 
 Used files:
 
@@ -329,9 +329,9 @@ Security:
    - eSewa test merchant ID + base URL + success/failure URLs.
 2. In each provider dashboard:
    - Configure webhooks/callback URLs to hit your staging domain:
-     - Stripe → `https://staging.deesha.org/api/webhooks/stripe`.
+     - Stripe → `https://staging.deessa.org/api/webhooks/stripe`.
      - Khalti → your front-end return URL that triggers `khalti/verify`.
-     - eSewa → `https://staging.deesha.org/api/payments/esewa/success` and `/failure`.
+     - eSewa → `https://staging.deessa.org/api/payments/esewa/success` and `/failure`.
 3. Test flows with small amounts:
    - Stripe test cards.
    - Khalti and eSewa sandbox flows.
