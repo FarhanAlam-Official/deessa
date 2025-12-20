@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Plus_Jakarta_Sans } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
 const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-sans" })
@@ -26,6 +27,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${plusJakartaSans.variable} font-sans antialiased`}>
         {children}
+        <Toaster />
         <Analytics />
       </body>
     </html>
