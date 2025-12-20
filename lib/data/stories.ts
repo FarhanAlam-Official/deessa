@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { createClient as createStaticClient } from "@/lib/supabase/static"
 
 export async function getPublishedStories() {
   const supabase = await createClient()
@@ -13,6 +14,21 @@ export async function getPublishedStories() {
     return []
   }
   return data || []
+}
+
+export function getPublishedStoriesStatic() {
+  const supabase = createStaticClient()
+  return supabase
+    .from("stories")
+    .select("slug")
+    .eq("is_published", true)
+    .then(({ data, error }) => {
+      if (error) {
+        console.error("Error fetching stories:", error)
+        return []
+      }
+      return data || []
+    })
 }
 
 export async function getFeaturedStory() {

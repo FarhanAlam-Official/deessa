@@ -5,14 +5,14 @@ import { notFound } from "next/navigation"
 import { ArrowLeft, MapPin, Heart, CheckCircle, Clock, Circle } from "lucide-react"
 import { Section } from "@/components/ui/section"
 import { Button } from "@/components/ui/button"
-import { getProjectBySlug, getPublishedProjects } from "@/lib/data/projects"
+import { getProjectBySlug, getPublishedProjectsStatic } from "@/lib/data/projects"
 
 interface PageProps {
   params: Promise<{ slug: string }>
 }
 
 export async function generateStaticParams() {
-  const projects = await getPublishedProjects()
+  const projects = await getPublishedProjectsStatic()
   return projects.map((project) => ({
     slug: project.slug,
   }))

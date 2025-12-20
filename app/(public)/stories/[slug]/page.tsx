@@ -5,14 +5,14 @@ import { notFound } from "next/navigation"
 import { ArrowLeft, Clock, Calendar, Tag, Share2 } from "lucide-react"
 import { Section } from "@/components/ui/section"
 import { Button } from "@/components/ui/button"
-import { getStoryBySlug, getPublishedStories } from "@/lib/data/stories"
+import { getStoryBySlug, getPublishedStoriesStatic } from "@/lib/data/stories"
 
 interface PageProps {
   params: Promise<{ slug: string }>
 }
 
 export async function generateStaticParams() {
-  const stories = await getPublishedStories()
+  const stories = await getPublishedStoriesStatic()
   return stories.map((story) => ({
     slug: story.slug,
   }))
