@@ -9,8 +9,21 @@ export function IntroVideo() {
   const [animateLogo, setAnimateLogo] = useState(false)
   const [fadeBackground, setFadeBackground] = useState(false)
   const [logoStyle, setLogoStyle] = useState<React.CSSProperties>({})
+  const [isBrave, setIsBrave] = useState(false)
+  const [userInteracted, setUserInteracted] = useState(false)
+  const [soundEnabled, setSoundEnabled] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const logoRef = useRef<HTMLDivElement>(null)
+
+  // Detect Brave browser
+  useEffect(() => {
+    const checkBrave = async () => {
+      if ((navigator as any).brave && await (navigator as any).brave.isBrave()) {
+        setIsBrave(true)
+      }
+    }
+    checkBrave()
+  }, [])
 
   useEffect(() => {
     // Check if intro has been shown (using localStorage to persist across sessions)
@@ -25,23 +38,70 @@ export function IntroVideo() {
   }, [])
 
   useEffect(() => {
-    if (showIntro && videoRef.current) {
+    if (showIntro && videoRef.current && !userInteracted) {
       const video = videoRef.current
       
-      // Start muted to allow autoplay, then unmute once playing
+      // Always start muted to satisfy browser autoplay policies
       video.muted = true
-      video.play()
-        .then(() => {
-          // Unmute after a brief moment to ensure smooth playback
-          setTimeout(() => {
-            video.muted = false
-          }, 100)
-        })
-        .catch((error) => {
-          console.error("Video autoplay failed:", error)
-        })
+      
+      // Ensure video is ready to play
+      video.load()
+      
+      // Try to play the video
+      const playPromise = video.play()
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            // Video started playing successfully
+            console.log('Video autoplay started (muted)')
+          })
+          .catch((error) => {
+            console.error("Video autoplay failed:", error)
+          })
+      }
     }
-  }, [showIntro])
+  }, [showIntro, userInteracted])
+
+  // Handle user click to play video (for non-Brave browsers)
+  const handlePlayClick = () => {
+    if (videoRef.current && !userInteracted) {
+      const video = videoRef.current
+      video.muted = true // Keep muted for other browsers
+      video.play().then(() => {
+        setUserInteracted(true)
+        console.log('Video started after user interaction')
+      }).catch(err => console.error('Play failed:', err))
+    }
+  }
+
+  // Handle any click to start video or enable sound
+  const handleContainerClick = (e: React.MouseEvent) => {
+    if (!userInteracted && videoRef.current) {
+      // First click: restart the video with proper audio settings
+      const video = videoRef.current
+      const currentTime = video.currentTime // Save current position
+      
+      // Unmute the video - user interaction allows sound in all browsers
+      video.muted = false
+      
+      // Restart from current position with new audio settings
+      video.currentTime = currentTime
+      video.play().then(() => {
+        setUserInteracted(true)
+        setSoundEnabled(true)
+        console.log('Video playing with sound after user interaction')
+      }).catch(err => {
+        console.error('Play with audio failed:', err)
+        // Fallback: try muted
+        video.muted = true
+        video.play().then(() => {
+          setUserInteracted(true)
+          console.log('Video playing muted (audio failed)')
+        }).catch(err2 => console.error('Fallback play failed:', err2))
+      })
+    }
+  }
 
   const handleVideoEnd = () => {
     setVideoEnded(true)
@@ -116,10 +176,20 @@ export function IntroVideo() {
 
   return (
     <div 
-      className={`fixed inset-0 z-[100] transition-opacity duration-1000 ease-out ${
+      className={`fixed inset-0 z-[100] transition-opacity duration-1000 ease-out cursor-pointer ${
         fadeBackground ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
+      onClick={handleContainerClick}
     >
+      {/* Subtle text prompt - show before interaction */}
+      {!userInteracted && !videoEnded && (
+        <div
+          className="absolute top-4 right-4 z-10 text-black/30 hover:text-black/50 text-[10px] uppercase tracking-wider transition-colors duration-300 pointer-events-none"
+        >
+          Click for sound
+        </div>
+      )}
+
       {/* Video Background - fades when logo starts flying */}
       <div 
         className={`absolute inset-0 bg-black transition-opacity duration-700 ease-out ${
@@ -131,8 +201,10 @@ export function IntroVideo() {
           className="w-full h-full object-cover"
           onEnded={handleVideoEnd}
           playsInline
+          autoPlay
           muted
           preload="auto"
+          webkit-playsinline="true"
         >
           <source src="/Deesa-Intro .mp4" type="video/mp4" />
           Your browser does not support the video tag.
