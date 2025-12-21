@@ -14,7 +14,7 @@ export default async function HomePage() {
     <>
       {/* Hero Section */}
       <section className="w-full pt-8 pb-16 lg:pt-16 lg:pb-24 px-4 md:px-8 bg-background">
-        <div className="max-w-[1400px] mx-auto grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        <div className="max-w-350 mx-auto grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Content */}
           <div className="lg:col-span-5 flex flex-col gap-6 relative z-10">
             <div className="flex items-center gap-3">
@@ -81,7 +81,7 @@ export default async function HomePage() {
             <div className="absolute bottom-0 left-10 w-72 h-72 bg-red-100 rounded-full blur-3xl opacity-60 mix-blend-multiply" />
             <div className="grid grid-cols-12 gap-4 h-full relative z-10">
               <div className="col-span-8 space-y-4">
-                <div className="relative group rounded-[2rem] overflow-hidden shadow-2xl h-[400px] lg:h-[500px]">
+                <div className="relative group rounded-4xl overflow-hidden shadow-2xl h-100 lg:h-125">
                   <Image
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7xPA5ZcI6zKmXhschYT9kJF4AqJ9KYyAa5qyutl1ZWv5adO6OvYLgL0wZmsSvQmp5iq8EBildkvodJmW6nQOiy52WDTtHveVZgJcxx0_cw_pXOEkv2E8ngXc8S6exY0flcsgm65QruhCVLREAaOyUXoPaJssWLYw4Gq3TRXCA6np2SOBQgIml3lxCiJQAcTos1hfbuZ1VmD0z_I8NvTTPYtKaIPbfibEi2YEU4fAP01FwBiwW62SkaoM5YiSpdS6RRW8rx6YqKo8"
                     alt="Happy Nepali children"
@@ -95,17 +95,28 @@ export default async function HomePage() {
                 </div>
               </div>
               <div className="col-span-4 space-y-4 pt-12">
-                <div className="relative rounded-[2rem] overflow-hidden shadow-xl aspect-[3/4] group">
+                <div className="relative rounded-4xl overflow-hidden shadow-xl aspect-3/4 group">
+                  {/* Video replacing image for testing - comment out video and uncomment Image below to revert */}
+                  <video
+                    src="/public/websiteClip/websiteClip.MP3"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  {/* Original Image - uncomment below and comment out video above to revert
                   <Image
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIbSVU06T05e97h5HGkLrHkYStnbYQkwzmRg7ALv-ZL5hNuclSRAIiEtnFyuI9cRH-YMtR-pZure02gYDVPziahnspKrlKVKaXMbZwUUn87yG0Efk7pm2WexkU4XJGmqjWZamzPnj45Hun2vsvOwqa0lUsvGBO1uGIZ796D8JQqWkcR3tIdmjcm6xeqh8ifKgxRXTvLl4uX2mp4jPYf579vKODNowVZQ9m6SJr6u6huslju1OStRG3SpoUa0QzyBJa-hz5q4oOb7M"
                     alt="Women weaving"
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <span className="absolute bottom-4 left-4 text-white font-bold text-sm">Skills</span>
+                  */}
+                  <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
+                  {/* <span className="absolute bottom-4 left-4 text-white font-bold text-sm">Skills</span> */}
                 </div>
-                <div className="relative rounded-[2rem] overflow-hidden shadow-xl aspect-square group">
+                <div className="relative rounded-4xl overflow-hidden shadow-xl aspect-square group">
                   <Image
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmzOd9EzUlZkbuXEdlrotwYaDKUdIoq7etYPho3JMYsWZZcml-2Ntzj9cDdMOcO_GbE9La2Jq5GKGewwQ2Ousghkb6a8TYJ99fkfg2mqMwY_gBODE6RIBn5hn82xionJLCGc111edDh08deMwKzbRmyp5QebA1DpEedy6mRKGROhkEeBfSL2LrG-mHp1IR2YMBRVUER9NbBpCfJlC8WsU9U6Cu6zeVR1ACSJrfaWZTJ_ANEJYlR7oAG3lT40lHsF6JWKCLeO4zJEI"
                     alt="Classroom"
@@ -122,7 +133,7 @@ export default async function HomePage() {
 
       {/* Stats Section */}
       <section className="bg-muted py-16 border-y border-border">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-8">
+        <div className="max-w-350 mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="bg-surface p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-[4rem] -mr-4 -mt-4 transition-transform group-hover:scale-110" />
@@ -225,7 +236,7 @@ export default async function HomePage() {
             backgroundSize: "30px 30px",
           }}
         />
-        <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10">
+        <div className="max-w-350 mx-auto px-4 md:px-8 relative z-10">
           <div className="flex flex-col lg:flex-row gap-16 items-center">
             <div className="flex-1">
               <span className="text-primary font-bold tracking-widest uppercase text-sm mb-4 block">Take Action</span>
@@ -345,7 +356,7 @@ export default async function HomePage() {
               type="email"
               placeholder="Enter your email address"
               required
-              className="flex-grow h-14 px-6 rounded-full text-foreground border-0 focus:ring-4 focus:ring-white/30"
+              className="grow h-14 px-6 rounded-full text-foreground border-0 focus:ring-4 focus:ring-white/30"
             />
             <Button type="submit" variant="secondary" size="lg" className="h-14 px-8 rounded-full">
               Subscribe Now

@@ -17,7 +17,7 @@ export function InitiativeCard({ title, description, image, icon: Icon, href, cl
     <Link
       href={href}
       className={cn(
-        "group relative overflow-hidden rounded-[2rem] bg-gray-100 transition-all duration-500 ease-out hover:shadow-2xl h-[500px]",
+        "group relative overflow-hidden rounded-4xl bg-gray-100 transition-all duration-500 ease-out hover:shadow-2xl h-125",
         className,
       )}
     >
@@ -25,9 +25,9 @@ export function InitiativeCard({ title, description, image, icon: Icon, href, cl
         src={image || "/placeholder.svg"}
         alt={title}
         fill
-        className="object-cover transition-transform duration-700 group-hover:scale-110 grayscale-[30%] group-hover:grayscale-0"
+        className="object-cover transition-transform duration-700 group-hover:scale-110 grayscale-30 group-hover:grayscale-0"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
       <div className="absolute bottom-0 p-8 w-full translate-y-12 group-hover:translate-y-0 transition-transform duration-500 ease-out">
         <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white mb-4">
           <Icon className="size-5" />
