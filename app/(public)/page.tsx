@@ -98,7 +98,7 @@ export default async function HomePage() {
                 <div className="relative rounded-4xl overflow-hidden shadow-xl aspect-3/4 group">
                   {/* Video replacing image for testing - comment out video and uncomment Image below to revert */}
                   <video
-                    src="/public/websiteClip/websiteClip.MP3"
+                    src="websiteClip/websiteClip.mp4"
                     autoPlay
                     loop
                     muted
