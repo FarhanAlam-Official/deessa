@@ -35,3 +35,5 @@ COMMIT_PLAN.md
 # Large media files
 public/websiteClip/*.mp4
 public/websiteClip/*.MP3
+# Video files
+*.mp4
