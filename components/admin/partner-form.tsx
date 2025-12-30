@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2, AlertCircle } from "lucide-react"
 import { createPartner, updatePartner } from "@/lib/actions/admin-partners"
+import { FileUpload } from "@/components/admin/file-upload"
 import type { Partner } from "@/lib/types/admin"
 
 interface PartnerFormProps {
@@ -22,6 +23,7 @@ export function PartnerForm({ partner }: PartnerFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [type, setType] = useState(partner?.type || "partner")
+  const [logoUrl, setLogoUrl] = useState(partner?.logo || "")
   const router = useRouter()
 
   async function handleSubmit(formData: FormData) {
@@ -89,14 +91,15 @@ export function PartnerForm({ partner }: PartnerFormProps) {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="logo">Logo URL</Label>
-                  <Input
-                    id="logo"
-                    name="logo"
-                    type="url"
-                    defaultValue={partner?.logo || ""}
-                    placeholder="https://..."
+                  <FileUpload
+                    bucket="partner-logos"
+                    currentUrl={logoUrl}
+                    onUpload={setLogoUrl}
+                    label="Partner Logo"
+                    maxSizeMB={2}
+                    allowUrl={true}
                   />
+                  <input type="hidden" name="logo" value={logoUrl} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="website">Website URL</Label>

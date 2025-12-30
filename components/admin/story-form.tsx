@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, AlertCircle } from "lucide-react"
 import { createStory, updateStory } from "@/lib/actions/admin-stories"
+import { FileUpload } from "@/components/admin/file-upload"
 import type { Story } from "@/lib/types/admin"
 
 interface StoryFormProps {
@@ -20,6 +21,7 @@ interface StoryFormProps {
 export function StoryForm({ story }: StoryFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [imageUrl, setImageUrl] = useState(story?.image || "")
   const router = useRouter()
 
   async function handleSubmit(formData: FormData) {
@@ -68,10 +70,15 @@ export function StoryForm({ story }: StoryFormProps) {
                 <Textarea id="content" name="content" defaultValue={story?.content || ""} rows={12} />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image">Image URL</Label>
-                <Input id="image" name="image" type="url" defaultValue={story?.image || ""} />
-              </div>
+              <FileUpload
+                bucket="story-images"
+                currentUrl={imageUrl}
+                onUpload={setImageUrl}
+                label="Story Image"
+                maxSizeMB={5}
+                allowUrl={true}
+              />
+              <input type="hidden" name="image" value={imageUrl} />
             </CardContent>
           </Card>
         </div>
