@@ -118,17 +118,19 @@ export default async function ImpactPage() {
       <Section className="bg-surface" id="reports">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Transparency Reports</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Transparency Reports & Documents</h2>
             <p className="text-foreground-muted">
-              Download our annual reports for detailed breakdowns of finances and impact.
+              Download our annual reports, organizational documents, and detailed breakdowns of finances and impact.
             </p>
           </div>
           <div className="grid gap-4">
             {[
-              { title: "Annual Report 2023", size: "2.4 MB", year: "2023" },
-              { title: "Financial Statement 2023", size: "1.1 MB", year: "2023" },
-              { title: "Impact Assessment Q4 2023", size: "890 KB", year: "2023" },
-              { title: "Annual Report 2022", size: "2.1 MB", year: "2022" },
+              { title: "Annual Report 2023", size: "2.4 MB", year: "2023", href: "#" },
+              { title: "Financial Statement 2023", size: "1.1 MB", year: "2023", href: "#" },
+              { title: "Impact Assessment Q4 2023", size: "890 KB", year: "2023", href: "#" },
+              { title: "Annual Report 2022", size: "2.1 MB", year: "2022", href: "#" },
+              { title: "deessa Foundation - Organization Bio", size: "PDF", year: "2024", href: "/deesa-resources/deessa Foundation_ Short Bio -2.pdf", download: true },
+              { title: "General Concept Note", size: "PDF", year: "2024", href: "/deesa-resources/General Concept Note- deeSsa Foundation .pdf", download: true },
             ].map((report) => (
               <div
                 key={report.title}
@@ -139,11 +141,19 @@ export default async function ImpactPage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold text-foreground">{report.title}</h3>
-                  <p className="text-sm text-foreground-muted">PDF • {report.size}</p>
+                  <p className="text-sm text-foreground-muted">{report.size} {report.year && `• ${report.year}`}</p>
                 </div>
-                <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/10">
-                  <Download className="size-5" />
-                </Button>
+                {report.download ? (
+                  <Button asChild variant="ghost" size="icon" className="text-primary hover:bg-primary/10">
+                    <a href={report.href} download>
+                      <Download className="size-5" />
+                    </a>
+                  </Button>
+                ) : (
+                  <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/10">
+                    <Download className="size-5" />
+                  </Button>
+                )}
               </div>
             ))}
           </div>
