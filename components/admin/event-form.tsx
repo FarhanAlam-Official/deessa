@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, AlertCircle } from "lucide-react"
 import { createEvent, updateEvent } from "@/lib/actions/admin-events"
+import { FileUpload } from "@/components/admin/file-upload"
 import type { Event } from "@/lib/types/admin"
 
 interface EventFormProps {
@@ -21,6 +22,7 @@ interface EventFormProps {
 export function EventForm({ event }: EventFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [imageUrl, setImageUrl] = useState(event?.image || "")
   const router = useRouter()
 
   async function handleSubmit(formData: FormData) {
@@ -64,10 +66,15 @@ export function EventForm({ event }: EventFormProps) {
                 <Textarea id="description" name="description" defaultValue={event?.description} rows={4} required />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image">Image URL</Label>
-                <Input id="image" name="image" type="url" defaultValue={event?.image || ""} />
-              </div>
+              <FileUpload
+                bucket="event-images"
+                currentUrl={imageUrl}
+                onUpload={setImageUrl}
+                label="Event Banner Image"
+                maxSizeMB={5}
+                allowUrl={true}
+              />
+              <input type="hidden" name="image" value={imageUrl} />
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">

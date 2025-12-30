@@ -110,7 +110,7 @@ export default async function DonatePage() {
 
       {/* Trust Indicators */}
       <Section className="bg-background">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
           <div className="flex flex-col items-center text-center p-6">
             <div className="size-14 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-4">
               <Shield className="size-7" />
@@ -131,6 +131,15 @@ export default async function DonatePage() {
             </div>
             <h3 className="font-bold text-foreground mb-2">Cancel Anytime</h3>
             <p className="text-sm text-foreground-muted">Monthly donations can be modified or cancelled anytime.</p>
+          </div>
+          <div className="flex flex-col items-center text-center p-6">
+            <div className="size-14 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mb-4">
+              <CheckCircle className="size-7" />
+            </div>
+            <h3 className="font-bold text-foreground mb-2">Registered NGO</h3>
+            <p className="text-sm text-foreground-muted">
+              Officially registered with Nepal&apos;s Social Welfare Council.
+            </p>
           </div>
         </div>
       </Section>

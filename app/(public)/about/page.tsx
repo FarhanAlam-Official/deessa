@@ -18,6 +18,7 @@ import { TeamMemberCard } from "@/components/ui/team-member-card"
 import { Button } from "@/components/ui/button"
 import { getPublishedTeamMembers } from "@/lib/data/team"
 import { timeline } from "@/data/timeline"
+import { ResourceDownloads } from "@/components/resource-downloads"
 
 export const metadata: Metadata = {
   title: "About Us - Dessa Foundation",
@@ -218,7 +219,21 @@ export default async function AboutPage() {
           </div>
         </div>
       </Section>
-
+      {/* Resources & Documentation */}
+      <Section className="bg-background">
+        <div className="text-center mb-12">
+          <h2 className="text-primary font-bold tracking-wide uppercase text-sm mb-3">Resources</h2>
+          <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Official Documents & Materials
+          </h3>
+          <p className="text-foreground-muted text-lg max-w-2xl mx-auto">
+            Access our organizational documents, brand guidelines, and registration certificates.
+          </p>
+        </div>
+        <div className="max-w-4xl mx-auto">
+          <ResourceDownloads />
+        </div>
+      </Section>
       {/* CTA Section */}
       <section className="bg-foreground py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-10 text-center">

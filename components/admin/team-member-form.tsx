@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, AlertCircle } from "lucide-react"
 import { createTeamMember, updateTeamMember } from "@/lib/actions/admin-team"
+import { FileUpload } from "@/components/admin/file-upload"
 import type { TeamMember } from "@/lib/types/admin"
 
 interface TeamMemberFormProps {
@@ -20,6 +21,7 @@ interface TeamMemberFormProps {
 export function TeamMemberForm({ member }: TeamMemberFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [imageUrl, setImageUrl] = useState(member?.image || "")
   const router = useRouter()
 
   async function handleSubmit(formData: FormData) {
@@ -75,16 +77,15 @@ export function TeamMemberForm({ member }: TeamMemberFormProps) {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image">Photo URL</Label>
-                <Input
-                  id="image"
-                  name="image"
-                  type="url"
-                  defaultValue={member?.image || ""}
-                  placeholder="https://..."
-                />
-              </div>
+              <FileUpload
+                bucket="team-photos"
+                currentUrl={imageUrl}
+                onUpload={setImageUrl}
+                label="Team Member Photo"
+                maxSizeMB={5}
+                allowUrl={true}
+              />
+              <input type="hidden" name="image" value={imageUrl} />
             </CardContent>
           </Card>
 

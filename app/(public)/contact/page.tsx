@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Mail, Phone, MapPin, Clock, Send } from "lucide-react"
+import { Mail, Phone, MapPin, Clock, Send, Shield, Award } from "lucide-react"
 import { Section } from "@/components/ui/section"
 import { Button } from "@/components/ui/button"
 import { ContactForm } from "@/components/contact-form"
@@ -112,6 +112,57 @@ export default function ContactPage() {
                 </Button>
               </div>
             </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* Organization Credentials */}
+      <Section className="bg-surface">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Registered & Verified</h2>
+          <p className="text-foreground-muted">Official documentation and registration certificates</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="bg-background p-6 rounded-xl border border-border text-center">
+            <div className="size-14 bg-green-100 rounded-full flex items-center justify-center text-green-600 mx-auto mb-4">
+              <Shield className="size-7" />
+            </div>
+            <h3 className="font-bold text-foreground mb-2">SWC Registered</h3>
+            <p className="text-sm text-foreground-muted mb-4">
+              Officially registered with Nepal&apos;s Social Welfare Council
+            </p>
+            <Button asChild variant="outline" size="sm">
+              <a href="/deesa-resources/SWC.jpg" download>
+                <Award className="size-3 mr-2" />
+                View Certificate
+              </a>
+            </Button>
+          </div>
+          <div className="bg-background p-6 rounded-xl border border-border text-center">
+            <div className="size-14 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mx-auto mb-4">
+              <Award className="size-7" />
+            </div>
+            <h3 className="font-bold text-foreground mb-2">Tax Registered</h3>
+            <p className="text-sm text-foreground-muted mb-4">Valid PAN registration for transparency</p>
+            <Button asChild variant="outline" size="sm">
+              <a href="/deesa-resources/PAN.pdf" download>
+                <Award className="size-3 mr-2" />
+                View PAN
+              </a>
+            </Button>
+          </div>
+          <div className="bg-background p-6 rounded-xl border border-border text-center">
+            <div className="size-14 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 mx-auto mb-4">
+              <Mail className="size-7" />
+            </div>
+            <h3 className="font-bold text-foreground mb-2">Learn More</h3>
+            <p className="text-sm text-foreground-muted mb-4">Download our complete organization bio</p>
+            <Button asChild variant="outline" size="sm">
+              <a href="/deesa-resources/deessa Foundation_ Short Bio -2.pdf" download>
+                <Award className="size-3 mr-2" />
+                Download Bio
+              </a>
+            </Button>
           </div>
         </div>
       </Section>

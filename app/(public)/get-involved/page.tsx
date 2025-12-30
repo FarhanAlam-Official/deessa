@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Users, Heart, Briefcase, Globe, CheckCircle, ArrowRight } from "lucide-react"
+import { Users, Heart, Briefcase, Globe, CheckCircle, ArrowRight, Shield } from "lucide-react"
 import { Section } from "@/components/ui/section"
 import { Button } from "@/components/ui/button"
 import { VolunteerForm } from "@/components/volunteer-form"
