@@ -98,18 +98,7 @@ export default async function HomePage() {
               <div className="col-span-4 space-y-4 pt-12">
                 <div className="relative rounded-4xl overflow-hidden shadow-xl aspect-3/4 group">
                   {/* Video replacing image for testing - comment out video and uncomment Image below to revert */}
-<<<<<<< HEAD
-                  <video
-                    src="/public/websiteClip/websiteClip.MP3"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-=======
                   <HeroVideo />
->>>>>>> 3b44811c435a89ed8166cf3c5f4c20aad714a7d5
                   {/* Original Image - uncomment below and comment out video above to revert
                   <Image
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIbSVU06T05e97h5HGkLrHkYStnbYQkwzmRg7ALv-ZL5hNuclSRAIiEtnFyuI9cRH-YMtR-pZure02gYDVPziahnspKrlKVKaXMbZwUUn87yG0Efk7pm2WexkU4XJGmqjWZamzPnj45Hun2vsvOwqa0lUsvGBO1uGIZ796D8JQqWkcR3tIdmjcm6xeqh8ifKgxRXTvLl4uX2mp4jPYf579vKODNowVZQ9m6SJr6u6huslju1OStRG3SpoUa0QzyBJa-hz5q4oOb7M"
