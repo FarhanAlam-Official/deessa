@@ -159,6 +159,8 @@ export function IntroVideo() {
             setFadeBackground(true)
             // Show navbar logo when flying logo reaches destination
             window.dispatchEvent(new CustomEvent("intro-logo-landed"))
+            // Notify that intro animation is complete and page content can start
+            window.dispatchEvent(new CustomEvent("intro-animation-complete"))
           }, 1800)
         })
       })

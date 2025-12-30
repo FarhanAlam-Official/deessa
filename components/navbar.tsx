@@ -41,12 +41,12 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full bg-surface/95 backdrop-blur-lg border-b border-border/50 shadow-sm transition-all duration-300">
       <div className="px-4 md:px-8 py-4 flex items-center justify-between mx-auto max-w-[1400px] w-full">
         {/* Logo */}
-        <Link href="/" className="flex items-center group">
+        <Link href="/" className="flex items-center">
           <div 
             data-navbar-logo
             className={cn(
-              "w-52 h-10 flex items-center justify-center relative overflow-hidden transition-all duration-300",
-              hideNavbarLogo ? "opacity-0 scale-95" : "opacity-100 scale-100 group-hover:scale-105"
+              "w-52 h-10 flex items-center justify-center relative overflow-hidden transition-opacity duration-300",
+              hideNavbarLogo ? "opacity-0" : "opacity-100"
             )}
           >
             <Image

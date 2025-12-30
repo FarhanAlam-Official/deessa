@@ -9,8 +9,7 @@ export default function PublicLayout({
   children: React.ReactNode
 }) {
   return (
-    <>
-      <IntroVideo />
+    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
       <Navbar />
       <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
         <main className="flex-1">{children}</main>
