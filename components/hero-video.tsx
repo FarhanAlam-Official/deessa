@@ -1,11 +1,21 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
+import { Volume2, VolumeX } from "lucide-react"
 
 export function HeroVideo() {
   const [introComplete, setIntroComplete] = useState(false)
   const [isInView, setIsInView] = useState(true) // Start as true since hero is typically at top
+  const [isMuted, setIsMuted] = useState(true)
   const videoRef = useRef<HTMLVideoElement>(null)
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      const newMutedState = !isMuted
+      videoRef.current.muted = newMutedState
+      setIsMuted(newMutedState)
+    }
+  }
 
   useEffect(() => {
     // Check if intro was already shown (skip waiting if it's not showing)
@@ -102,17 +112,37 @@ export function HeroVideo() {
   }, [introComplete, isInView, playVideo])
 
   return (
-    <video
-      ref={videoRef}
-      loop
-      src="/websiteClip/websiteClip.mp4"
-      muted
-      playsInline
-      preload="auto"
-      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-    >
-      <source src="/websiteClip/websiteClip.mp4" type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
+    <div className="absolute inset-0 w-full h-full group/video">
+      <video
+        ref={videoRef}
+        autoPlay
+        loop
+        src="/Deesa-Intro .mp4"
+        muted={isMuted}
+        playsInline
+        preload="auto"
+        onClick={toggleMute}
+        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 cursor-pointer"
+      >
+        <source src="/Deesa-Intro .mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      
+      {/* Mute/Unmute Button Indicator */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          toggleMute()
+        }}
+        className="absolute bottom-3 right-3 p-1.5 bg-black/30 hover:bg-black/50 backdrop-blur-sm rounded-full transition-all duration-200 z-50 opacity-0 group-hover/video:opacity-100"
+        aria-label={isMuted ? "Unmute video" : "Mute video"}
+      >
+        {isMuted ? (
+          <VolumeX className="h-4 w-4 text-white/80" />
+        ) : (
+          <Volume2 className="h-4 w-4 text-white/80" />
+        )}
+      </button>
+    </div>
   )
 }
