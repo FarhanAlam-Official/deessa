@@ -76,15 +76,17 @@ export function ProjectForm({ project }: ProjectFormProps) {
                   rows={6}
                 />
               </div>
-FileUpload
-                bucket="project-images"
-                currentUrl={imageUrl}
-                onUpload={setImageUrl}
-                label="Project Image"
-                maxSizeMB={5}
-                allowUrl={true}
-              />
-              <input type="hidden" name="image" value={imageUrl} /put id="image" name="image" type="url" defaultValue={project?.image || ""} />
+
+              <div className="space-y-2">
+                <FileUpload
+                  bucket="project-images"
+                  currentUrl={imageUrl}
+                  onUpload={setImageUrl}
+                  label="Project Image"
+                  maxSizeMB={5}
+                  allowUrl={true}
+                />
+                <input type="hidden" name="image" value={imageUrl} />
               </div>
             </CardContent>
           </Card>
