@@ -38,7 +38,7 @@ export function Navbar() {
   }, [])
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-surface/95 backdrop-blur-md border-b border-border transition-all duration-300">
+    <header className="sticky top-0 z-50 w-full bg-surface/95 backdrop-blur-lg border-b border-border/50 shadow-sm transition-all duration-300">
       <div className="px-4 md:px-8 py-4 flex items-center justify-between mx-auto max-w-[1400px] w-full">
         {/* Logo */}
         <Link href="/" className="flex items-center">
@@ -62,61 +62,84 @@ export function Navbar() {
 
         {/* Desktop Navigation */}
         <div className="hidden lg:flex flex-1 justify-center">
-          <nav className="flex items-center gap-6 bg-background px-6 py-2.5 rounded-full border border-border">
+          <nav className="flex items-center gap-1 bg-background/60 backdrop-blur-sm px-3 py-2 rounded-full border border-border/60 shadow-sm">
             {navLinks.slice(0, 6).map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "text-sm font-bold transition-colors",
-                  pathname === link.href ? "text-primary" : "text-foreground-muted hover:text-primary",
+                  "relative px-4 py-2 text-sm font-bold rounded-full transition-all duration-200",
+                  pathname === link.href 
+                    ? "text-primary bg-primary/10" 
+                    : "text-foreground-muted hover:text-primary hover:bg-primary/5"
                 )}
               >
                 {link.label}
+                {pathname === link.href && (
+                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                )}
               </Link>
             ))}
           </nav>
         </div>
 
         {/* Desktop Actions */}
-        <div className="hidden md:flex gap-4 items-center">
+        <div className="hidden md:flex gap-3 items-center">
           <Link
             href="/get-involved"
-            className="text-sm font-bold text-foreground hover:text-primary transition-colors underline decoration-2 decoration-transparent hover:decoration-primary underline-offset-4"
+            className="relative text-sm font-bold text-foreground hover:text-primary transition-all duration-200 px-3 py-2 rounded-full hover:bg-primary/5 group"
           >
             Get Involved
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full rounded-full" />
           </Link>
-          <Button asChild className="rounded-full h-11 px-7 shadow-xl">
-            <Link href="/donate">Donate Now</Link>
+          <Button asChild className="rounded-full h-11 px-7 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
+            <Link href="/donate" className="flex items-center gap-2">
+              <Heart className="size-4 fill-current" />
+              Donate Now
+            </Link>
           </Button>
         </div>
 
         {/* Mobile Menu Button */}
-        <button className="md:hidden p-2 text-foreground" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+        <button 
+          className="md:hidden p-2.5 text-foreground hover:bg-primary/5 rounded-full transition-all duration-200 hover:scale-105 active:scale-95" 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+        >
           {mobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
         </button>
       </div>
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-surface border-t border-border">
-          <nav className="flex flex-col p-4 gap-2">
+        <div className="lg:hidden bg-surface/95 backdrop-blur-lg border-t border-border/50 shadow-lg animate-in slide-in-from-top-2 duration-200">
+          <nav className="flex flex-col p-4 gap-1.5 max-h-[calc(100vh-80px)] overflow-y-auto">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "py-3 px-4 rounded-lg text-sm font-bold transition-colors",
-                  pathname === link.href ? "bg-primary/10 text-primary" : "text-foreground hover:bg-background",
+                  "relative py-3.5 px-4 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]",
+                  pathname === link.href 
+                    ? "bg-primary/10 text-primary shadow-sm" 
+                    : "text-foreground hover:bg-background/80 hover:shadow-sm"
                 )}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.label}
+                {pathname === link.href && (
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full bg-primary" />
+                )}
               </Link>
             ))}
-            <Button asChild className="mt-4 rounded-full">
-              <Link href="/donate">Donate Now</Link>
-            </Button>
+            <div className="mt-4 pt-4 border-t border-border/50">
+              <Button asChild className="w-full rounded-xl h-12 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02]">
+                <Link href="/donate" className="flex items-center justify-center gap-2">
+                  <Heart className="size-4 fill-current" />
+                  Donate Now
+                </Link>
+              </Button>
+            </div>
           </nav>
         </div>
       )}

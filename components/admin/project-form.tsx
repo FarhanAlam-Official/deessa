@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, AlertCircle } from "lucide-react"
 import { createProject, updateProject } from "@/lib/actions/admin-projects"
+import { FileUpload } from "@/components/admin/file-upload"
 import type { Project } from "@/lib/types/admin"
 
 interface ProjectFormProps {
@@ -21,6 +22,7 @@ interface ProjectFormProps {
 export function ProjectForm({ project }: ProjectFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [imageUrl, setImageUrl] = useState(project?.image || "")
   const router = useRouter()
 
   async function handleSubmit(formData: FormData) {
@@ -74,10 +76,15 @@ export function ProjectForm({ project }: ProjectFormProps) {
                   rows={6}
                 />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="image">Image URL</Label>
-                <Input id="image" name="image" type="url" defaultValue={project?.image || ""} />
+FileUpload
+                bucket="project-images"
+                currentUrl={imageUrl}
+                onUpload={setImageUrl}
+                label="Project Image"
+                maxSizeMB={5}
+                allowUrl={true}
+              />
+              <input type="hidden" name="image" value={imageUrl} /put id="image" name="image" type="url" defaultValue={project?.image || ""} />
               </div>
             </CardContent>
           </Card>

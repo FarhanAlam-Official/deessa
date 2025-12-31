@@ -9,6 +9,7 @@ const footerLinks = {
     { label: "Our Mission", href: "/about" },
     { label: "Our Team", href: "/about#team" },
     { label: "Partners", href: "/about#partners" },
+    { label: "Press & Media", href: "/press" },
     { label: "Annual Reports", href: "/impact#reports" },
   ],
   programs: [
@@ -23,9 +24,10 @@ const footerLinks = {
     { label: "Become a Member", href: "/get-involved#member" },
     { label: "Events", href: "/events" },
   ],
-  legal: [
-    { label: "Privacy Policy", href: "/privacy" },
-    { label: "Terms of Service", href: "/terms" },
+  resources: [
+    { label: "Brand Guidelines", href: "/deesa-resources/Deessa Brand Guidelines.pdf", download: true },
+    { label: "Organization Bio", href: "/deesa-resources/deessa Foundation_ Short Bio -2.pdf", download: true },
+    { label: "SWC Certificate", href: "/deesa-resources/SWC.jpg", download: true },
     { label: "Contact Us", href: "/contact" },
   ],
 }
@@ -55,7 +57,7 @@ export function Footer() {
 
       {/* Main Footer Content */}
       <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12">
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-3 mb-6">
@@ -123,6 +125,29 @@ export function Footer() {
                   <Link href={link.href} className="text-gray-400 text-sm hover:text-white transition-colors">
                     {link.label}
                   </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-bold text-sm uppercase tracking-wider mb-4">Resources</h3>
+            <ul className="space-y-3">
+              {footerLinks.resources.map((link) => (
+                <li key={link.href}>
+                  {link.download ? (
+                    <a
+                      href={link.href}
+                      download
+                      className="text-gray-400 text-sm hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link href={link.href} className="text-gray-400 text-sm hover:text-white transition-colors">
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
