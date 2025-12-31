@@ -1,6 +1,52 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Local font face for Marissa Font (falls back to system/local if available)
+   Place your woff2/woff files in /public/fonts/ (example: Marissa-Regular.woff2)
+   If the font is installed on your OS, the local() src will try that first. */
+@font-face {
+  font-family: "Marissa Font";
+  src: local("Marissa"), local("Marissa Regular"), local("Marissa-Regular"),
+       url('/fonts/Marissa-Regular.woff2') format('woff2'),
+       url('/fonts/Marissa-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Marissa Font";
+  src: local("Marissa Bold"), local("Marissa-Bold"),
+       url('/fonts/Marissa-Bold.woff2') format('woff2'),
+       url('/fonts/Marissa-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Scoped test font-face using TTF so you can test the H1 only without changing site-wide font
+   Place Marissa-Regular.ttf / Marissa-Bold.ttf into public/fonts/ for this test. */
+@font-face {
+  font-family: "Marissa Test";
+  src: local("Marissa"), url('/fonts/Marissa-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Marissa Test";
+  src: local("Marissa Bold"), url('/fonts/Marissa-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Helper class you can add to the specific H1 to test Marissa without affecting the rest of the site */
+.font-marissa-test {
+  font-family: "Marissa Test", "Marissa Font", ui-serif, Georgia, 'Times New Roman', serif;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
