@@ -23,6 +23,8 @@ export type StartDonationResult = {
   message: string
   redirectUrl?: string
   donationId?: string
+  formData?: Record<string, string> // For eSewa v2 form POST
+  requiresFormSubmit?: boolean // Indicates if form POST is needed
 }
 
 export async function startDonation(input: StartDonationInput): Promise<StartDonationResult> {
@@ -37,8 +39,15 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
     const settings = await getPaymentSettings()
     const availableProviders = getSupportedProviders(settings)
 
+    // If the selected provider is not available, try to use the primary provider or first available
     if (!availableProviders.includes(input.provider)) {
-      return { ok: false, message: "Selected payment method is currently unavailable" }
+      if (availableProviders.length === 0) {
+        return { ok: false, message: "No payment methods are currently available. Please contact support." }
+      }
+      // Use the first available provider as fallback
+      const fallbackProvider = availableProviders[0]
+      console.warn(`Provider ${input.provider} not available, using ${fallbackProvider} instead`)
+      input.provider = fallbackProvider
     }
 
     const mode = getPaymentMode()
@@ -48,10 +57,13 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
 
     const supabase = await createClient()
 
+    // Ensure amount has exactly 2 decimal places to prevent floating-point precision issues
+    const preciseAmount = Number(input.amount.toFixed(2))
+
     const { data: donation, error } = await supabase
       .from("donations")
       .insert({
-        amount: input.amount,
+        amount: preciseAmount,
         currency,
         donor_name: input.donorName,
         donor_email: input.donorEmail,
@@ -92,6 +104,7 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
           currency,
           donorName: input.donorName,
           donorEmail: input.donorEmail,
+          donorPhone: input.donorPhone,
         },
         mode,
       )
@@ -108,6 +121,16 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
       )
       redirectUrl = result.redirectUrl
       transactionId = result.referenceId
+      
+      // eSewa v2 requires form POST
+      return {
+        ok: true,
+        message: "Redirecting you to the secure payment page...",
+        redirectUrl: result.redirectUrl,
+        formData: result.formData,
+        requiresFormSubmit: Object.keys(result.formData).length > 0,
+        donationId: donation.id,
+      }
     }
 
     if (!redirectUrl) {
@@ -117,15 +140,17 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
 
     // Persist provider transaction reference for webhook/callback reconciliation.
     // We prefix with the provider so admins can easily see which gateway was used.
+    const paymentId = transactionId ? `${input.provider}:${transactionId}` : null
+    
     const { error: updateError } = await supabase
       .from("donations")
       .update({
-        payment_id: transactionId ? `${input.provider}:${transactionId}` : null,
+        payment_id: paymentId,
       })
       .eq("id", donation.id)
 
     if (updateError) {
-      console.error("Failed to update donation with transaction id", updateError)
+      console.error("Failed to update donation payment_id:", updateError.message)
     }
 
     return {

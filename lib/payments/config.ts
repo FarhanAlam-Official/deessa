@@ -30,7 +30,8 @@ export function isProviderEnvConfigured(provider: PaymentProvider): boolean {
 
   switch (provider) {
     case "stripe":
-      return Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET)
+      // Stripe secret key is required, webhook secret is optional (webhooks won't work without it, but checkout will)
+      return Boolean(process.env.STRIPE_SECRET_KEY)
     case "khalti":
       return Boolean(process.env.KHALTI_SECRET_KEY && process.env.KHALTI_BASE_URL)
     case "esewa":
