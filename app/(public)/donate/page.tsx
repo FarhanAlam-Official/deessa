@@ -93,18 +93,58 @@ export default async function DonatePage() {
       </section>
 
       {/* Donation Form Section */}
-      <Section className="bg-surface">
-        <div className="max-w-4xl mx-auto">
-          <DonationForm
-            tiers={donationTiers}
-            enabledProviders={enabledProviders}
-            primaryProvider={settings.primaryProvider}
-            defaultCurrency={settings.defaultCurrency}
-          />
-          <p className="mt-4 text-center text-xs text-foreground-muted">
-            Payment mode: <span className="font-semibold uppercase">{mode}</span> — in live mode,
-            payments are processed by secure third-party gateways (Stripe, Khalti, eSewa).
-          </p>
+      <Section className="bg-gradient-to-b from-background via-surface/50 to-background py-16 md:py-20">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid lg:grid-cols-3 gap-8 items-start">
+            {/* Form Column - Takes 2 columns on large screens */}
+            <div className="lg:col-span-2">
+              <DonationForm
+                tiers={donationTiers}
+                enabledProviders={enabledProviders}
+                primaryProvider={settings.primaryProvider}
+                defaultCurrency={settings.defaultCurrency}
+              />
+            </div>
+            
+            {/* Info Sidebar - Takes 1 column on large screens */}
+            <div className="lg:col-span-1 space-y-6">
+              <div className="bg-surface border border-border rounded-2xl p-6 shadow-lg">
+                <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">
+                  <Shield className="size-5 text-primary" />
+                  Secure & Trusted
+                </h3>
+                <p className="text-sm text-foreground-muted mb-4">
+                  All payments are processed through industry-leading secure payment gateways. Your financial information is never stored on our servers.
+                </p>
+                <div className="flex items-center gap-2 text-xs text-foreground-muted">
+                  <span className="font-semibold">Mode:</span>
+                  <span className="uppercase px-2 py-1 bg-muted rounded">{mode}</span>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-6">
+                <h3 className="font-bold text-foreground mb-3">Why Donate?</h3>
+                <ul className="space-y-2 text-sm text-foreground-muted">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="size-4 text-primary mt-0.5 flex-shrink-0" />
+                    <span>100% of funds go directly to programs</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="size-4 text-primary mt-0.5 flex-shrink-0" />
+                    <span>Tax-deductible receipts provided</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="size-4 text-primary mt-0.5 flex-shrink-0" />
+                    <span>Transparent impact reporting</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="size-4 text-primary mt-0.5 flex-shrink-0" />
+                    <span>Cancel anytime for monthly donations</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </Section>
 

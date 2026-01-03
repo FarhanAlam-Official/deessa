@@ -22,7 +22,7 @@ export default function DonationCancelPage() {
         </h1>
 
         <p className="text-xl text-foreground-muted mb-8 leading-relaxed">
-          Your donation was cancelled and no charges were made to your card.
+          Your donation was cancelled and no charges were made.
         </p>
 
         <div className="bg-surface border border-border rounded-2xl p-8 mb-8">
