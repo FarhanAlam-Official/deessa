@@ -1,8 +1,7 @@
 import type React from "react"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { AdminSidebar } from "@/components/admin/admin-sidebar"
-import { AdminHeader } from "@/components/admin/admin-header"
+import { AdminLayoutContent } from "@/components/admin/admin-layout-content"
 import type { AdminUser } from "@/lib/types/admin"
 
 export const metadata = {
@@ -33,12 +32,8 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <AdminSidebar adminUser={adminUser as AdminUser} />
-      <div className="lg:pl-64">
-        <AdminHeader adminUser={adminUser as AdminUser} />
-        <main className="p-4 lg:p-6">{children}</main>
-      </div>
-    </div>
+    <AdminLayoutContent adminUser={adminUser as AdminUser}>
+      {children}
+    </AdminLayoutContent>
   )
 }
