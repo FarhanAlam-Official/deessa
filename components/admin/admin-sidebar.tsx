@@ -17,6 +17,8 @@ import {
   Heart,
   Building,
   MessageSquare,
+  Home,
+  Image,
 } from "lucide-react"
 import { type AdminUser, hasPermission, canViewFinance, canManageUsers } from "@/lib/types/admin"
 
@@ -102,17 +104,29 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
 
   const settingsNav = [
     {
-      name: "Admin Users",
-      href: "/admin/users",
-      icon: UserCog,
-      permission: "users",
-      requiresAdmin: true,
+      name: "Homepage Manager",
+      href: "/admin/homepage",
+      icon: Home,
+      permission: "settings",
+    },
+    {
+      name: "Media Library",
+      href: "/admin/media",
+      icon: Image,
+      permission: "settings",
     },
     {
       name: "Site Settings",
       href: "/admin/settings",
       icon: Settings,
       permission: "settings",
+    },
+    {
+      name: "Admin Users",
+      href: "/admin/users",
+      icon: UserCog,
+      permission: "users",
+      requiresAdmin: true,
     },
   ]
 
