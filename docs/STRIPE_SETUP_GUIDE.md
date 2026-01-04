@@ -106,11 +106,16 @@ Webhooks allow Stripe to notify your application when payment events occur.
    - Click **Add endpoint**
    - Enter your webhook URL: `https://yourdomain.com/api/webhooks/stripe`
    - Select events to listen to:
-     - `checkout.session.completed`
-     - `checkout.session.expired`
-     - `payment_intent.payment_failed`
+     - `checkout.session.completed` (required - updates payment status to completed)
+     - `checkout.session.expired` (optional - marks expired sessions as failed)
+     - `payment_intent.payment_failed` (optional - handles failed payments)
+     - `customer.subscription.created` (optional - for monthly donations)
+     - `invoice.payment_succeeded` (optional - for subscription payments)
+     - `invoice.payment_failed` (optional - for failed subscription payments)
 
 3. Copy the **Signing secret** and add it to your production environment variables
+
+**Note:** The success page automatically polls for status updates if the webhook hasn't processed yet. This ensures users see the correct status even if there's a slight delay in webhook delivery.
 
 ### Step 6: Enable Live Mode
 

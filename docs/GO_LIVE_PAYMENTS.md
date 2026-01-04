@@ -161,44 +161,81 @@ Stripe webhook path:
 Required for live mode:
 
 - `KHALTI_SECRET_KEY`
+  - Sandbox: Get from [test-admin.khalti.com](https://test-admin.khalti.com) (use OTP: `987654`)
+  - Production: Get from [admin.khalti.com](https://admin.khalti.com)
+  - Format: `live_secret_key_...` (use the `live_secret_key` value, not test keys)
 - `KHALTI_BASE_URL`  
-  - e.g. `https://khalti.com/api/v2`
+  - Sandbox: `https://dev.khalti.com/api/v2`
+  - Production: `https://khalti.com/api/v2`
 - `KHALTI_RETURN_URL`  
-  - e.g. `https://deessa.org/payments/khalti/return` (this URL should call the verify endpoint server-side).
+  - e.g. `https://deessa.org/payments/khalti/return`
+  - This is where users are redirected after payment completion
+  - The return page calls the verification API endpoint
+- `KHALTI_SANDBOX_MODE` (optional)
+  - Set to `"true"` for sandbox testing, `"false"` or leave empty for production
 
 Used files:
 
-- `lib/payments/khalti.ts`
-- `app/api/payments/khalti/verify/route.ts`
+- `lib/payments/khalti.ts` - Payment initiation with enhanced features
+- `app/api/payments/khalti/verify/route.ts` - Payment verification
+- `app/(public)/payments/khalti/return/page.tsx` - Return page handler
 
 Khalti verification path:
 
 - `POST /api/payments/khalti/verify`
   - Body: `{ "pidx": "<khalti_pidx>" }`
+  - Handles all status codes: Completed, Pending, Initiated, Refunded, Expired, Canceled, Partially Refunded
+
+**Enhanced Features:**
+
+- Customer information (name, email, phone)
+- Amount breakdown for transparency
+- Product details array
+- Merchant metadata
+- Comprehensive error handling
+- Amount verification
+- Idempotency checks
 
 ### 4.4 eSewa
 
 Required for live mode:
 
 - `ESEWA_MERCHANT_ID`  
-  - e.g. `EPAYTEST` (sandbox) or your production merchant code.
+  - Sandbox: `EPAYTEST`
+  - Production: Your merchant ID from eSewa
+- `ESEWA_SECRET_KEY` (optional, if available)
+  - Secret key for transaction verification
 - `ESEWA_BASE_URL`  
-  - e.g. `https://esewa.com.np`
+  - Sandbox: `https://uat.esewa.com.np`
+  - Production: `https://esewa.com.np`
 - `ESEWA_SUCCESS_URL`  
   - e.g. `https://deessa.org/api/payments/esewa/success`
+  - Must be publicly accessible from eSewa servers
+  - Must use HTTPS in production
 - `ESEWA_FAILURE_URL`  
   - e.g. `https://deessa.org/api/payments/esewa/failure`
+  - Must be publicly accessible from eSewa servers
+  - Must use HTTPS in production
 
 Used files:
 
-- `lib/payments/esewa.ts`
-- `app/api/payments/esewa/success/route.ts`
-- `app/api/payments/esewa/failure/route.ts`
+- `lib/payments/esewa.ts` - Payment initiation with validation
+- `app/api/payments/esewa/success/route.ts` - Success callback handler
+- `app/api/payments/esewa/failure/route.ts` - Failure callback handler
 
 eSewa callback paths:
 
-- Success: `GET /api/payments/esewa/success`
-- Failure: `GET /api/payments/esewa/failure`
+- Success: `GET /api/payments/esewa/success?refId=...&pid=...&amt=...`
+- Failure: `GET /api/payments/esewa/failure?pid=...`
+
+**Enhanced Features:**
+
+- Proper parameter validation
+- Amount verification against donation record
+- Transaction verification via `transrec` endpoint
+- Idempotency checks
+- Comprehensive error handling
+- Support for both sandbox and production URLs
 
 ---
 
@@ -228,48 +265,94 @@ Security:
 ### 5.2 Khalti
 
 1. `startDonation` calls `startKhaltiPayment`:
+   - Validates amount (minimum Rs. 10 = 1000 paisa), email, and name.
    - Calls `POST {KHALTI_BASE_URL}/epayment/initiate/` with:
      - `amount` in paisa (minor units).
      - `purchase_order_id = donation.id`.
+     - `purchase_order_name = donor name`.
      - `return_url = KHALTI_RETURN_URL`.
+     - `customer_info` with name, email, and optional phone.
+     - `amount_breakdown` for transparency.
+     - `product_details` array.
+     - `merchant_extra` with donation metadata.
    - Stores `payment_id = "khalti:<pidx>"` on the donation.
    - Returns `payment_url` for redirect.
-2. `DonationForm` redirects donor to Khalti’s hosted page.
-3. After payment, the frontend or Khalti returns a `pidx` to your app, which must then call:
-   - `POST /api/payments/khalti/verify` with `{ pidx }`.
-4. `khalti/verify` handler:
+2. `DonationForm` redirects donor to Khalti's hosted payment page.
+3. User completes payment on Khalti's page (payment link expires in 60 minutes).
+4. Khalti redirects user to `KHALTI_RETURN_URL` with `pidx` and other parameters.
+5. Return page (`app/(public)/payments/khalti/return/page.tsx`):
+   - Extracts `pidx` from URL query parameters.
+   - Calls `POST /api/payments/khalti/verify` with `{ pidx }`.
+   - Shows loading state while verifying.
+   - Redirects to success/failure page based on result.
+6. `khalti/verify` handler:
    - Finds the donation by `payment_id = "khalti:<pidx>"`.
+   - Checks idempotency (prevents duplicate processing).
    - Calls `POST {KHALTI_BASE_URL}/epayment/lookup/` with `Authorization: Key <KHALTI_SECRET_KEY>`.
-   - If `status === "Completed"`, marks donation `payment_status = "completed"`; otherwise `failed`.
+   - Verifies amount matches donation amount (with tolerance).
+   - Handles all status codes:
+     - `Completed` → `payment_status = "completed"` (provide service).
+     - `Pending` / `Initiated` → Keep as `pending` (hold, contact Khalti if needed).
+     - `Refunded` / `Partially Refunded` → `payment_status = "failed"` (do not provide service).
+     - `Expired` / `User canceled` → `payment_status = "failed"` (do not provide service).
+   - Updates donation status and redirects user.
 
 Security:
 
 - Only server-side code talks to Khalti.
 - `KHALTI_SECRET_KEY` is never exposed to the browser.
+- Amount verification ensures payment matches donation.
+- Idempotency prevents duplicate processing.
+- Comprehensive error handling and logging (without sensitive data).
 
 ### 5.3 eSewa
 
 1. `startDonation` calls `startEsewaPayment`:
-   - Builds a redirect URL:
-     - Required query params: `amt`, `psc`, `pdc`, `txAmt`, `tAmt`, `pid`, `scd`, `su`, `fu`.
-     - `pid = "esewa_<donationId>"` so callbacks can map back to the donation.
-   - Returns the URL for 302/redirect.
-2. `DonationForm` redirects donor to eSewa.
-3. eSewa redirects back to:
-   - `ESEWA_SUCCESS_URL` on success → `GET /api/payments/esewa/success`.
-   - `ESEWA_FAILURE_URL` on failure → `GET /api/payments/esewa/failure`.
-4. Success handler:
-   - Reads `refId`/`rid`, `pid`/`oid`, and `amt`.
-   - Derives `donationId` from `pid`.
+   - Validates amount (minimum Rs. 1).
+   - Builds a redirect URL with all required parameters:
+     - `amt`: Amount (formatted to 2 decimal places).
+     - `psc`: Product service charge (0 for donations).
+     - `pdc`: Product delivery charge (0 for donations).
+     - `txAmt`: Tax amount (0 for donations).
+     - `tAmt`: Total amount (amt + psc + pdc + txAmt).
+     - `pid`: Product ID (`esewa_<donationId>`) for callback mapping.
+     - `scd`: Service code (merchant ID).
+     - `su`: Success URL (callback on success).
+     - `fu`: Failure URL (callback on failure).
+   - Returns the URL for redirect.
+2. `DonationForm` redirects donor to eSewa's payment page.
+3. User completes payment on eSewa's page.
+4. eSewa redirects back to callback URLs:
+   - `ESEWA_SUCCESS_URL` on success → `GET /api/payments/esewa/success?refId=...&pid=...&amt=...`
+   - `ESEWA_FAILURE_URL` on failure → `GET /api/payments/esewa/failure?pid=...`
+5. Success handler (`app/api/payments/esewa/success/route.ts`):
+   - Validates all required parameters (`refId`, `pid`, `amt`).
+   - Validates UUID format of donation ID.
+   - Finds donation by ID (extracted from `pid`).
+   - Checks idempotency (prevents duplicate processing).
+   - Verifies amount matches donation amount (with tolerance).
    - Calls `GET {ESEWA_BASE_URL}/epay/transrec?amt=...&scd=<merchantId>&pid=<pid>&rid=<refId>`.
-   - If response contains `"success"`, sets `payment_status = "completed"` and `payment_id = "esewa:<refId>"`; otherwise `failed`.
-5. Failure handler:
-   - Derives `donationId` from `pid` and sets `payment_status = "failed"` if still `pending`.
+   - If response contains `"success"` (case-insensitive):
+     - Sets `payment_status = "completed"` and `payment_id = "esewa:<refId>"`.
+     - Redirects user to success page.
+   - Otherwise:
+     - Sets `payment_status = "failed"`.
+     - Redirects user to cancel page.
+6. Failure handler (`app/api/payments/esewa/failure/route.ts`):
+   - Validates `pid` parameter.
+   - Derives `donationId` from `pid`.
+   - Checks idempotency.
+   - Sets `payment_status = "failed"` if still `pending`.
+   - Redirects user to cancel page.
 
 Security:
 
 - Final status is only trusted after `transrec` verification.
 - Secrets stay server-side.
+- Amount verification ensures payment matches donation.
+- Idempotency prevents duplicate processing.
+- Comprehensive error handling and logging (without sensitive data).
+- Proper URL encoding and parameter validation.
 
 ---
 
@@ -351,7 +434,49 @@ Security:
 
 ---
 
-## 8. Maintenance Notes
+## 8. Security Features
+
+The payment system includes comprehensive security measures:
+
+### Input Validation
+
+- Amount validation (minimums and maximums per currency)
+- Email format validation
+- Phone number validation
+- UUID format validation
+- Input sanitization to prevent XSS
+
+### Transaction Security
+
+- **Amount Verification**: All payments are verified to ensure amounts match between donation and gateway response
+- **Idempotency**: Prevents duplicate processing of the same transaction
+- **Server-Side Only**: All API keys and secrets stay server-side, never exposed to client
+- **Verification Required**: Never trust client-side status; always verify with gateway API
+
+### Secure Logging
+
+- Sensitive data is masked in logs (API keys, transaction IDs)
+- Payment events are logged for auditing without exposing PII
+- Error logging includes context without sensitive details
+
+### Error Handling
+
+- Comprehensive error types and messages
+- User-friendly error messages (internal errors not exposed)
+- Proper HTTP status codes
+- Retry logic for transient failures
+- Timeout handling (30 seconds default)
+
+### Security Utilities
+
+- `lib/payments/security.ts` provides:
+  - Input validation functions
+  - Amount validation
+  - Secure logging utilities
+  - Idempotency key generation
+  - Data masking functions
+
+## 9. Maintenance Notes
 
 - **Adding a new provider**:
   - Extend `PaymentProvider` type in `lib/payments/config.ts`.
@@ -359,14 +484,63 @@ Security:
   - Add its init in `startDonation`.
   - Add a new webhook/verify route under `app/api/...`.
   - Extend the admin payment settings form and donation form provider selector.
+  - Update this documentation.
 
 - **Changing API versions or endpoints**:
   - Stripe: update `apiVersion` in `lib/payments/stripe.ts` when upgrading the Stripe SDK.
   - Khalti/eSewa: adjust URLs and payload shapes only inside their helper + verify files.
+  - Update documentation with new endpoints/parameters.
 
 - **Security checks**:
   - Never log full request bodies from providers (to avoid leaking PII).
   - Keep Stripe/Khalti/eSewa secrets only in environment variables.
   - Do not trust query params alone for success; always confirm via webhook/verify call.
+  - Regularly review and update security utilities.
+  - Monitor for security advisories from payment providers.
+
+- **Testing**:
+  - Always test in sandbox/staging before production.
+  - Test all error scenarios (network failures, invalid amounts, etc.).
+  - Verify idempotency works correctly.
+  - Test amount verification with edge cases.
+
+## 10. Additional Documentation
+
+For detailed provider-specific documentation, see:
+
+- [Khalti Integration Guide](./KHALTI_INTEGRATION.md) - Complete Khalti setup and troubleshooting
+- [eSewa Integration Guide](./ESEWA_INTEGRATION.md) - Complete eSewa setup and troubleshooting
+
+## 11. Support and Troubleshooting
+
+### Common Issues
+
+**Payment stuck in pending:**
+
+- Check verification endpoint logs
+- Manually verify payment using provider's lookup API
+- Check callback/return URLs are accessible
+
+**Amount mismatches:**
+
+- Verify currency conversion is correct
+- Check tolerance settings (default: 1 paisa for NPR, 1 cent for USD)
+- Review donation amount calculation
+
+**Callback not received:**
+
+- Verify callback URLs are publicly accessible
+- Check firewall rules allow provider IPs
+- Ensure HTTPS is properly configured
+- Test callback URLs manually
+
+### Getting Help
+
+1. Check provider-specific documentation (Khalti/eSewa guides)
+2. Review server logs (check for error messages)
+3. Verify environment variables are set correctly
+4. Test in sandbox/staging environment
+5. Contact provider support if issue persists
+6. Contact Deesha Foundation technical team
 
 This document should give future maintainers everything needed to understand, audit, and safely evolve the payment system without re-reading all of the implementation code. If you change any payment-related logic, please update this file accordingly.
