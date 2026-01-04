@@ -150,13 +150,30 @@ export function SiteSettingsForm({ settings }: SiteSettingsFormProps) {
             <p className="text-muted-foreground">Configure global website settings</p>
           </div>
         </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="icon" className="h-10 w-10 hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all duration-200 hover:scale-105">
-              <HelpCircle className="h-5 w-5" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:!max-w-4xl max-h-[80vh] overflow-y-auto">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="default"
+            onClick={() => router.push("/admin/homepage")}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+          >
+            <Home className="h-4 w-4 mr-2" />
+            Homepage Manager
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => router.push("/admin/media")}
+            className="hover:bg-purple-50 hover:text-purple-600 hover:border-purple-300"
+          >
+            <ImageIcon className="h-4 w-4 mr-2" />
+            Media Library
+          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="icon" className="h-10 w-10 hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all duration-200 hover:scale-105">
+                <HelpCircle className="h-5 w-5" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:!max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-2xl">Image Upload Guidelines</DialogTitle>
               <DialogDescription>
@@ -278,7 +295,8 @@ export function SiteSettingsForm({ settings }: SiteSettingsFormProps) {
               </div>
             </div>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
