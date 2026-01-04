@@ -8,6 +8,7 @@ import { ProjectCard } from "@/components/ui/project-card"
 import { getFeaturedProjects } from "@/lib/data/projects"
 import { HeroVideo } from "@/components/hero-video"
 import { getHomeHeroSettings, getInitiativeSettings } from "@/lib/data/site-settings"
+import { SecretKeyListener } from "@/components/secret-key-listener"
 
 export default async function HomePage() {
   const projects = await getFeaturedProjects(3)
@@ -15,7 +16,7 @@ export default async function HomePage() {
   const initiatives = await getInitiativeSettings()
 
   return (
-    <>
+    <SecretKeyListener>
       {/* Hero Section */}
       <section className="w-full pt-8 pb-16 lg:pt-16 lg:pb-24 px-4 md:px-8 bg-background">
         <div className="max-w-350 mx-auto grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
@@ -365,6 +366,6 @@ export default async function HomePage() {
           </form>
         </div>
       </section>
-    </>
+    </SecretKeyListener>
   )
 }
