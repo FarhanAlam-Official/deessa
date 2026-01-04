@@ -10,7 +10,7 @@ Your homepage is now connected to the database settings, but you need to populat
 
 Go to your Supabase dashboard → SQL Editor and run:
 
-```
+```bash
 scripts/004-site-assets-storage.sql
 ```
 
@@ -20,7 +20,7 @@ This creates the storage buckets for hero images, site assets, press gallery, an
 
 Then run:
 
-```
+```bash
 scripts/005-expand-site-settings.sql
 ```
 
