@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Loader2, CheckCircle, XCircle, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,7 @@ interface VerificationResult {
   message?: string
 }
 
-export default function KhaltiReturnPage() {
+function KhaltiReturnContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [verification, setVerification] = useState<VerificationResult | null>(null)
@@ -239,6 +239,28 @@ export default function KhaltiReturnPage() {
         </div>
       </div>
     </Section>
+  )
+}
+
+export default function KhaltiReturnPage() {
+  return (
+    <Suspense fallback={
+      <Section className="py-16 md:py-24">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="bg-blue-50 border-4 border-blue-500 rounded-full w-24 h-24 mx-auto flex items-center justify-center mb-6">
+            <Loader2 className="size-16 text-blue-600 animate-spin" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-black text-foreground mb-4">
+            Loading...
+          </h1>
+          <p className="text-xl text-foreground-muted mb-8 leading-relaxed">
+            Please wait while we process your request.
+          </p>
+        </div>
+      </Section>
+    }>
+      <KhaltiReturnContent />
+    </Suspense>
   )
 }
 
