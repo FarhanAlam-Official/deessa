@@ -20,6 +20,7 @@ import {
   MessageSquare,
   Home,
   Layers,
+  PanelLeftClose,
 } from "lucide-react"
 import { type AdminUser, hasPermission, canViewFinance, canManageUsers } from "@/lib/types/admin"
 import {
@@ -150,70 +151,81 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
   }
 
   return (
-    <aside 
-      className={cn(
-        "fixed inset-y-0 left-0 z-50 hidden flex-col border-r bg-background transition-all duration-300 lg:flex",
-        isCollapsed ? "w-16" : "w-64"
-      )}
-    >
-      <button 
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="flex h-16 items-center gap-2 border-b px-4 w-full hover:bg-muted/50 transition-colors cursor-pointer"
+    <TooltipProvider delayDuration={300}>
+      <aside 
+        onClick={() => isCollapsed && setIsCollapsed(false)}
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 hidden flex-col border-r bg-background transition-all duration-300 lg:flex",
+          isCollapsed ? "w-16 cursor-pointer hover:bg-muted/30" : "w-64"
+        )}
       >
-        <Image 
-          src="/favicon.png" 
-          alt="deessa Foundation" 
-          width={32} 
-          height={32}
-          className="flex-shrink-0"
-        />
-        <span className={cn(
-          "font-semibold transition-all duration-200",
-          isCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-        )}>
-          deessa Admin
-        </span>
-      </button>
+      <div className="flex h-16 items-center justify-between border-b px-4">
+        <div className="flex items-center gap-2">
+          <Image 
+            src="/favicon.png" 
+            alt="deessa Foundation" 
+            width={32} 
+            height={32}
+            className="flex-shrink-0"
+          />
+          <span className={cn(
+            "font-semibold transition-all duration-200",
+            isCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+          )}>
+            deessa Admin
+          </span>
+        </div>
+        {!isCollapsed && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsCollapsed(true)
+            }}
+            className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-muted transition-colors"
+            aria-label="Collapse sidebar"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </button>
+        )}
+      </div>
 
-      <nav className="flex-1 overflow-y-auto p-4 space-y-6">
+      <nav onClick={(e) => e.stopPropagation()} className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-6">
         {/* Main Navigation */}
         <div className="space-y-1">
           {navigation.filter(canAccess).map((item) => (
-            <TooltipProvider key={item.name}>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      "flex items-center rounded-lg py-2 text-sm font-medium transition-all duration-200 group relative",
-                      isActive(item.href)
-                        ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-md scale-[1.02]"
-                        : "text-muted-foreground hover:bg-primary/10 hover:text-primary hover:scale-[1.02]",
-                      isCollapsed ? "justify-center px-0 mx-auto w-10 h-10" : "gap-3 px-3"
-                    )}
-                  >
-                    <item.icon className={cn(
-                      "h-4 w-4 flex-shrink-0 transition-all",
-                      isActive(item.href) && "animate-pulse"
-                    )} />
-                    <span className={cn(
-                      "transition-all duration-200 font-semibold",
-                      isCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-                    )}>
-                      {item.name}
-                    </span>
-                    {isActive(item.href) && !isCollapsed && (
-                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-100 animate-shimmer pointer-events-none" />
-                    )}
-                  </Link>
-                </TooltipTrigger>
-                {isCollapsed && (
-                  <TooltipContent side="right">
-                    <p>{item.name}</p>
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            </TooltipProvider>
+            <Tooltip key={item.name}>
+              <TooltipTrigger asChild>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "flex items-center rounded-lg py-2 text-sm font-medium transition-all duration-200 group relative",
+                    isActive(item.href)
+                      ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-md scale-[1.02]"
+                      : "text-muted-foreground hover:bg-primary/10 hover:text-primary hover:scale-[1.02]",
+                    isCollapsed ? "justify-center px-0 mx-auto w-10 h-10" : "gap-3 px-3"
+                  )}
+                >
+                  <item.icon className={cn(
+                    "h-4 w-4 flex-shrink-0 transition-all",
+                    isActive(item.href) && "animate-pulse"
+                  )} />
+                  <span className={cn(
+                    "transition-all duration-200 font-semibold",
+                    isCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+                  )}>
+                    {item.name}
+                  </span>
+                  {isActive(item.href) && !isCollapsed && (
+                    <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-100 animate-shimmer pointer-events-none" />
+                  )}
+                </Link>
+              </TooltipTrigger>
+              {isCollapsed && (
+                <TooltipContent side="right">
+                  <p>{item.name}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
           ))}
         </div>
 
@@ -247,9 +259,8 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
             <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Engagement</p>
           )}
           {engagementNav.filter(canAccess).map((item) => (
-            <TooltipProvider key={item.name}>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
+            <Tooltip key={item.name}>
+              <TooltipTrigger asChild>
                   <Link
                     href={item.href}
                     className={cn(
@@ -281,7 +292,6 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
                   </TooltipContent>
                 )}
               </Tooltip>
-            </TooltipProvider>
           ))}
         </div>
 
@@ -293,9 +303,8 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
             <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Settings</p>
           )}
           {settingsNav.filter(canAccess).map((item) => (
-            <TooltipProvider key={item.name}>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
+            <Tooltip key={item.name}>
+              <TooltipTrigger asChild>
                   <Link
                     href={item.href}
                     className={cn(
@@ -327,15 +336,13 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
                   </TooltipContent>
                 )}
               </Tooltip>
-            </TooltipProvider>
-          ))}
-        </div>
-      </nav>
+            ))}
+          </div>
+        </nav>
 
-      <div className="border-t p-4">
-        <TooltipProvider>
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
+      <div onClick={(e) => e.stopPropagation()} className="border-t p-4">
+        <Tooltip>
+          <TooltipTrigger asChild>
               <div className={cn(
                 "flex items-center gap-3 rounded-lg bg-muted/50 px-3 py-2",
                 isCollapsed && "justify-center"
@@ -361,8 +368,8 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
               </TooltipContent>
             )}
           </Tooltip>
-        </TooltipProvider>
-      </div>
-    </aside>
+        </div>
+      </aside>
+    </TooltipProvider>
   )
 }

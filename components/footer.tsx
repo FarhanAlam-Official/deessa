@@ -1,6 +1,8 @@
 "use client"
 
+import { useState, useRef } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Heart, Mail, MapPin, Phone, Facebook, Twitter, Instagram, Youtube, Settings } from "lucide-react"
 import { NewsletterForm } from "@/components/newsletter-form"
 
@@ -40,6 +42,37 @@ const socialLinks = [
 ]
 
 export function Footer() {
+  const [clickCount, setClickCount] = useState(0)
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    
+    const newCount = clickCount + 1
+
+    // Clear existing timeout
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current)
+    }
+
+    if (newCount === 3) {
+      // Open admin in new tab
+      window.open("/admin", "_blank", "noopener,noreferrer")
+      setClickCount(0)
+    } else {
+      setClickCount(newCount)
+      
+      // Reset count after 1 second of no clicks
+      clickTimeoutRef.current = setTimeout(() => {
+        if (newCount === 1) {
+          // Single click - navigate to home
+          window.location.href = "/"
+        }
+        setClickCount(0)
+      }, 1000)
+    }
+  }
+
   return (
     <footer className="relative bg-foreground text-white [&]:before:hidden [&]:after:hidden">
       {/* Newsletter Section */}
@@ -60,15 +93,17 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12">
           {/* Brand Column */}
           <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-3 mb-6">
-              <div className="size-10 flex items-center justify-center bg-primary rounded-xl text-white">
-                <Heart className="size-5 fill-current" />
+            <div onClick={handleLogoClick} className="mb-6 inline-block cursor-pointer">
+              <div className="w-24 h-24 flex items-center justify-center relative">
+                <Image
+                  src="/logo.png"
+                  alt="deessa Foundation Logo"
+                  width={96}
+                  height={96}
+                  className="object-contain scale-[250%]"
+                />
               </div>
-              <div>
-                <h2 className="text-lg font-black leading-none">deessa</h2>
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Foundation</span>
-              </div>
-            </Link>
+            </div>
             <p className="text-gray-400 text-sm leading-relaxed mb-6 max-w-sm">
               Empowering communities in rural Nepal through sustainable education, healthcare, and livelihood
               initiatives since 2015.
