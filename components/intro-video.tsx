@@ -31,8 +31,8 @@ export function IntroVideo() {
     const lastShown = localStorage.getItem("introLastShown")
     const now = Date.now()
     
-    // Show intro if never shown, or if it's been more than 2 minutes
-    if (!introShown || (lastShown && now - parseInt(lastShown) > 2 * 60 * 1000)) {
+    // Show intro if never shown, or if it's been more than 30 minutes
+    if (!introShown || (lastShown && now - parseInt(lastShown) > 30 * 60 * 1000)) {
       setShowIntro(true)
     }
   }, [])
@@ -101,6 +101,20 @@ export function IntroVideo() {
         }).catch(err2 => console.error('Fallback play failed:', err2))
       })
     }
+  }
+
+  // Handle skip button click
+  const handleSkip = (e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent container click
+    if (videoRef.current) {
+      videoRef.current.pause()
+    }
+    // Mark intro as shown and hide it
+    localStorage.setItem("introShown", "true")
+    localStorage.setItem("introLastShown", Date.now().toString())
+    setShowIntro(false)
+    // Notify that intro was skipped
+    window.dispatchEvent(new CustomEvent("intro-animation-complete"))
   }
 
   const handleVideoEnd = () => {
@@ -190,6 +204,17 @@ export function IntroVideo() {
         >
           Click for sound
         </div>
+      )}
+
+      {/* Skip button - subtle in bottom right */}
+      {!videoEnded && (
+        <button
+          onClick={handleSkip}
+          className="absolute bottom-6 right-6 z-10 px-3 py-1.5 text-white/40 hover:text-white/80 text-xs font-light tracking-wide transition-all duration-300 hover:bg-white/5 rounded-md backdrop-blur-sm border border-white/10 hover:border-white/30"
+          aria-label="Skip intro"
+        >
+          Skip
+        </button>
       )}
 
       {/* Video Background - fades when logo starts flying */}
