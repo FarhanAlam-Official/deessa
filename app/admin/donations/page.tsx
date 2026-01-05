@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { HandHeart, TrendingUp, Calendar, DollarSign } from "lucide-react"
 import { canViewFinance, type AdminRole } from "@/lib/types/admin"
+import { formatCurrency } from "@/lib/utils/currency"
 
 async function checkFinancePermission() {
   const supabase = await createClient()
@@ -30,14 +31,21 @@ async function getDonations() {
 async function getDonationStats() {
   const supabase = await createClient()
 
-  const { data: donations } = await supabase.from("donations").select("amount, is_monthly, payment_status")
+  const { data: donations } = await supabase.from("donations").select("amount, is_monthly, payment_status, currency")
 
-  const total =
-    donations?.reduce((sum, d) => (d.payment_status === "completed" ? sum + (d.amount || 0) : sum), 0) || 0
+  // Separate totals by currency
+  const totals = donations?.reduce((acc, d) => {
+    if (d.payment_status === "completed") {
+      const currency = d.currency || "NPR"
+      acc[currency] = (acc[currency] || 0) + (d.amount || 0)
+    }
+    return acc
+  }, {} as Record<string, number>) || {}
+
   const monthlyDonors = donations?.filter((d) => d.is_monthly && d.payment_status === "completed").length || 0
   const totalDonors = donations?.filter((d) => d.payment_status === "completed").length || 0
 
-  return { total, monthlyDonors, totalDonors }
+  return { totals, monthlyDonors, totalDonors }
 }
 
 export default async function DonationsPage() {
@@ -69,7 +77,16 @@ export default async function DonationsPage() {
             <DollarSign className="h-5 w-5 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{stats.total.toLocaleString()}</div>
+            <div className="space-y-1">
+              {Object.entries(stats.totals).map(([currency, amount]) => (
+                <div key={currency} className="text-2xl font-bold">
+                  {formatCurrency(amount, currency, { showCode: true })}
+                </div>
+              ))}
+              {Object.keys(stats.totals).length === 0 && (
+                <div className="text-2xl font-bold">₨0</div>
+              )}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -124,7 +141,9 @@ export default async function DonationsPage() {
                         <p className="text-sm text-muted-foreground">{donation.donor_email}</p>
                       </div>
                     </TableCell>
-                    <TableCell className="font-medium">₹{donation.amount.toLocaleString()}</TableCell>
+                    <TableCell className="font-medium">
+                      {formatCurrency(donation.amount, donation.currency, { showCode: true })}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={donation.is_monthly ? "default" : "secondary"}>
                         {donation.is_monthly ? "Monthly" : "One-time"}
