@@ -10,7 +10,7 @@ export default function PublicLayout({
 }) {
   return (
     <>
-      <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+      <div className="relative flex min-h-screen w-full flex-col">
         <IntroVideo />
         <Navbar />
         <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
