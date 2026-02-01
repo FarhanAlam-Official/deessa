@@ -6,7 +6,6 @@ import { createClient } from "@/lib/supabase/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { getPaymentMode } from "@/lib/payments/config"
 import {
-  validateUUID,
   verifyAmountMatch,
   fetchWithTimeout,
   logPaymentEvent,
@@ -20,7 +19,11 @@ function verifySignature(message: string, signature: string, secretKey: string):
   const hmac = crypto.createHmac("sha256", secretKey)
   hmac.update(message)
   const expectedSignature = hmac.digest("base64")
-  return expectedSignature === signature
+  try {
+    return crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(signature))
+  } catch {
+    return false
+  }
 }
 
 export async function GET(request: Request) {
@@ -80,10 +83,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Missing required response fields" }, { status: 400 })
   }
 
-  // Extract donation ID from transaction_uuid (format: timestamp-donationIdPrefix)
-  const parts = transaction_uuid.split("-")
-  const donationIdPrefix = parts.length > 1 ? parts[1] : parts[0]
-  
   // Use service role client to bypass RLS for payment verification
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -92,33 +91,48 @@ export async function GET(request: Request) {
   }
   const supabase = createServiceClient(supabaseUrl, serviceRoleKey)
 
-  // Find donation by ID prefix
-  const { data: donations, error: searchError } = await supabase
+  // Find donation by exact transaction_uuid binding
+  const { data: donation, error: searchError } = await supabase
     .from("donations")
     .select("*")
-    .like("id", `${donationIdPrefix}%`)
-    .order("created_at", { ascending: false })
-    .limit(1)
+    .eq("esewa_transaction_uuid", transaction_uuid)
+    .single()
 
-  if (searchError || !donations || donations.length === 0) {
+  if (searchError || !donation) {
     logPaymentEvent("eSewa success - donation not found", {
       transactionUuid: transaction_uuid,
-      donationIdPrefix,
       error: searchError,
     }, "warn")
     return NextResponse.json({ error: "Donation not found" }, { status: 404 })
   }
 
-  const donation = donations[0]
+  // Verify signature (required in live mode; skip for mock)
+  if (!isMock && mode === "live") {
+    const secretKey = process.env.ESEWA_SECRET_KEY
+    if (!secretKey) {
+      logPaymentEvent("eSewa success - missing ESEWA_SECRET_KEY in live mode", {}, "error")
+      return NextResponse.json({ error: "Server misconfigured" }, { status: 500 })
+    }
+    if (!signature || !signed_field_names) {
+      logPaymentEvent("eSewa success - missing signature fields in live mode", {
+        donationId: donation.id,
+        transactionUuid: maskSensitiveData(transaction_uuid),
+      }, "error")
+      return NextResponse.json({ error: "Invalid response signature" }, { status: 400 })
+    }
 
-  // Verify signature (skip for mock mode)
-  if (!isMock && mode !== "mock" && signature && signed_field_names) {
-    const secretKey = process.env.ESEWA_SECRET_KEY || "8gBm/:&EnhH.1/q"
-    const fields = signed_field_names.split(",")
-    const message = fields.map((field: string) => `${field}=${responseData[field]}`).join(",")
-    
+    const fields = String(signed_field_names).split(",").map((s) => s.trim()).filter(Boolean)
+    const required = ["total_amount", "transaction_uuid", "product_code"]
+    if (!required.every((r) => fields.includes(r))) {
+      logPaymentEvent("eSewa success - signed fields missing required fields", {
+        donationId: donation.id,
+        signed_field_names,
+      }, "error")
+      return NextResponse.json({ error: "Invalid response signature" }, { status: 400 })
+    }
+
+    const message = fields.map((field) => `${field}=${responseData[field]}`).join(",")
     const isValid = verifySignature(message, signature, secretKey)
-    
     if (!isValid) {
       logPaymentEvent("eSewa success - invalid signature", {
         donationId: donation.id,
@@ -170,6 +184,31 @@ export async function GET(request: Request) {
       actual: actualAmount,
       warning: amountVerification.error,
     }, "warn")
+    await supabase
+      .from("donations")
+      .update({ payment_status: "review", provider: "esewa", provider_ref: transaction_uuid })
+      .eq("id", donation.id)
+
+    return NextResponse.redirect(
+      new URL(`/donate/cancel?provider=esewa&reason=amount_mismatch`, url.origin),
+    )
+  }
+
+  // Idempotency / replay protection using payment_events ledger (best-effort if table exists)
+  try {
+    const eventId = transaction_code ? `code:${transaction_code}` : `uuid:${transaction_uuid}`
+    const { error: eventErr } = await supabase
+      .from("payment_events")
+      .insert({ provider: "esewa", event_id: eventId, donation_id: donation.id })
+    if (eventErr) {
+      if ((eventErr as any).code === "23505" || String((eventErr as any).message || "").toLowerCase().includes("duplicate")) {
+        return NextResponse.redirect(
+          new URL(`/donate/success?provider=esewa&transaction_code=${encodeURIComponent(transaction_code || transaction_uuid)}${isMock ? "&mock=1" : ""}`, url.origin),
+        )
+      }
+    }
+  } catch {
+    // ignore if ledger missing
   }
 
   // Update donation status
@@ -178,6 +217,9 @@ export async function GET(request: Request) {
     .update({
       payment_status: "completed",
       payment_id: `esewa:${transaction_code || transaction_uuid}`,
+      provider: "esewa",
+      provider_ref: transaction_uuid,
+      esewa_transaction_code: transaction_code || null,
     })
     .eq("id", donation.id)
 

@@ -6,6 +6,21 @@ import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { getPaymentMode } from "@/lib/payments/config"
 import { verifyStripeSession } from "@/lib/payments/stripe"
 
+// Very small in-memory throttle to slow down brute force of session IDs.
+// Note: On serverless this is best-effort; on a single Node process it is effective.
+const ipHits = new Map<string, { count: number; resetAt: number }>()
+function shouldRateLimit(ip: string, now: number): boolean {
+  const windowMs = 60_000
+  const max = 60
+  const entry = ipHits.get(ip)
+  if (!entry || entry.resetAt <= now) {
+    ipHits.set(ip, { count: 1, resetAt: now + windowMs })
+    return false
+  }
+  entry.count += 1
+  return entry.count > max
+}
+
 // Create a service role client for updates (bypasses RLS)
 function createServiceRoleClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -20,6 +35,14 @@ function createServiceRoleClient() {
 
 export async function GET(request: Request) {
   try {
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip") ||
+      "unknown"
+    if (shouldRateLimit(ip, Date.now())) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+    }
+
     const { searchParams } = new URL(request.url)
     const sessionId = searchParams.get("session_id")
 
@@ -28,6 +51,11 @@ export async function GET(request: Request) {
         { error: "Missing session_id parameter" },
         { status: 400 }
       )
+    }
+
+    // Basic format check to reduce accidental logs / abuse
+    if (!sessionId.startsWith("cs_")) {
+      return NextResponse.json({ error: "Invalid session_id" }, { status: 400 })
     }
 
     const mode = getPaymentMode()
@@ -48,7 +76,8 @@ export async function GET(request: Request) {
     if (donationId) {
       const { data: donation } = await supabase
         .from("donations")
-        .select("*")
+        // Do not return donor PII from a public endpoint.
+        .select("id,amount,currency,is_monthly,payment_status,provider_ref,stripe_session_id")
         .eq("id", donationId)
         .single()
 
@@ -66,30 +95,51 @@ export async function GET(request: Request) {
           (mode === "mock" && session?.id)
 
         if (isPaymentComplete) {
-          // Use service role client to bypass RLS
-          const serviceSupabase = createServiceRoleClient()
-          
-          // Update donation status to completed
-          const { data: updatedDonation, error: updateError } = await serviceSupabase
-            .from("donations")
-            .update({
-              payment_status: "completed",
-              payment_id: session?.subscription
-                ? `stripe:subscription:${session.subscription}`
-                : `stripe:${session?.id}`,
-            })
-            .eq("id", donationId)
-            .select()
-            .single()
+          // In live mode, only allow this if it matches the stored session id and amount/currency match.
+          const storedSessionId = (donation as any).stripe_session_id as string | null
+          const storedCurrency = (donation as any).currency as string | null
+          const storedAmount = Number((donation as any).amount)
+          const sessionCurrency = (session?.currency || "").toUpperCase()
+          const sessionMinor = session?.amount_total ?? null
+          const expectedMinor = Number.isFinite(storedAmount) ? Math.round(storedAmount * 100) : null
 
-          if (!updateError && updatedDonation) {
-            return NextResponse.json({
-              success: true,
-              session: verificationResult.session,
-              donation: updatedDonation,
-            })
-          } else if (updateError) {
-            console.error("Failed to update donation status:", updateError)
+          const canWriteInLive =
+            mode !== "live" ||
+            (storedSessionId === sessionId &&
+              storedCurrency?.toUpperCase() === sessionCurrency &&
+              sessionMinor !== null &&
+              expectedMinor !== null &&
+              expectedMinor === sessionMinor)
+
+          if (canWriteInLive) {
+            // Use service role client to bypass RLS
+            const serviceSupabase = createServiceRoleClient()
+
+            const { data: updatedDonation, error: updateError } = await serviceSupabase
+              .from("donations")
+              .update({
+                payment_status: "completed",
+                payment_id: session?.subscription
+                  ? `stripe:subscription:${session.subscription}`
+                  : `stripe:${session?.id}`,
+                stripe_subscription_id:
+                  session?.subscription && typeof session.subscription === "string"
+                    ? session.subscription
+                    : null,
+              })
+              .eq("id", donationId)
+              .select("id,amount,currency,is_monthly,payment_status,provider_ref,stripe_session_id")
+              .single()
+
+            if (!updateError && updatedDonation) {
+              return NextResponse.json({
+                success: true,
+                session: verificationResult.session,
+                donation: updatedDonation,
+              })
+            } else if (updateError) {
+              console.error("Failed to update donation status:", updateError)
+            }
           }
         }
       }
