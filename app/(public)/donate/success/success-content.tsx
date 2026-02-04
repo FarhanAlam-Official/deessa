@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { formatCurrency } from "@/lib/utils/currency"
+import { ReceiptPreview } from "@/components/receipt-preview"
+import { getReceiptForDisplay, getOrganizationDetailsForReceipt } from "@/lib/actions/donation-receipt"
+import { notifications } from "@/lib/notifications"
 
 interface VerificationResult {
   success: boolean
@@ -32,6 +35,14 @@ export function SuccessContent() {
   const [verification, setVerification] = useState<VerificationResult | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [provider, setProvider] = useState<"stripe" | "khalti" | "esewa">("stripe")
+  const [receipt, setReceipt] = useState<any>(null)
+  const [isFetchingReceipt, setIsFetchingReceipt] = useState(false)
+  const [organizationDetails, setOrganizationDetails] = useState<{
+    name: string
+    vatNumber: string
+    panNumber: string
+    swcNumber: string
+  } | null>(null)
 
   useEffect(() => {
     const providerParam = searchParams.get("provider") as "stripe" | "khalti" | "esewa" | null
@@ -178,6 +189,65 @@ export function SuccessContent() {
     setIsLoading(false)
   }, [searchParams])
 
+  // Auto-fetch receipt and organization details when donation is completed
+  useEffect(() => {
+    const fetchReceiptAndOrgDetails = async () => {
+      const donation = verification?.donation
+      if (!donation || donation.payment_status !== "completed") {
+        return
+      }
+
+      // Fetch organization details
+      try {
+        const orgDetails = await getOrganizationDetailsForReceipt()
+        setOrganizationDetails(orgDetails)
+      } catch (error) {
+        console.error("Error fetching organization details:", error)
+      }
+
+      // Fetch receipt if it exists
+      setIsFetchingReceipt(true)
+      try {
+        const receiptData = await getReceiptForDisplay(donation.id)
+        if (receiptData?.receipt_number) {
+          setReceipt(receiptData)
+        } else {
+          // If receipt doesn't exist yet, poll for it (webhook might still be processing)
+          let attempts = 0
+          const maxAttempts = 10
+          const pollInterval = 2000
+
+          const pollForReceipt = setInterval(async () => {
+            attempts++
+            try {
+              const pollReceiptData = await getReceiptForDisplay(donation.id)
+              if (pollReceiptData?.receipt_number) {
+                clearInterval(pollForReceipt)
+                setReceipt(pollReceiptData)
+                setIsFetchingReceipt(false)
+              } else if (attempts >= maxAttempts) {
+                clearInterval(pollForReceipt)
+                setIsFetchingReceipt(false)
+              }
+            } catch (pollError) {
+              console.error("Error polling for receipt:", pollError)
+              if (attempts >= maxAttempts) {
+                clearInterval(pollForReceipt)
+                setIsFetchingReceipt(false)
+              }
+            }
+          }, pollInterval)
+        }
+      } catch (error) {
+        console.error("Error fetching receipt:", error)
+      } finally {
+        setIsFetchingReceipt(false)
+      }
+    }
+
+    fetchReceiptAndOrgDetails()
+  }, [verification?.donation])
+
   if (isLoading) {
     return (
       <div className="max-w-3xl mx-auto text-center">
@@ -238,31 +308,60 @@ export function SuccessContent() {
       </p>
 
       {donation && (
-        <div className="bg-surface border border-border rounded-2xl p-6 mb-8 text-left">
-          <h2 className="text-xl font-bold text-foreground mb-4 text-center">Donation Details</h2>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-foreground-muted">Donor Name:</span>
-              <span className="font-semibold text-foreground">{donation.donor_name}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-foreground-muted">Amount:</span>
-              <span className="font-semibold text-foreground">
-                {formatCurrency(amount, currency, { showCode: true })}
-              </span>
-            </div>
-            {donation.is_monthly && (
+        <>
+          <div className="bg-surface border border-border rounded-2xl p-6 mb-8 text-left">
+            <h2 className="text-xl font-bold text-foreground mb-4 text-center">Donation Details</h2>
+            <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-foreground-muted">Type:</span>
-                <span className="font-semibold text-primary">Monthly Recurring</span>
+                <span className="text-foreground-muted">Donor Name:</span>
+                <span className="font-semibold text-foreground">{donation.donor_name}</span>
               </div>
-            )}
-            <div className="flex justify-between">
-              <span className="text-foreground-muted">Status:</span>
-              <span className="font-semibold text-green-600 capitalize">{donation.payment_status}</span>
+              <div className="flex justify-between">
+                <span className="text-foreground-muted">Amount:</span>
+                <span className="font-semibold text-foreground">
+                  {formatCurrency(amount, currency, { showCode: true })}
+                </span>
+              </div>
+              {donation.is_monthly && (
+                <div className="flex justify-between">
+                  <span className="text-foreground-muted">Type:</span>
+                  <span className="font-semibold text-primary">Monthly Recurring</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-foreground-muted">Status:</span>
+                <span className="font-semibold text-green-600 capitalize">{donation.payment_status}</span>
+              </div>
             </div>
           </div>
-        </div>
+
+          {donation.payment_status === "completed" && isFetchingReceipt && !receipt && (
+            <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-3">
+                <Loader2 className="size-5 text-blue-600 animate-spin" />
+                <p className="text-sm text-blue-800">Generating your receipt...</p>
+              </div>
+            </div>
+          )}
+
+          {receipt && organizationDetails && (
+            <ReceiptPreview
+              receiptNumber={receipt.receipt_number}
+              receiptUrl={receipt.receipt_url}
+              donorName={donation.donor_name}
+              donorEmail={donation.donor_email}
+              donorPhone={donation.donor_phone}
+              amount={donation.amount}
+              currency={donation.currency}
+              paymentDate={new Date(donation.created_at)}
+              isMonthly={donation.is_monthly}
+              organizationName={organizationDetails.name}
+              vatNumber={organizationDetails.vatNumber}
+              panNumber={organizationDetails.panNumber}
+              swcNumber={organizationDetails.swcNumber}
+            />
+          )}
+        </>
       )}
 
       <div className="bg-surface border border-border rounded-2xl p-8 mb-8">

@@ -4,6 +4,7 @@ import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { getPaymentMode } from "@/lib/payments/config"
+import { generateReceiptForDonation } from "@/lib/actions/donation-receipt"
 import type Stripe from "stripe"
 
 // Create a service role client for webhooks (bypasses RLS)
@@ -195,6 +196,17 @@ export async function POST(request: Request) {
           )
         }
 
+        // Generate receipt automatically after payment completion
+        if (updatedDonation) {
+          try {
+            await generateReceiptForDonation({ donationId: updatedDonation.id })
+            console.log(`Receipt generated for donation ${updatedDonation.id}`)
+          } catch (receiptError) {
+            // Don't fail the webhook if receipt generation fails - it can be retried later
+            console.error("Failed to generate receipt for donation:", receiptError)
+          }
+        }
+
         break
       }
 
@@ -316,7 +328,7 @@ export async function POST(request: Request) {
             // Update the most recent matching donation
             const donation = donations[0]
             if (donation.payment_status !== "completed") {
-              await supabase
+              const { data: updatedDonations } = await supabase
                 .from("donations")
                 .update({
                   payment_status: "completed",
@@ -325,6 +337,19 @@ export async function POST(request: Request) {
                   stripe_subscription_id: invoice.subscription,
                 })
                 .eq("id", donation.id)
+                .select()
+
+              const updatedDonation = updatedDonations?.[0]
+              
+              // Generate receipt for subscription payment
+              if (updatedDonation) {
+                try {
+                  await generateReceiptForDonation({ donationId: updatedDonation.id })
+                  console.log(`Receipt generated for subscription donation ${updatedDonation.id}`)
+                } catch (receiptError) {
+                  console.error("Failed to generate receipt for subscription donation:", receiptError)
+                }
+              }
             }
           }
         }
