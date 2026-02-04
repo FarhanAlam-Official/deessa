@@ -1,14 +1,15 @@
+/* Import Comic Neue from Google Fonts for body text */
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&display=swap');
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Local font face for Marissa Font (falls back to system/local if available)
-   Place your woff2/woff files in /public/fonts/ (example: Marissa-Regular.woff2)
-   If the font is installed on your OS, the local() src will try that first. */
+/* Local font face for Marissa Font
+   Using the actual font file: MarissaFont-Regular.ttf in /public/fonts/ */
 @font-face {
   font-family: "Marissa Font";
-  src: local("Marissa"), local("Marissa Regular"), local("Marissa-Regular"),
-       url('/fonts/Marissa-Regular.woff2') format('woff2'),
-       url('/fonts/Marissa-Regular.woff') format('woff');
+  src: local("Marissa"), local("MarissaFont"), local("Marissa Font"),
+       url('/fonts/MarissaFont-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -16,35 +17,38 @@
 
 @font-face {
   font-family: "Marissa Font";
-  src: local("Marissa Bold"), local("Marissa-Bold"),
-       url('/fonts/Marissa-Bold.woff2') format('woff2'),
-       url('/fonts/Marissa-Bold.woff') format('woff');
+  src: local("Marissa"), local("MarissaFont"), local("Marissa Font"),
+       url('/fonts/MarissaFont-Regular.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
-/* Scoped test font-face using TTF so you can test the H1 only without changing site-wide font
-   Place Marissa-Regular.ttf / Marissa-Bold.ttf into public/fonts/ for this test. */
-@font-face {
-  font-family: "Marissa Test";
-  src: local("Marissa"), url('/fonts/Marissa-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
+/* Apply Comic Neue font to body and all general text */
+body, p, span, a, li, td, th, label, input, textarea, button, div {
+  font-family: "Comic Neue", cursive, sans-serif;
 }
 
-@font-face {
-  font-family: "Marissa Test";
-  src: local("Marissa Bold"), url('/fonts/Marissa-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
+/* Apply Marissa Font to ALL headings and titles site-wide */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Marissa Font", ui-serif, Georgia, 'Times New Roman', serif !important;
 }
 
-/* Helper class you can add to the specific H1 to test Marissa without affecting the rest of the site */
-.font-marissa-test {
-  font-family: "Marissa Test", "Marissa Font", ui-serif, Georgia, 'Times New Roman', serif;
+/* Also apply Marissa to common heading/title class patterns */
+.heading,
+.title {
+  font-family: "Marissa Font", ui-serif, Georgia, 'Times New Roman', serif !important;
+}
+
+/* Helper class for explicit Marissa usage */
+.font-marissa,
+.font-marissa * {
+  font-family: "Marissa Font", ui-serif, Georgia, 'Times New Roman', serif !important;
+}
+
+/* Helper class for explicit Comic Neue usage */
+.font-comic {
+  font-family: "Comic Neue", cursive, sans-serif !important;
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -177,8 +181,9 @@
 }
 
 @theme inline {
-  /* optional: --font-sans, --font-serif, --font-mono if they are applied in the layout.tsx */
-  --font-sans: "Plus Jakarta Sans", "Plus Jakarta Sans Fallback", sans-serif;
+  /* Comic Neue for body text, Marissa for headings */
+  --font-sans: "Comic Neue", cursive, sans-serif;
+  --font-heading: "Marissa Font", ui-serif, Georgia, serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

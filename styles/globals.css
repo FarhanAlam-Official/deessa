@@ -123,3 +123,44 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Apply Marissa Font to all headings and titles */
+h1, h2, h3, h4, h5, h6,
+.heading,
+.title,
+[class*="heading"],
+[class*="title"] {
+  font-family: "Marissa Font", "Marissa Test", ui-serif, Georgia, 'Times New Roman', serif !important;
+}
+
+/* Specific heading weights */
+h1 {
+  font-weight: 700;
+}
+
+h2, h3 {
+  font-weight: 700;
+}
+
+h4, h5, h6 {
+  font-weight: 400;
+}
+
+/* Override font-black, font-bold classes to use Marissa */
+.font-black h1,
+.font-black h2,
+.font-black h3,
+h1.font-black,
+h2.font-black,
+h3.font-black {
+  font-family: "Marissa Font", "Marissa Test", ui-serif, Georgia, 'Times New Roman', serif !important;
+}
+
+.font-bold h1,
+.font-bold h2,
+.font-bold h3,
+h1.font-bold,
+h2.font-bold,
+h3.font-bold {
+  font-family: "Marissa Font", "Marissa Test", ui-serif, Georgia, 'Times New Roman', serif !important;
+}
