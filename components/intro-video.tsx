@@ -57,7 +57,16 @@ export function IntroVideo() {
             console.log('Video autoplay started (muted)')
           })
           .catch((error) => {
-            console.error("Video autoplay failed:", error)
+            // AbortError is expected when browser pauses video to save power
+            // This is not a real error, just ignore it
+            if (error.name === 'AbortError') {
+              // Browser interrupted playback, try again
+              setTimeout(() => {
+                video.play().catch(() => {})
+              }, 100)
+            } else {
+              console.error("Video autoplay failed:", error)
+            }
           })
       }
     }
