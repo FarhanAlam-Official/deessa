@@ -39,3 +39,9 @@ public/websiteClip/*.MP3
 *.mp4
 # Exception for intro video
 !public/Deesa-Intro*.mp4
+
+
+/.agents
+/.claude
+/.codex
+/.opencode
