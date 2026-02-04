@@ -120,10 +120,13 @@ export function PodcastCard({
         "flex flex-col grow p-5 md:p-6",
         isPrimary ? "gap-3" : "gap-2"
       )}>
-        <h3 className={cn(
-          "font-bold text-foreground leading-tight transition-colors duration-300 group-hover:text-primary",
-          isPrimary ? "text-lg md:text-xl" : "text-base"
-        )}>
+        <h3 
+          className={cn(
+            "font-black text-foreground leading-tight transition-colors duration-300 group-hover:text-primary",
+            isPrimary ? "text-lg md:text-xl" : "text-base"
+          )}
+          style={{ fontWeight: 900 }}
+        >
           {title}
         </h3>
 

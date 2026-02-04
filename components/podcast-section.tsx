@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 const mainEpisodes = [
   {
     id: 1,
-    title: "Living With Autism – Episode 1",
+    title: "Living with Autism: Real Voices, Real Stories || EP 1 ll deessa Foundation",
     description:
       "An intimate conversation exploring the daily experiences, challenges, and beautiful moments of living with autism. Hear directly from individuals and families sharing their authentic stories.",
     thumbnail: "https://img.youtube.com/vi/_3sg3XmjChU/maxresdefault.jpg",
@@ -21,7 +21,7 @@ const mainEpisodes = [
   },
   {
     id: 2,
-    title: "Living With Autism – Episode 2",
+    title: "Living with Autism: Real Voices, Real Stories || EP 2 ll deessa Foundation",
     description:
       "Continuing our journey into autism awareness, this episode features new perspectives on communication, sensory experiences, and building understanding in communities.",
     thumbnail: "https://img.youtube.com/vi/P5sl39_iatQ/maxresdefault.jpg",
@@ -31,7 +31,7 @@ const mainEpisodes = [
   },
   {
     id: 3,
-    title: "Living With Autism – Episode 3",
+    title: "Living with Autism: Real Voices, Real Stories || EP 3 ll deessa Foundation",
     description:
       "Our latest episode dives deep into support systems, educational approaches, and celebrating neurodiversity. Stories of resilience, growth, and hope.",
     thumbnail: "https://img.youtube.com/vi/95y79LR13Rk/maxresdefault.jpg",
@@ -45,7 +45,7 @@ const mainEpisodes = [
 const teaserVideos = [
   {
     id: 4,
-    title: "Living With Autism – Episode 1 Teaser",
+    title: "Living with Autism: Real Voices, Real Stories || Episode 1 || Teaser ll deessa Foundation",
     description: "A sneak peek into Episode 1 of our autism awareness series.",
     thumbnail: "https://img.youtube.com/vi/er9_Y4_gyk8/maxresdefault.jpg",
     duration: "1:30",
@@ -54,7 +54,7 @@ const teaserVideos = [
   },
   {
     id: 5,
-    title: "Living With Autism – Episode 2 Teaser",
+    title: "Living with Autism: Real Voices, Real Stories || Episode 2 || Teaser ll deessa Foundation",
     description: "Preview of Episode 2 exploring new perspectives on autism.",
     thumbnail: "https://img.youtube.com/vi/oHmRPg5ohkY/hqdefault.jpg",
     duration: "1:25",
@@ -63,7 +63,7 @@ const teaserVideos = [
   },
   {
     id: 6,
-    title: "Living With Autism – Episode 3 Teaser",
+    title: "Living with Autism: Real Voices, Real Stories || Episode 3 || Teaser ll deessa Foundation",
     description: "Coming soon - a glimpse into Episode 3 of our series.",
     thumbnail: "https://img.youtube.com/vi/2NA9nd5AD-U/maxresdefault.jpg",
     duration: "1:20",
