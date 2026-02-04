@@ -203,6 +203,8 @@ export default function EventsPage() {
                 time={event.event_time || ""}
                 location={event.location}
                 category={event.category}
+                href={`/events/${event.id}`}
+                variant="secondary"
                 isPast
               />
             ))}

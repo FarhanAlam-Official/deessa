@@ -96,7 +96,7 @@ export function ResourceDownloads({
           <Card key={resource.title} className="hover:shadow-lg transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-start gap-4 mb-4">
-                <div className="size-12 flex items-center justify-center bg-primary/10 rounded-lg text-primary flex-shrink-0">
+                <div className="size-12 flex items-center justify-center bg-primary/10 rounded-lg text-primary shrink-0">
                   <Icon className="size-6" />
                 </div>
                 <div className="flex-1">

@@ -32,7 +32,7 @@ export default async function AboutPage() {
     <>
       {/* Hero Section */}
       <section className="relative">
-        <div className="w-full h-[600px] relative overflow-hidden">
+        <div className="w-full h-150 relative overflow-hidden">
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{
@@ -131,17 +131,32 @@ export default async function AboutPage() {
             {timeline.map((item, index) => (
               <div
                 key={item.year}
-                className={`relative flex flex-col md:flex-row items-center justify-between mb-12 ${index % 2 === 0 ? "" : "md:flex-row-reverse"}`}
+                className="relative flex items-center justify-between mb-12"
               >
-                <div
-                  className={`md:w-5/12 pl-12 md:pl-0 ${index % 2 === 0 ? "md:text-right md:order-1" : "md:text-left md:order-3"}`}
-                >
-                  <h3 className="text-2xl font-bold text-primary">{item.year}</h3>
-                  <h4 className="text-xl font-bold text-foreground mt-1">{item.title}</h4>
-                  <p className="text-foreground-muted mt-2">{item.description}</p>
+                {/* Left side content (even indexes: 0, 2, 4...) */}
+                <div className={`w-5/12 ${index % 2 === 0 ? "text-right pr-8" : ""}`}>
+                  {index % 2 === 0 && (
+                    <>
+                      <h3 className="text-2xl font-bold text-primary">{item.year}</h3>
+                      <h4 className="text-xl font-bold text-foreground mt-1">{item.title}</h4>
+                      <p className="text-foreground-muted mt-2">{item.description}</p>
+                    </>
+                  )}
                 </div>
-                <div className="absolute left-4 md:left-1/2 w-4 h-4 bg-surface border-4 border-primary rounded-full transform -translate-x-2 md:-translate-x-2 z-10 order-1" />
-                <div className={`md:w-5/12 ${index % 2 === 0 ? "order-3" : "order-1"}`} />
+
+                {/* Center dot */}
+                <div className="w-4 h-4 bg-surface border-4 border-primary rounded-full z-10 shrink-0" />
+
+                {/* Right side content (odd indexes: 1, 3, 5...) */}
+                <div className={`w-5/12 ${index % 2 === 1 ? "text-left pl-8" : ""}`}>
+                  {index % 2 === 1 && (
+                    <>
+                      <h3 className="text-2xl font-bold text-primary">{item.year}</h3>
+                      <h4 className="text-xl font-bold text-foreground mt-1">{item.title}</h4>
+                      <p className="text-foreground-muted mt-2">{item.description}</p>
+                    </>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -181,14 +196,33 @@ export default async function AboutPage() {
           <div className="lg:w-1/2">
             <h2 className="text-2xl font-bold text-foreground mb-8">Our Partners & Supporters</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
-              {[Handshake, Globe, GraduationCap, HeartPulse, Droplet, Trees].map((Icon, index) => (
-                <div
-                  key={index}
-                  className="h-24 bg-background rounded-lg flex items-center justify-center grayscale hover:grayscale-0 opacity-70 hover:opacity-100 transition-all cursor-pointer border border-transparent hover:border-border"
-                >
-                  <Icon className="size-10 text-foreground-muted" />
-                </div>
-              ))}
+              {[
+                { Icon: Handshake, color: 'blue', from: 'from-blue-50', to: 'to-blue-100', hoverBorder: 'hover:border-blue-400', hoverShadow: 'hover:shadow-blue-500/20', hoverGradient: 'group-hover:from-blue-500/5 group-hover:to-blue-500/10', hoverIcon: 'group-hover:text-blue-600' },
+                { Icon: Globe, color: 'green', from: 'from-green-50', to: 'to-green-100', hoverBorder: 'hover:border-green-400', hoverShadow: 'hover:shadow-green-500/20', hoverGradient: 'group-hover:from-green-500/5 group-hover:to-green-500/10', hoverIcon: 'group-hover:text-green-600' },
+                { Icon: GraduationCap, color: 'purple', from: 'from-purple-50', to: 'to-purple-100', hoverBorder: 'hover:border-purple-400', hoverShadow: 'hover:shadow-purple-500/20', hoverGradient: 'group-hover:from-purple-500/5 group-hover:to-purple-500/10', hoverIcon: 'group-hover:text-purple-600' },
+                { Icon: HeartPulse, color: 'rose', from: 'from-rose-50', to: 'to-rose-100', hoverBorder: 'hover:border-rose-400', hoverShadow: 'hover:shadow-rose-500/20', hoverGradient: 'group-hover:from-rose-500/5 group-hover:to-rose-500/10', hoverIcon: 'group-hover:text-rose-600' },
+                { Icon: Droplet, color: 'cyan', from: 'from-cyan-50', to: 'to-cyan-100', hoverBorder: 'hover:border-cyan-400', hoverShadow: 'hover:shadow-cyan-500/20', hoverGradient: 'group-hover:from-cyan-500/5 group-hover:to-cyan-500/10', hoverIcon: 'group-hover:text-cyan-600' },
+                { Icon: Trees, color: 'emerald', from: 'from-emerald-50', to: 'to-emerald-100', hoverBorder: 'hover:border-emerald-400', hoverShadow: 'hover:shadow-emerald-500/20', hoverGradient: 'group-hover:from-emerald-500/5 group-hover:to-emerald-500/10', hoverIcon: 'group-hover:text-emerald-600' },
+              ].map((partner, index) => {
+                const { Icon, from, to, hoverBorder, hoverShadow, hoverGradient, hoverIcon } = partner;
+                return (
+                  <div
+                    key={index}
+                    className={`group relative h-28 bg-gradient-to-br ${from} ${to} dark:from-background dark:to-surface rounded-2xl flex items-center justify-center border-2 border-border/50 ${hoverBorder} transition-all duration-300 cursor-pointer overflow-hidden shadow-sm hover:shadow-xl ${hoverShadow} hover:-translate-y-1`}
+                  >
+                    {/* Background gradient effect on hover */}
+                    <div className={`absolute inset-0 bg-gradient-to-br from-transparent to-transparent ${hoverGradient} transition-all duration-300`} />
+                    
+                    {/* Icon with animation */}
+                    <Icon className={`relative size-12 text-foreground-muted/60 ${hoverIcon} transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`} />
+                    
+                    {/* Subtle shine effect */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <div className="absolute -inset-full top-0 block h-full w-1/2 transform -skew-x-12 bg-gradient-to-r from-transparent to-white/10 group-hover:animate-[shimmer_1.5s_ease-in-out]" />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
           <div className="lg:w-1/2" id="reports">
@@ -236,7 +270,7 @@ export default async function AboutPage() {
       </Section>
       {/* CTA Section */}
       <section className="bg-foreground py-20">
-        <div className="max-w-[1200px] mx-auto px-4 md:px-10 text-center">
+        <div className="max-w-300 mx-auto px-4 md:px-10 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to Make a Difference?</h2>
           <p className="text-gray-400 max-w-2xl mx-auto mb-8">
             Whether through volunteering, donating, or simply spreading the word, your involvement is crucial to our
