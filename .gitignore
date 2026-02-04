@@ -37,3 +37,5 @@ public/websiteClip/*.mp4
 public/websiteClip/*.MP3
 # Video files
 *.mp4
+# Exception for intro video
+!public/Deesa-Intro*.mp4
