@@ -233,7 +233,7 @@ export function IntroVideo() {
           preload="auto"
           webkit-playsinline="true"
         >
-          <source src="/Deesa-Intro .mp4" type="video/mp4" />
+          <source src="/Deesa-Intro%20.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       </div>
