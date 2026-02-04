@@ -9,6 +9,7 @@ export interface EsewaInitResult {
   redirectUrl: string
   referenceId: string
   formData: Record<string, string>
+  transactionUuid: string
 }
 
 export interface EsewaDonationContext {
@@ -42,7 +43,7 @@ export async function startEsewaPayment(
   }
 
   const merchantId = process.env.ESEWA_MERCHANT_ID || "EPAYTEST"
-  const secretKey = process.env.ESEWA_SECRET_KEY || "8gBm/:&EnhH.1/q"
+  const secretKey = process.env.ESEWA_SECRET_KEY
   
   // Determine base URL
   const isSandbox = merchantId === "EPAYTEST" || process.env.ESEWA_BASE_URL?.includes("rc-epay")
@@ -53,7 +54,8 @@ export async function startEsewaPayment(
   const failureUrl = process.env.ESEWA_FAILURE_URL || `${siteUrl}/api/payments/esewa/failure`
 
   // Generate transaction UUID (unique identifier for the transaction)
-  const transactionUuid = `${Date.now()}-${donation.id.substring(0, 8)}`
+  // Use a full donation id binding to avoid prefix collisions in callbacks
+  const transactionUuid = `${Date.now()}-${donation.id}`
   const referenceId = `esewa_${donation.id}`
 
   if (mode === "mock") {
@@ -69,6 +71,7 @@ export async function startEsewaPayment(
       redirectUrl: mockUrl,
       referenceId,
       formData: {},
+      transactionUuid,
     }
   }
 
@@ -148,5 +151,6 @@ export async function startEsewaPayment(
     redirectUrl,
     referenceId,
     formData,
+    transactionUuid,
   }
 }

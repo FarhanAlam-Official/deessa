@@ -70,6 +70,7 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
         donor_phone: input.donorPhone || null,
         is_monthly: input.isMonthly,
         payment_status: "pending",
+        provider: input.provider,
       })
       .select()
       .single()
@@ -81,6 +82,8 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
 
     let redirectUrl: string | undefined
     let transactionId: string | undefined
+    let providerRef: string | undefined
+    let providerUpdate: Record<string, unknown> = {}
 
     if (input.provider === "stripe") {
       const result = await startStripeCheckout(
@@ -96,6 +99,11 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
       )
       redirectUrl = result.redirectUrl
       transactionId = result.sessionId
+      providerRef = result.sessionId
+      providerUpdate = {
+        provider_ref: result.sessionId,
+        stripe_session_id: result.sessionId,
+      }
     } else if (input.provider === "khalti") {
       const result = await startKhaltiPayment(
         {
@@ -110,6 +118,11 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
       )
       redirectUrl = result.redirectUrl
       transactionId = result.pidx
+      providerRef = result.pidx
+      providerUpdate = {
+        provider_ref: result.pidx,
+        khalti_pidx: result.pidx,
+      }
     } else if (input.provider === "esewa") {
       const result = await startEsewaPayment(
         {
@@ -121,7 +134,22 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
       )
       redirectUrl = result.redirectUrl
       transactionId = result.referenceId
+      providerRef = result.transactionUuid
+      providerUpdate = {
+        provider_ref: result.transactionUuid,
+        esewa_transaction_uuid: result.transactionUuid,
+      }
       
+      // Persist provider references before returning (eSewa returns early)
+      const paymentId = transactionId ? `${input.provider}:${transactionId}` : null
+      await supabase
+        .from("donations")
+        .update({
+          payment_id: paymentId,
+          ...providerUpdate,
+        })
+        .eq("id", donation.id)
+
       // eSewa v2 requires form POST
       return {
         ok: true,
@@ -146,6 +174,8 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
       .from("donations")
       .update({
         payment_id: paymentId,
+        provider_ref: providerRef ?? null,
+        ...providerUpdate,
       })
       .eq("id", donation.id)
 

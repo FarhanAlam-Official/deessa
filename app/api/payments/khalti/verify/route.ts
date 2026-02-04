@@ -38,7 +38,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
     const pidx = body.pidx as string | undefined
-    const purchaseOrderId = body.purchase_order_id as string | undefined // Khalti may return this in callback
+    const purchaseOrderId = body.purchase_order_id as string | undefined // optional; used only for additional validation
 
     if (!pidx || typeof pidx !== "string" || pidx.trim().length === 0) {
       return NextResponse.json(
@@ -62,58 +62,12 @@ export async function POST(request: Request) {
     }
     const supabase = createServiceClient(supabaseUrl, serviceRoleKey)
 
-    // If we have purchase_order_id from the callback, try that first
-    let donation: any = null
-    let donationError: any = null
-
-    if (purchaseOrderId) {
-      const uuidValidation = validateUUID(purchaseOrderId)
-      if (uuidValidation.valid) {
-        const { data: orderDonation } = await supabase
-          .from("donations")
-          .select("*")
-          .eq("id", purchaseOrderId)
-          .single()
-
-        if (orderDonation) {
-          donation = orderDonation
-          
-          // Update payment_id if not set or doesn't match
-          if (!donation.payment_id || !donation.payment_id.includes(pidx)) {
-            await supabase
-              .from("donations")
-              .update({ payment_id: `khalti:${pidx}` })
-              .eq("id", donation.id)
-          }
-        }
-      }
-    }
-
-    // If not found by purchase_order_id, try payment_id
-    if (!donation) {
-      const { data: paymentDonation } = await supabase
-        .from("donations")
-        .select("*")
-        .eq("payment_id", `khalti:${pidx}`)
-        .single()
-
-      donation = paymentDonation
-    }
-
-    // If still not found, try alternative lookup by pidx pattern
-    if (!donation) {
-      const { data: altDonation } = await supabase
-        .from("donations")
-        .select("*")
-        .like("payment_id", `%${pidx}%`)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single()
-
-      if (altDonation) {
-        donation = altDonation
-      }
-    }
+    // Strict mapping: donation must already be associated to this pidx
+    const { data: donation } = await supabase
+      .from("donations")
+      .select("*")
+      .eq("khalti_pidx", pidx)
+      .single()
 
     // If donation still not found, return error
     if (!donation) {
@@ -125,6 +79,22 @@ export async function POST(request: Request) {
         },
         { status: 404 },
       )
+    }
+
+    // If caller provides purchase_order_id, validate it matches the donation we found
+    if (purchaseOrderId) {
+      const uuidValidation = validateUUID(purchaseOrderId)
+      if (!uuidValidation.valid || purchaseOrderId !== donation.id) {
+        logPaymentEvent("Khalti verify - purchase_order_id mismatch", {
+          donationId: donation.id,
+          providedPurchaseOrderId: maskSensitiveData(purchaseOrderId),
+          pidx: maskSensitiveData(pidx),
+        }, "warn")
+        return NextResponse.json(
+          { ok: false, error: "Invalid purchase order reference" },
+          { status: 400 },
+        )
+      }
     }
 
     // Idempotency check: if already processed, return current status
@@ -148,7 +118,12 @@ export async function POST(request: Request) {
       // In mock mode, mark as completed
       const { error: updateError } = await supabase
         .from("donations")
-        .update({ payment_status: "completed" })
+        .update({
+          payment_status: "completed",
+          provider: "khalti",
+          provider_ref: pidx,
+          payment_id: `khalti:${pidx}`,
+        })
         .eq("id", donation.id)
 
       if (updateError) {
@@ -289,7 +264,15 @@ export async function POST(request: Request) {
         actual: data.total_amount,
         warning: amountVerification.error,
       }, "warn")
-      // Don't fail the transaction, but log the warning
+      // Fail-closed: do not complete on amount mismatch.
+      await supabase
+        .from("donations")
+        .update({ payment_status: "review", provider: "khalti", provider_ref: pidx })
+        .eq("id", donation.id)
+      return NextResponse.json(
+        { ok: false, status: "failed", error: "Amount mismatch; requires manual review" },
+        { status: 400 },
+      )
     }
 
     // Handle different status codes according to Khalti documentation
@@ -342,20 +325,33 @@ export async function POST(request: Request) {
     }
 
     if (shouldUpdate) {
+      // Replay/idempotency protection using payment_events ledger (best-effort if table exists)
+      if (newStatus === "completed" || newStatus === "failed") {
+        try {
+          const eventId = data.transaction_id ? `tx:${data.transaction_id}` : `pidx:${pidx}`
+          const { error: eventErr } = await supabase
+            .from("payment_events")
+            .insert({ provider: "khalti", event_id: eventId, donation_id: donation.id })
+          if (eventErr) {
+            if ((eventErr as any).code === "23505" || String((eventErr as any).message || "").toLowerCase().includes("duplicate")) {
+              return NextResponse.json(
+                { ok: true, status: donation.payment_status, message: "Transaction already processed" },
+                { status: 200 },
+              )
+            }
+          }
+        } catch {
+          // ignore if ledger missing
+        }
+      }
+
       // Update payment_status and ensure payment_id is set correctly
       const updateData: { payment_status: string; payment_id?: string } = {
         payment_status: newStatus,
       }
 
       // If payment_id is not set or doesn't match, update it
-      if (!donation.payment_id || !donation.payment_id.includes(pidx)) {
-        updateData.payment_id = `khalti:${pidx}`
-        logPaymentEvent("Khalti verify - updating payment_id", {
-          donationId: donation.id,
-          oldPaymentId: donation.payment_id,
-          newPaymentId: updateData.payment_id,
-        })
-      }
+      updateData.payment_id = `khalti:${pidx}`
 
       const { error: updateError } = await supabase
         .from("donations")

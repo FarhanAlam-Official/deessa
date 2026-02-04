@@ -2,7 +2,17 @@
 
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { logPaymentEvent, maskSensitiveData } from "@/lib/payments/security"
+
+function createServiceRoleClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error("Missing Supabase service role credentials")
+  }
+  return createServiceClient(supabaseUrl, serviceRoleKey)
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url)
@@ -34,31 +44,24 @@ export async function GET(request: Request) {
     )
   }
 
-  // Extract donation ID from transaction_uuid (format: timestamp-donationIdPrefix)
-  const parts = transaction_uuid.split("-")
-  const donationIdPrefix = parts.length > 1 ? parts[1] : parts[0]
+  // Use service role client to bypass RLS for payment verification
+  const supabase = createServiceRoleClient()
 
-  const supabase = await createClient()
-
-  // Find donation by ID prefix
-  const { data: donations, error: searchError } = await supabase
+  // Find donation by exact transaction_uuid binding
+  const { data: donation, error: searchError } = await supabase
     .from("donations")
     .select("*")
-    .like("id", `${donationIdPrefix}%`)
-    .order("created_at", { ascending: false })
-    .limit(1)
+    .eq("esewa_transaction_uuid", transaction_uuid)
+    .single()
 
-  if (searchError || !donations || donations.length === 0) {
+  if (searchError || !donation) {
     logPaymentEvent("eSewa failure - donation not found", {
       transactionUuid: maskSensitiveData(transaction_uuid),
-      donationIdPrefix,
     }, "warn")
     return NextResponse.redirect(
       new URL(`/donate/cancel?provider=esewa&reason=donation_not_found`, url.origin),
     )
   }
-
-  const donation = donations[0]
 
   // Idempotency check
   if (donation.payment_status === "completed") {
@@ -85,7 +88,7 @@ export async function GET(request: Request) {
   // Update status to failed
   const { error: updateError } = await supabase
     .from("donations")
-    .update({ payment_status: "failed" })
+    .update({ payment_status: "failed", provider: "esewa", provider_ref: transaction_uuid })
     .eq("id", donation.id)
 
   if (updateError) {

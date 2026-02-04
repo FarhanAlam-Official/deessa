@@ -85,6 +85,7 @@ Controlled via environment variable:
   - `live`:
     - Uses real Stripe, Khalti, and eSewa endpoints.
     - Requires proper live API keys and webhook secrets in env.
+    - **Production safety**: the app refuses to start in production unless `PAYMENT_MODE="live"` (guardrail in `lib/payments/config.ts`).
 
 Implementation: `lib/payments/config.ts` → `getPaymentMode()`.
 
@@ -203,8 +204,8 @@ Required for live mode:
 - `ESEWA_MERCHANT_ID`  
   - Sandbox: `EPAYTEST`
   - Production: Your merchant ID from eSewa
-- `ESEWA_SECRET_KEY` (optional, if available)
-  - Secret key for transaction verification
+- `ESEWA_SECRET_KEY`
+  - **Required in live mode** for signature verification of eSewa v2 responses.
 - `ESEWA_BASE_URL`  
   - Sandbox: `https://uat.esewa.com.np`
   - Production: `https://esewa.com.np`
@@ -426,6 +427,7 @@ Security:
 1. Repeat Step 2 using **live** credentials and production domain.
 2. Double-check:
    - All env vars are set.
+  - `PAYMENT_MODE="live"` (production guardrail will fail startup otherwise).
    - Webhooks/callback URLs in provider dashboards point to the production domain.
    - `/admin/settings/payments` reflects the providers you actually want live.
 3. Monitor:

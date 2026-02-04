@@ -18,8 +18,17 @@ const DEFAULT_PAYMENT_SETTINGS: PaymentSettings = {
 }
 
 export function getPaymentMode(): PaymentMode {
-  const mode = process.env.PAYMENT_MODE === "live" ? "live" : "mock"
-  return mode
+  const envMode = process.env.PAYMENT_MODE === "live" ? "live" : "mock"
+
+  // Guardrail: never allow mock mode in production deployments.
+  // This prevents signature verification from being skipped on public endpoints.
+  if (process.env.NODE_ENV === "production" && envMode !== "live") {
+    throw new Error(
+      'PAYMENT_MODE must be "live" in production. Refusing to run with mock mode.',
+    )
+  }
+
+  return envMode
 }
 
 export function isProviderEnvConfigured(provider: PaymentProvider): boolean {

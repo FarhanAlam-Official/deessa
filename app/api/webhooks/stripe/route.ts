@@ -4,6 +4,7 @@ import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { getPaymentMode } from "@/lib/payments/config"
+import { generateReceiptForDonation } from "@/lib/actions/donation-receipt"
 import type Stripe from "stripe"
 
 // Create a service role client for webhooks (bypasses RLS)
@@ -61,6 +62,33 @@ export async function POST(request: Request) {
   const supabase = createServiceRoleClient()
 
   try {
+    // Idempotency / replay protection: store Stripe event.id once
+    const recordEventOnce = async (donationId: string | null | undefined) => {
+      try {
+        const { error } = await supabase
+          .from("payment_events")
+          .insert({
+            provider: "stripe",
+            event_id: event.id,
+            donation_id: donationId ?? null,
+          })
+        if (error) {
+          // Postgres unique violation via Supabase can present as an error string; treat as already-processed.
+          if ((error as any).code === "23505" || String((error as any).message || "").toLowerCase().includes("duplicate")) {
+            return { alreadyProcessed: true }
+          }
+          // If the ledger doesn't exist yet, do not block processing (migration not applied).
+          if (String((error as any).message || "").toLowerCase().includes("payment_events")) {
+            return { alreadyProcessed: false }
+          }
+          return { alreadyProcessed: false }
+        }
+        return { alreadyProcessed: false }
+      } catch {
+        return { alreadyProcessed: false }
+      }
+    }
+
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session
@@ -71,61 +99,23 @@ export async function POST(request: Request) {
           break
         }
 
-        // Try to find donation by ID first
-        let { data: donation, error: fetchError } = await supabase
+        // Idempotency / replay protection
+        const recorded = await recordEventOnce(donationId)
+        if (recorded.alreadyProcessed) break
+
+        // Strict lookup: donation must match id
+        const { data: donation, error: fetchError } = await supabase
           .from("donations")
           .select("*")
           .eq("id", donationId)
           .single()
 
-        // If not found by ID, try alternative lookups
-        if (fetchError || !donation) {
-          // Try finding by payment_id (in case payment_id was set during checkout creation)
-          const paymentIdPattern = `stripe:${session.id}`
-          const { data: donationsByPaymentId } = await supabase
-            .from("donations")
-            .select("*")
-            .like("payment_id", paymentIdPattern)
-            .limit(1)
-
-          if (donationsByPaymentId && donationsByPaymentId.length > 0) {
-            donation = donationsByPaymentId[0]
-            fetchError = null
-          } else {
-            // Try finding by email and amount as last resort (for recent donations)
-            const { data: donationsByEmail } = await supabase
-              .from("donations")
-              .select("*")
-              .eq("donor_email", session.metadata?.donor_email || session.customer_email || "")
-              .eq("payment_status", "pending")
-              .order("created_at", { ascending: false })
-              .limit(5)
-
-            if (donationsByEmail && donationsByEmail.length > 0) {
-              // Try to match by amount if available
-              const sessionAmount = session.amount_total ? session.amount_total / 100 : null
-              const matchingDonation = sessionAmount
-                ? donationsByEmail.find(d => Math.abs(Number(d.amount) - sessionAmount) < 0.01)
-                : donationsByEmail[0]
-
-              if (matchingDonation) {
-                donation = matchingDonation
-                fetchError = null
-              }
-            }
-
-            if (!donation) {
-              console.error("checkout.session.completed: Donation not found", {
-                donationId,
-                sessionId: session.id,
-              })
-              break
-            }
-          }
-        }
-
         if (!donation) {
-          console.error("checkout.session.completed: Donation not found after all attempts", donationId)
+          console.error("checkout.session.completed: Donation not found", {
+            donationId,
+            sessionId: session.id,
+            error: fetchError,
+          })
           break
         }
 
@@ -134,15 +124,41 @@ export async function POST(request: Request) {
           break
         }
 
-        // Verify amount and currency match (for one-time payments)
-        if (session.mode === "payment" && session.amount_total && donation.amount) {
-          const expectedMinor = Math.round(Number(donation.amount) * 100)
-          if (expectedMinor !== session.amount_total) {
-            console.warn(
-              "checkout.session.completed: Amount mismatch for donation",
+        // Only mark complete if Stripe says the checkout is paid
+        if (session.payment_status !== "paid") {
+          console.warn("checkout.session.completed: Session not paid; keeping pending", {
+            donationId,
+            sessionId: session.id,
+            payment_status: session.payment_status,
+          })
+          break
+        }
+
+        // Fail-closed amount/currency check for one-time payments
+        if (session.mode === "payment") {
+          const donationCurrency = String(donation.currency || "").toLowerCase()
+          const sessionCurrency = String(session.currency || "").toLowerCase()
+          const expectedMinor = donation.amount ? Math.round(Number(donation.amount) * 100) : null
+          const actualMinor = session.amount_total ?? null
+          if (!expectedMinor || actualMinor === null || donationCurrency !== sessionCurrency || expectedMinor !== actualMinor) {
+            console.error("checkout.session.completed: Amount/currency mismatch; marking review", {
               donationId,
-              `Expected: ${expectedMinor}, Got: ${session.amount_total}`
-            )
+              sessionId: session.id,
+              donationCurrency,
+              sessionCurrency,
+              expectedMinor,
+              actualMinor,
+            })
+            await supabase
+              .from("donations")
+              .update({
+                payment_status: "review",
+                stripe_session_id: session.id,
+                provider: "stripe",
+                provider_ref: session.id,
+              })
+              .eq("id", donationId)
+            break
           }
         }
 
@@ -154,6 +170,13 @@ export async function POST(request: Request) {
             payment_id: session.subscription
               ? `stripe:subscription:${session.subscription}`
               : `stripe:${session.id}`,
+            provider: "stripe",
+            provider_ref: session.id,
+            stripe_session_id: session.id,
+            stripe_subscription_id:
+              session.subscription && typeof session.subscription === "string"
+                ? session.subscription
+                : null,
           })
           .eq("id", donationId)
           .select()
@@ -173,6 +196,17 @@ export async function POST(request: Request) {
           )
         }
 
+        // Generate receipt automatically after payment completion
+        if (updatedDonation) {
+          try {
+            await generateReceiptForDonation({ donationId: updatedDonation.id })
+            console.log(`Receipt generated for donation ${updatedDonation.id}`)
+          } catch (receiptError) {
+            // Don't fail the webhook if receipt generation fails - it can be retried later
+            console.error("Failed to generate receipt for donation:", receiptError)
+          }
+        }
+
         break
       }
 
@@ -183,6 +217,9 @@ export async function POST(request: Request) {
         if (!donationId) {
           break
         }
+
+        const recorded = await recordEventOnce(donationId)
+        if (recorded.alreadyProcessed) break
 
         const { data: donation } = await supabase
           .from("donations")
@@ -213,6 +250,9 @@ export async function POST(request: Request) {
         if (!donationId) {
           break
         }
+
+        const recorded = await recordEventOnce(donationId)
+        if (recorded.alreadyProcessed) break
 
         const { data: donation } = await supabase
           .from("donations")
@@ -246,6 +286,9 @@ export async function POST(request: Request) {
           break
         }
 
+        const recorded = await recordEventOnce(donationId)
+        if (recorded.alreadyProcessed) break
+
         const { data: donation } = await supabase
           .from("donations")
           .select("*")
@@ -257,6 +300,9 @@ export async function POST(request: Request) {
             .from("donations")
             .update({
               payment_id: `stripe:subscription:${subscription.id}`,
+              provider: "stripe",
+              provider_ref: subscription.id,
+              stripe_subscription_id: subscription.id,
             })
             .eq("id", donationId)
         }
@@ -269,6 +315,9 @@ export async function POST(request: Request) {
 
         // For subscription invoices, find the donation
         if (invoice.subscription && typeof invoice.subscription === "string") {
+          const recorded = await recordEventOnce(null)
+          if (recorded.alreadyProcessed) break
+
           // Try to find donation by subscription ID in payment_id
           const { data: donations } = await supabase
             .from("donations")
@@ -279,12 +328,28 @@ export async function POST(request: Request) {
             // Update the most recent matching donation
             const donation = donations[0]
             if (donation.payment_status !== "completed") {
-              await supabase
+              const { data: updatedDonations } = await supabase
                 .from("donations")
                 .update({
                   payment_status: "completed",
+                  provider: "stripe",
+                  provider_ref: invoice.subscription,
+                  stripe_subscription_id: invoice.subscription,
                 })
                 .eq("id", donation.id)
+                .select()
+
+              const updatedDonation = updatedDonations?.[0]
+              
+              // Generate receipt for subscription payment
+              if (updatedDonation) {
+                try {
+                  await generateReceiptForDonation({ donationId: updatedDonation.id })
+                  console.log(`Receipt generated for subscription donation ${updatedDonation.id}`)
+                } catch (receiptError) {
+                  console.error("Failed to generate receipt for subscription donation:", receiptError)
+                }
+              }
             }
           }
         }
@@ -297,6 +362,9 @@ export async function POST(request: Request) {
 
         // For subscription invoices, mark donation as failed
         if (invoice.subscription && typeof invoice.subscription === "string") {
+          const recorded = await recordEventOnce(null)
+          if (recorded.alreadyProcessed) break
+
           const { data: donations } = await supabase
             .from("donations")
             .select("*")
@@ -309,6 +377,9 @@ export async function POST(request: Request) {
                 .from("donations")
                 .update({
                   payment_status: "failed",
+                  provider: "stripe",
+                  provider_ref: invoice.subscription,
+                  stripe_subscription_id: invoice.subscription,
                 })
                 .eq("id", donation.id)
             }
