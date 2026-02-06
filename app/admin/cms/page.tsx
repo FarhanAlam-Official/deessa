@@ -16,6 +16,7 @@ import {
   FolderKanban,
   Newspaper,
   Settings as SettingsIcon,
+  Podcast,
 } from "lucide-react"
 
 export const metadata = {
@@ -71,6 +72,14 @@ export default async function CMSPage() {
       href: "/admin/stories",
       permission: "stories",
       color: "bg-indigo-500",
+    },
+    {
+      title: "Podcasts",
+      description: "Manage podcast episodes, highlights, and videos",
+      icon: Podcast,
+      href: "/admin/podcasts",
+      permission: "stories",
+      color: "bg-rose-500",
     },
     {
       title: "Team Members",
