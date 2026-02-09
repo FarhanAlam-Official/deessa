@@ -22,29 +22,28 @@ export default async function HighlightsPage() {
 
   return (
     <div className="min-h-screen bg-bg-main">
-      <main className="container mx-auto px-4 py-8 lg:py-12">
-        {/* Header - Improved Design */}
-        <div className="mb-10">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-gradient-to-br from-brand-primary to-brand-primary-dark rounded-2xl shadow-lg">
-              <Sparkles className="w-8 h-8 text-white" />
+      {/* Simple Clean Header */}
+      <div className="bg-white border-b-4 border-brand-primary">
+        <div className="container max-w-7xl mx-auto px-2 py-12 md:py-16">
+          <div className="max-w-4xl">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary/10 text-brand-primary rounded-lg mb-4">
+              <Sparkles className="w-5 h-5" />
+              <span className="font-bold text-sm uppercase tracking-wider">Key Moments</span>
             </div>
-            <div>
-              <h1 className="text-5xl font-heading font-bold text-text-main mb-1">
-                Podcast Highlights
-              </h1>
-              <p className="text-lg text-text-muted">
-                Key moments from our conversations
-              </p>
-            </div>
+            
+            <h1 className="font-heading font-black text-4xl md:text-5xl lg:text-6xl mb-4 text-text-main leading-tight">
+              Podcast Highlights
+            </h1>
+            
+            <p className="text-lg md:text-xl text-text-muted leading-relaxed">
+              Discover {allHighlights.length} impactful insights and inspiring stories from our podcast episodes. Each short captures the essence of meaningful conversations about autism, inclusion, and community impact.
+            </p>
           </div>
-          <p className="text-base text-text-muted max-w-3xl leading-relaxed ml-20">
-            Discover the most impactful insights, inspiring stories, and powerful moments from our podcast episodes. 
-            Each short captures the essence of meaningful conversations about autism, inclusion, and community impact.
-          </p>
         </div>
+      </div>
 
-        {/* Content with filters */}
+      {/* Highlights Content */}
+      <div className="container max-w-7xl mx-auto px-2 py-12">
         {allHighlights.length > 0 ? (
           <Suspense fallback={<div className="text-center py-12">Loading highlights...</div>}>
             <HighlightsPageContent highlights={allHighlights} />
@@ -60,7 +59,7 @@ export default async function HighlightsPage() {
             </p>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }
