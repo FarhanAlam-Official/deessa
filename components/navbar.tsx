@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
-import { Heart, Menu, X, ChevronRight, Sparkles, Home, Users, Briefcase, Award, FileText, Calendar, Mail } from "lucide-react"
+import { Heart, Menu, X, ChevronRight, Sparkles, Home, Users, Briefcase, Award, FileText, Podcast, Calendar, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -14,6 +14,7 @@ const navLinks = [
   { href: "/programs", label: "Programs", icon: Briefcase },
   { href: "/impact", label: "Impact", icon: Award },
   { href: "/stories", label: "Stories", icon: FileText },
+  { href: "/podcasts", label: "Podcasts", icon: Podcast },
   { href: "/events", label: "Events", icon: Calendar },
   { href: "/contact", label: "Contact", icon: Mail },
 ];

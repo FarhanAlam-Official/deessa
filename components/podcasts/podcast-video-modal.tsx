@@ -5,17 +5,15 @@ import { XIcon, ExternalLink, Maximize2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface PodcastVideoModalProps {
-  isOpen: boolean
-  onClose: () => void
   youtubeId: string
   title: string
+  onClose: () => void
 }
 
-export function PodcastVideoModal({
-  isOpen,
-  onClose,
+export default function PodcastVideoModal({
   youtubeId,
   title,
+  onClose,
 }: PodcastVideoModalProps) {
   // Handle escape key to close modal
   const handleEscape = useCallback(
@@ -28,18 +26,14 @@ export function PodcastVideoModal({
   )
 
   useEffect(() => {
-    if (isOpen) {
-      document.addEventListener("keydown", handleEscape)
-      document.body.style.overflow = "hidden"
-    }
+    document.addEventListener("keydown", handleEscape)
+    document.body.style.overflow = "hidden"
 
     return () => {
       document.removeEventListener("keydown", handleEscape)
       document.body.style.overflow = ""
     }
-  }, [isOpen, handleEscape])
-
-  if (!isOpen) return null
+  }, [handleEscape])
 
   // YouTube embed URL with autoplay, fullscreen support, and standard controls
   const embedUrl = `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`
@@ -82,7 +76,7 @@ export function PodcastVideoModal({
               rel="noopener noreferrer"
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-full",
-                "bg-white/10 hover:bg-white/20 text-white text-sm font-medium",
+                "bg-brand-primary/90 hover:bg-brand-primary text-white text-sm font-medium",
                 "transition-all duration-300 hover:scale-105"
               )}
             >
@@ -97,7 +91,7 @@ export function PodcastVideoModal({
               rel="noopener noreferrer"
               className={cn(
                 "flex items-center justify-center size-10 rounded-full",
-                "bg-white/10 hover:bg-white/20 text-white",
+                "bg-brand-primary/90 hover:bg-brand-primary text-white",
                 "transition-all duration-300 hover:scale-105"
               )}
               aria-label="Open in fullscreen on YouTube"

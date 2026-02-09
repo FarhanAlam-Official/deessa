@@ -21,6 +21,7 @@ import {
   Home,
   Layers,
   PanelLeftClose,
+  Podcast,
 } from "lucide-react"
 import { type AdminUser, hasPermission, canViewFinance, canManageUsers } from "@/lib/types/admin"
 import {
@@ -72,6 +73,12 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
       name: "Stories",
       href: "/admin/stories",
       icon: FileText,
+      permission: "stories",
+    },
+    {
+      name: "Podcasts",
+      href: "/admin/podcasts",
+      icon: Podcast,
       permission: "stories",
     },
     {

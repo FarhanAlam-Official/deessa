@@ -4,8 +4,9 @@ import Link from "next/link"
 import { ArrowRight, Clock, BookOpen } from "lucide-react"
 import { Section } from "@/components/ui/section"
 import { StoryCard } from "@/components/ui/story-card"
-import { PodcastSection } from "@/components/podcast-section"
+import PodcastSection from "@/components/podcasts/podcast-section"
 import { getPublishedStories, getFeaturedStory } from "@/lib/data/stories"
+import { getLatestPodcasts } from "@/lib/data/podcasts"
 
 export const metadata: Metadata = {
   title: "Stories & Podcast - Deessa Foundation",
@@ -13,8 +14,12 @@ export const metadata: Metadata = {
 }
 
 export default async function StoriesPage() {
-  const allStories = await getPublishedStories()
-  const featuredStory = await getFeaturedStory()
+  const [allStories, featuredStory, podcasts] = await Promise.all([
+    getPublishedStories(),
+    getFeaturedStory(),
+    getLatestPodcasts(6),
+  ])
+  
   const remainingStories = allStories.filter((s) => s.id !== featuredStory?.id)
 
   return (
@@ -43,7 +48,7 @@ export default async function StoriesPage() {
       </section>
 
       {/* Living With Autism Podcast Section */}
-      <PodcastSection />
+      <PodcastSection podcasts={podcasts} />
 
       {/* Stories Grid - Only show if there are stories */}
       {(remainingStories.length > 0 || featuredStory) && (
