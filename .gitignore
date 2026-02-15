@@ -31,6 +31,8 @@ next-env.d.ts
 # Git automation scripts (temporary)
 execute-commits.ps1
 COMMIT_PLAN.md
+execute-conference-commits.ps1
+COMMIT_PLAN_FEB_15_28.md
 
 # Large media files
 public/websiteClip/*.mp4
@@ -46,3 +48,4 @@ public/websiteClip/*.MP3
 /.codex
 /.opencode
 /.qoder
+/skills-lock.json
