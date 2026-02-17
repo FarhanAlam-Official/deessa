@@ -16,6 +16,8 @@ export interface KhaltiDonationContext {
   donorName: string
   donorEmail: string
   donorPhone?: string
+  /** Override the return URL (e.g. for conference registrations) */
+  returnUrl?: string
 }
 
 /**
@@ -46,6 +48,7 @@ export async function startKhaltiPayment(
 
   const baseUrl = process.env.KHALTI_BASE_URL || "https://khalti.com/api/v2"
   const returnUrl =
+    donation.returnUrl ||
     process.env.KHALTI_RETURN_URL ||
     `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/payments/khalti/return`
 
