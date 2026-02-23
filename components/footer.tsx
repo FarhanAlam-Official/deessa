@@ -91,7 +91,7 @@ export function Footer() {
   }
 
   const handleTwitterClick = () => {
-    alert("🐦 Follow us on Twitter! 🌟\n\nWe're excited to connect with you on Twitter soon!\nIn the meantime, follow us on our other social platforms to stay updated with our latest work and impact stories.\n\n💙 Thank you for your support!")
+    alert("🐦 We'll be on Twitter Soon! 🌟\n\nWe're excited to connect with you on Twitter!\nIn the meantime, follow us on our other social platforms to stay updated with our latest work and impact stories.\n\n💙 Thank you for your support!")
   }
 
   return (
