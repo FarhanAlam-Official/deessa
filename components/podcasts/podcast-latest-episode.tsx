@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Play, Calendar, Clock, FileText, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Podcast } from '@/lib/types/podcast';
 import { formatDistanceToNow } from 'date-fns';
-import PodcastVideoModal from './podcast-video-modal';
+import { useVideoModal } from '@/contexts/VideoModalContext';
 import { notifications } from '@/lib/notifications';
 
 interface PodcastLatestEpisodeProps {
@@ -15,7 +14,7 @@ interface PodcastLatestEpisodeProps {
 }
 
 export default function PodcastLatestEpisode({ episode }: PodcastLatestEpisodeProps) {
-  const [showModal, setShowModal] = useState(false);
+  const { openVideoModal } = useVideoModal();
   const publishedDate = new Date(episode.publishedAt);
 
   return (
@@ -34,7 +33,7 @@ export default function PodcastLatestEpisode({ episode }: PodcastLatestEpisodePr
               
               {/* Play Button Overlay */}
               <button
-                onClick={() => setShowModal(true)}
+                onClick={() => openVideoModal(episode.youtubeId, episode.title)}
                 className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-all"
                 aria-label={`Play ${episode.title}`}
               >
@@ -116,15 +115,6 @@ export default function PodcastLatestEpisode({ episode }: PodcastLatestEpisodePr
           </div>
         </div>
       </div>
-
-      {/* Video Modal */}
-      {showModal && (
-        <PodcastVideoModal
-          youtubeId={episode.youtubeId}
-          title={episode.title}
-          onClose={() => setShowModal(false)}
-        />
-      )}
     </>
   );
 }

@@ -1,18 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Play, Youtube, Radio, Podcast as PodcastIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Podcast } from '@/lib/types/podcast';
-import PodcastVideoModal from './podcast-video-modal';
+import { useVideoModal } from '@/contexts/VideoModalContext';
 
 interface PodcastMainHeroProps {
   episodes: Podcast[];
 }
 
 export default function PodcastMainHero({ episodes }: PodcastMainHeroProps) {
+  const { openVideoModal } = useVideoModal();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [showModal, setShowModal] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
   const episode = episodes[currentIndex];
@@ -66,7 +67,7 @@ export default function PodcastMainHero({ episodes }: PodcastMainHeroProps) {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
               <Button
                 size="lg"
-                onClick={() => setShowModal(true)}
+                onClick={() => openVideoModal(episode.youtubeId, episode.title)}
                 className="bg-brand-primary hover:bg-brand-primary-dark text-white px-8 py-6 text-lg font-semibold"
               >
                 <Play className="w-5 h-5 mr-2" fill="currentColor" />
@@ -91,7 +92,7 @@ export default function PodcastMainHero({ episodes }: PodcastMainHeroProps) {
                     <Radio className="w-5 h-5 text-text-main" />
                   </button>
                   <button
-                    onClick={() => setShowModal(true)}
+                    onClick={() => openVideoModal(episode.youtubeId, episode.title)}
                     className="w-10 h-10 rounded-full bg-bg-soft hover:bg-brand-primary/10 flex items-center justify-center transition-colors"
                     aria-label="Watch on YouTube"
                   >
@@ -102,17 +103,29 @@ export default function PodcastMainHero({ episodes }: PodcastMainHeroProps) {
             </div>
           </div>
 
-          {/* Right Column - Video Player */}
+          {/* Right Column - Video Thumbnail with Play Overlay */}
           <div className="relative">
-            <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl bg-black">
-              <iframe
+            <div
+              className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl bg-black cursor-pointer group/hero"
+              onClick={() => openVideoModal(episode.youtubeId, episode.title)}
+            >
+              {/* Thumbnail */}
+              <Image
                 key={episode.id}
-                src={`https://www.youtube.com/embed/${episode.youtubeId}?rel=0&modestbranding=1`}
-                title={episode.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
+                src={episode.thumbnailUrl || `https://i.ytimg.com/vi/${episode.youtubeId}/maxresdefault.jpg`}
+                alt={episode.title}
+                fill
+                className="object-cover transition-transform duration-500 group-hover/hero:scale-105"
+                unoptimized
               />
+              {/* Dark overlay */}
+              <div className="absolute inset-0 bg-black/30 group-hover/hero:bg-black/40 transition-colors duration-300" />
+              {/* Play Button Overlay */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-20 h-20 rounded-full bg-white/90 group-hover/hero:bg-white flex items-center justify-center shadow-2xl transform group-hover/hero:scale-110 transition-all duration-300">
+                  <Play className="w-9 h-9 text-brand-primary ml-1" fill="currentColor" />
+                </div>
+              </div>
             </div>
 
             {/* Carousel Indicators - Only show if multiple episodes */}
@@ -135,15 +148,6 @@ export default function PodcastMainHero({ episodes }: PodcastMainHeroProps) {
           </div>
         </div>
       </section>
-
-      {/* Video Modal */}
-      {showModal && (
-        <PodcastVideoModal
-          youtubeId={episode.youtubeId}
-          title={episode.title}
-          onClose={() => setShowModal(false)}
-        />
-      )}
     </>
   );
 }

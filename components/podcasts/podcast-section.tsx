@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { Headphones, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react"
 import { PodcastCard } from "./podcast-card"
-import PodcastVideoModal from "./podcast-video-modal"
+import { useVideoModal } from "@/contexts/VideoModalContext"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Podcast } from "@/lib/types/podcast"
@@ -18,10 +18,14 @@ export default function PodcastSection({ podcasts, className }: PodcastSectionPr
   const mainEpisodes = podcasts.slice(0, 3)
   const teaserVideos = podcasts.slice(3, 6)
   
-  const [activePodcast, setActivePodcast] = useState<Podcast | null>(null)
+  const { openVideoModal } = useVideoModal()
   const [isVisible, setIsVisible] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  const handlePlayPodcast = (podcast: Podcast) => {
+    openVideoModal(podcast.youtubeId, podcast.title)
+  }
 
   // Intersection Observer for scroll animation
   useEffect(() => {
@@ -135,7 +139,7 @@ export default function PodcastSection({ podcasts, className }: PodcastSectionPr
                   podcast={podcast}
                   variant="primary"
                   showTopics
-                  onPlay={setActivePodcast}
+                  onPlay={handlePlayPodcast}
                 />
               </div>
             ))}
@@ -189,7 +193,7 @@ export default function PodcastSection({ podcasts, className }: PodcastSectionPr
                     <PodcastCard
                       podcast={podcast}
                       variant="secondary"
-                      onPlay={setActivePodcast}
+                      onPlay={handlePlayPodcast}
                     />
                   </div>
                 ))}
@@ -225,15 +229,6 @@ export default function PodcastSection({ podcasts, className }: PodcastSectionPr
           </div>
         </div>
       </section>
-
-      {/* Video Modal */}
-      {activePodcast && (
-        <PodcastVideoModal
-          youtubeId={activePodcast.youtubeId}
-          title={activePodcast.title}
-          onClose={() => setActivePodcast(null)}
-        />
-      )}
     </>
   )
 }

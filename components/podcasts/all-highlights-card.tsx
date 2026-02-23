@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ExternalLink, Play } from 'lucide-react';
 import Link from 'next/link';
+import { useVideoModal } from '@/contexts/VideoModalContext';
 
 interface AllHighlightsCardProps {
   highlightUrl: string;
@@ -24,6 +25,7 @@ export default function AllHighlightsCard({
   episodeSlug, 
   index 
 }: AllHighlightsCardProps) {
+  const { activeInlineId, setActiveInlineId } = useVideoModal();
   const [isPlaying, setIsPlaying] = useState(false);
   const [metadata, setMetadata] = useState<VideoMetadata>({});
   const [imageError, setImageError] = useState(false);
@@ -42,36 +44,38 @@ export default function AllHighlightsCard({
   };
 
   const shortId = getYouTubeShortId(highlightUrl);
-  if (!shortId) return null;
 
-  const thumbnailUrl = `https://i.ytimg.com/vi/${shortId}/hqdefault.jpg`;
-  const fallbackThumbnail = `https://i.ytimg.com/vi/${shortId}/mqdefault.jpg`;
-  const embedUrl = `https://www.youtube.com/embed/${shortId}`;
+  const thumbnailUrl = shortId ? `https://i.ytimg.com/vi/${shortId}/hqdefault.jpg` : '';
+  const fallbackThumbnail = shortId ? `https://i.ytimg.com/vi/${shortId}/mqdefault.jpg` : '';
+  const embedUrl = shortId ? `https://www.youtube.com/embed/${shortId}` : '';
+
+  // Stop this card if another video (inline or modal) becomes active
+  useEffect(() => {
+    if (shortId && activeInlineId !== shortId) {
+      setIsPlaying(false);
+    }
+  }, [activeInlineId, shortId]);
 
   // Fetch video metadata on mount
   useEffect(() => {
+    if (!shortId) return;
     const fetchMetadata = async () => {
       try {
-        // Using YouTube oEmbed API (no API key required)
         const response = await fetch(
           `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${shortId}&format=json`
         );
-        
         if (response.ok) {
           const data = await response.json();
-          setMetadata({
-            title: data.title,
-            thumbnailUrl: data.thumbnail_url,
-          });
+          setMetadata({ title: data.title, thumbnailUrl: data.thumbnail_url });
         }
       } catch (error) {
-        // Silently fail - metadata is optional
         console.log('Could not fetch video metadata');
       }
     };
-
     fetchMetadata();
   }, [shortId]);
+
+  if (!shortId) return null;
 
   return (
     <div className="group relative aspect-[9/16] rounded-xl overflow-hidden bg-gray-900 shadow-lg hover:shadow-2xl transition-all duration-300">
@@ -98,7 +102,7 @@ export default function AllHighlightsCard({
           
           {/* Play Button */}
           <button
-            onClick={() => setIsPlaying(true)}
+            onClick={() => { setActiveInlineId(shortId); setIsPlaying(true); }}
             className="absolute inset-0 flex items-center justify-center group/btn"
             aria-label="Play video"
           >
@@ -154,7 +158,7 @@ export default function AllHighlightsCard({
           
           {/* Close/Stop Button */}
           <button
-            onClick={() => setIsPlaying(false)}
+            onClick={() => { setIsPlaying(false); setActiveInlineId(null); }}
             className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/70 hover:bg-black/90 flex items-center justify-center transition-all duration-200 z-10 shadow-xl backdrop-blur-sm"
             aria-label="Stop video"
           >

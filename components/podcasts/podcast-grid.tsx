@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { PodcastCard } from './podcast-card';
-import PodcastVideoModal from './podcast-video-modal';
+import { useVideoModal } from '@/contexts/VideoModalContext';
 import { Podcast } from '@/lib/types/podcast';
 import { Button } from '@/components/ui/button';
 
@@ -12,12 +12,15 @@ interface PodcastGridProps {
 }
 
 export default function PodcastGrid({ initialPodcasts }: PodcastGridProps) {
-  const [selectedPodcast, setSelectedPodcast] = useState<Podcast | null>(null);
+  const { openVideoModal } = useVideoModal();
   const [displayCount, setDisplayCount] = useState(9);
-
+  
   const visiblePodcasts = initialPodcasts.slice(0, displayCount);
   const hasMore = displayCount < initialPodcasts.length;
 
+  const handlePlayPodcast = (podcast: Podcast) => {
+    openVideoModal(podcast.youtubeId, podcast.title);
+  };
   return (
     <div>
       {/* Archive Header */}
@@ -44,7 +47,7 @@ export default function PodcastGrid({ initialPodcasts }: PodcastGridProps) {
                 podcast={podcast}
                 variant="primary"
                 showTopics
-                onPlay={setSelectedPodcast}
+                onPlay={handlePlayPodcast}
               />
             ))}
           </div>
@@ -63,15 +66,6 @@ export default function PodcastGrid({ initialPodcasts }: PodcastGridProps) {
             </div>
           )}
         </>
-      )}
-
-      {/* Video Modal */}
-      {selectedPodcast && (
-        <PodcastVideoModal
-          youtubeId={selectedPodcast.youtubeId}
-          title={selectedPodcast.title}
-          onClose={() => setSelectedPodcast(null)}
-        />
       )}
     </div>
   );
