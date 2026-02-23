@@ -35,10 +35,27 @@ const footerLinks = {
 }
 
 const socialLinks = [
-  { icon: Facebook, href: "#", label: "Facebook" },
-  { icon: Twitter, href: "#", label: "Twitter" },
-  { icon: Instagram, href: "#", label: "Instagram" },
-  { icon: Youtube, href: "#", label: "YouTube" },
+  { 
+    icon: Facebook, 
+    href: "https://www.facebook.com/deessaFoundation", 
+    label: "Facebook" 
+  },
+  { 
+    icon: Twitter, 
+    href: "#", 
+    label: "Twitter",
+    isAlert: true 
+  },
+  { 
+    icon: Instagram, 
+    href: "https://www.instagram.com/deessa.foundation?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==", 
+    label: "Instagram" 
+  },
+  { 
+    icon: Youtube, 
+    href: "https://www.youtube.com/@deessaFoundation", 
+    label: "YouTube" 
+  },
 ]
 
 export function Footer() {
@@ -71,6 +88,10 @@ export function Footer() {
         setClickCount(0)
       }, 1000)
     }
+  }
+
+  const handleTwitterClick = () => {
+    alert("🐦 Follow us on Twitter! 🌟\n\nWe're excited to connect with you on Twitter soon!\nIn the meantime, follow us on our other social platforms to stay updated with our latest work and impact stories.\n\n💙 Thank you for your support!")
   }
 
   return (
@@ -207,14 +228,27 @@ export function Footer() {
           </div>
           <div className="flex items-center gap-4">
             {socialLinks.map((social) => (
-              <Link
-                key={social.label}
-                href={social.href}
-                className="size-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-primary hover:text-white transition-colors"
-                aria-label={social.label}
-              >
-                <social.icon className="size-4" />
-              </Link>
+              social.isAlert ? (
+                <button
+                  key={social.label}
+                  onClick={handleTwitterClick}
+                  className="size-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-primary hover:text-white transition-colors"
+                  aria-label={social.label}
+                >
+                  <social.icon className="size-4" />
+                </button>
+              ) : (
+                <Link
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="size-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-primary hover:text-white transition-colors"
+                  aria-label={social.label}
+                >
+                  <social.icon className="size-4" />
+                </Link>
+              )
             ))}
           </div>
         </div>
