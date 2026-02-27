@@ -16,13 +16,24 @@ export async function getConferenceSettings(): Promise<ConferenceSettings> {
     if (!setting?.value) return CONFERENCE_DEFAULTS
 
     const saved = setting.value as Partial<ConferenceSettings>
+
+    const rawAgenda =
+      Array.isArray(saved.agenda) && saved.agenda.length > 0
+        ? saved.agenda
+        : CONFERENCE_DEFAULTS.agenda
+
+    const agenda = rawAgenda.map((item, index) => ({
+      ...item,
+      id:
+        (item as any).id ||
+        `agenda-${index}-${(item as any).time ?? ""}-${(item as any).title ?? ""}`,
+    }))
+
     return {
       ...CONFERENCE_DEFAULTS,
       ...saved,
       // Arrays: use saved value if present, otherwise fall back to defaults
-      agenda: Array.isArray(saved.agenda) && saved.agenda.length > 0
-        ? saved.agenda
-        : CONFERENCE_DEFAULTS.agenda,
+      agenda,
       emailTemplates: {
         general: {
           ...CONFERENCE_DEFAULTS.emailTemplates.general,
@@ -74,6 +85,6 @@ export async function updateConferenceSettings(
     if (result?.error) return { success: false, error: result.error }
     return { success: true }
   } catch (err) {
-    return { success: false, error: String(err) }
+    return { success: false, error: err instanceof Error ? err.message : typeof err === 'string' ? err : JSON.stringify(err) }
   }
 }
