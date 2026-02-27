@@ -29,6 +29,15 @@ function createGmailTransporter() {
   })
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
 export interface ConferenceEmailResult {
   success: boolean
   message: string
@@ -156,8 +165,8 @@ export async function sendCustomEmail(params: {
               <tr><td style="height:4px;background:linear-gradient(90deg,#3FABDE,#2D8FBF);"></td></tr>
               <tr>
                 <td style="padding:36px 40px;">
-                  <p style="margin:0 0 8px;font-size:15px;color:#0F172A;">Dear ${toName},</p>
-                  <div style="font-size:15px;color:#334155;line-height:1.7;white-space:pre-wrap;">${body.replace(/\n/g, "<br/>")}</div>
+                  <p style="margin:0 0 8px;font-size:15px;color:#0F172A;">Dear ${escapeHtml(toName)},</p>
+                  <div style="font-size:15px;color:#334155;line-height:1.7;white-space:pre-wrap;">${escapeHtml(body).replace(/\n/g, "<br/>")}</div>
                   <hr style="margin:32px 0;border:none;border-top:1px solid #E2E8F0;"/>
                   <p style="margin:0;font-size:12px;color:#94A3B8;">
                     DEESSA Foundation &mdash; DEESSA National Conference 2026<br/>
@@ -198,17 +207,21 @@ export async function sendConferencePaymentLinkEmail(params: {
   try {
     const transporter = createGmailTransporter()
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-    const paymentUrl = `${siteUrl}/complete-payment?rid=${params.registrationId}`
+    const paymentUrl = `${siteUrl}/complete-payment?rid=${encodeURIComponent(params.registrationId)}`
     const shortId = `DEESSA-2026-${params.registrationId.slice(0, 6).toUpperCase()}`
+    const safeFullName = escapeHtml(params.fullName)
 
     let expiryNote = ""
     if (params.expiresAt) {
       const exp = new Date(params.expiresAt)
       const diffMs = exp.getTime() - Date.now()
-      const diffHrs = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60)))
-      expiryNote = `<p style="margin:12px 0 0;font-size:13px;color:#DC2626;font-weight:600;">⚠️ This link expires in approximately ${diffHrs} hour${diffHrs !== 1 ? 's' : ''}. Please complete payment before then.</p>`
+      if (diffMs <= 0) {
+        expiryNote = `<p style="margin:12px 0 0;font-size:13px;color:#DC2626;font-weight:600;">⚠️ This payment link may have expired. Please contact us if you need assistance.</p>`
+      } else {
+        const diffHrs = Math.floor(diffMs / (1000 * 60 * 60))
+        expiryNote = `<p style="margin:12px 0 0;font-size:13px;color:#DC2626;font-weight:600;">⚠️ This link expires in approximately ${diffHrs} hour${diffHrs !== 1 ? 's' : ''}. Please complete payment before then.</p>`
+      }
     }
-
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
@@ -230,7 +243,7 @@ export async function sendConferencePaymentLinkEmail(params: {
             <tr><td style="padding:36px 40px;">
               <h2 style="margin:0 0 4px;font-size:22px;color:#0F172A;font-weight:800;">Complete Your Registration</h2>
               <p style="margin:0 0 24px;font-size:14px;color:#64748B;">DEESSA National Conference 2026</p>
-              <p style="margin:0 0 16px;font-size:15px;color:#334155;">Dear <strong>${params.fullName}</strong>,</p>
+              <p style="margin:0 0 16px;font-size:15px;color:#334155;">Dear <strong>${safeFullName}</strong>,</p>
               <p style="margin:0 0 24px;font-size:15px;color:#334155;line-height:1.6;">Thank you for registering for the DEESSA National Conference 2026. Your registration has been received and is <strong>pending payment</strong>. Please complete payment to confirm your spot.</p>
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;border-radius:12px;background:#F8FAFC;border:1px solid #E2E8F0;">
                 <tr><td style="padding:16px 20px;">
