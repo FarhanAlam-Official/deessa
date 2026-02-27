@@ -2,6 +2,9 @@
 -- DEESSA Foundation — Conference Registrations Table
 -- Run this in the Supabase SQL Editor for your project.
 -- This is SEPARATE from the existing event_registrations table.
+--
+-- Prerequisite: Run scripts/002-admin-schema.sql first so that
+-- is_admin_user() exists (admin read/update policies use it).
 -- ==========================================================
 
 CREATE TABLE IF NOT EXISTS conference_registrations (
@@ -43,17 +46,36 @@ CREATE INDEX IF NOT EXISTS idx_conference_reg_email   ON conference_registration
 CREATE INDEX IF NOT EXISTS idx_conference_reg_status  ON conference_registrations(status);
 CREATE INDEX IF NOT EXISTS idx_conference_reg_created ON conference_registrations(created_at DESC);
 
+-- Prevent duplicate active registrations for the same email.
+-- Cancelled and expired rows are excluded so a user may re-register
+-- after cancellation or a failed/expired payment attempt.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_conf_reg_active_email
+  ON conference_registrations (email)
+  WHERE status NOT IN ('cancelled', 'expired');
+
 -- Enable Row Level Security
 ALTER TABLE conference_registrations ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies so this script can be re-run safely
+DROP POLICY IF EXISTS "Allow public inserts" ON conference_registrations;
+DROP POLICY IF EXISTS "Allow admin reads" ON conference_registrations;
+DROP POLICY IF EXISTS "Allow admin updates" ON conference_registrations;
+
 -- Public users can INSERT their own registration (no auth required)
 CREATE POLICY "Allow public inserts" ON conference_registrations
-  FOR INSERT WITH CHECK (true);
+  FOR INSERT
+  WITH CHECK (
+    full_name IS NOT NULL
+    AND length(trim(full_name)) > 0
+    AND email IS NOT NULL
+    AND length(trim(email)) > 0
+    AND consent_terms = TRUE
+  );
 
 -- Admin users (authenticated) can read all registrations
 CREATE POLICY "Allow admin reads" ON conference_registrations
-  FOR SELECT USING (auth.role() = 'authenticated');
+  FOR SELECT USING (is_admin_user());
 
 -- Admin users can update status / notes
 CREATE POLICY "Allow admin updates" ON conference_registrations
-  FOR UPDATE USING (auth.role() = 'authenticated');
+  FOR UPDATE USING (is_admin_user());
