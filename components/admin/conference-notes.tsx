@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Save, StickyNote, Loader2 } from "lucide-react"
 import { notifications } from "@/lib/notifications"
 import { updateConferenceRegistrationNotes } from "@/lib/actions/conference-registration"
@@ -13,24 +13,34 @@ interface ConferenceNotesProps {
 
 export function ConferenceNotes({ registrationId, initialNotes }: ConferenceNotesProps) {
   const [notes, setNotes] = useState(initialNotes ?? "")
+  const [savedNotes, setSavedNotes] = useState(initialNotes ?? "")
   const [saving, setSaving] = useState(false)
 
-  const isDirty = notes !== (initialNotes ?? "")
+  // Update savedNotes when initialNotes prop changes
+  useEffect(() => {
+    setSavedNotes(initialNotes ?? "")
+  }, [initialNotes])
+
+  const isDirty = notes !== savedNotes
 
   const handleSave = async () => {
     setSaving(true)
-    const result = await updateConferenceRegistrationNotes(registrationId, notes)
-    setSaving(false)
-    if (result.success) {
-      notifications.showSuccess({
-        title: "Notes saved",
-        description: "Admin notes have been saved successfully.",
-      })
-    } else {
-      notifications.showError({
-        title: "Failed to save notes",
-        description: result.error || "Please try again.",
-      })
+    try {
+      const result = await updateConferenceRegistrationNotes(registrationId, notes)
+      if (result.success) {
+        setSavedNotes(notes) // Update savedNotes to current notes after successful save
+        notifications.showSuccess({
+          title: "Notes saved",
+          description: "Admin notes have been saved successfully.",
+        })
+      } else {
+        notifications.showError({
+          title: "Failed to save notes",
+          description: result.error || "Please try again.",
+        })
+      }
+    } finally {
+      setSaving(false)
     }
   }
 
