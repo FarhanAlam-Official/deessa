@@ -118,8 +118,16 @@ function resolveRegistrationFee(
   cfg: Awaited<ReturnType<typeof getConferenceSettings>>,
 
   attendanceMode: string | null | undefined,
-): { amount: number; currency: "NPR" | "USD" } {
-  const currency = (cfg.registrationFeeCurrency ?? "NPR") as "NPR" | "USD";
+): {
+  amount: number
+  currency: "NPR" | "USD" | "EUR" | "GBP" | "INR"
+} {
+  const currency = (cfg.registrationFeeCurrency ?? "NPR") as
+    | "NPR"
+    | "USD"
+    | "EUR"
+    | "GBP"
+    | "INR";
 
   if (!cfg.registrationFeeEnabled) return { amount: 0, currency };
 
@@ -177,6 +185,27 @@ export async function registerForConference(
 
     const supabase = await createClient();
 
+    // ── Duplicate email guard ────────────────────────────────────────────────
+    // Mirrors the partial unique index (uq_conf_reg_active_email) on the DB.
+    // Gives a clear user-facing message instead of a raw constraint violation.
+    const normalizedEmail = data.email.trim().toLowerCase();
+    const { data: existing } = await supabase
+      .from("conference_registrations")
+      .select("id, status")
+      .eq("email", normalizedEmail)
+      .not("status", "in", '("cancelled","expired")')
+      .maybeSingle();
+
+    if (existing) {
+      return {
+        success: false,
+        message:
+          "An active registration already exists for this email address. " +
+          "Please check your inbox for a confirmation email, or contact support if you need assistance.",
+      };
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
     const cfg = await getConferenceSettings();
 
     const fee = resolveRegistrationFee(cfg, data.attendanceMode);
@@ -196,7 +225,7 @@ export async function registerForConference(
       .insert({
         full_name: data.fullName.trim(),
 
-        email: data.email.trim().toLowerCase(),
+        email: normalizedEmail,
 
         phone: data.phone?.trim() || null,
 
@@ -467,7 +496,7 @@ export async function startConferencePayment(
     const currency =
       actualProvider === "khalti" || actualProvider === "esewa"
         ? ("NPR" as const)
-        : (fee.currency as "NPR" | "USD");
+        : (fee.currency as "NPR" | "USD" | "EUR" | "GBP" | "INR");
 
     // ── Provider-specific session creation ────────────────────────────────────
 
@@ -598,6 +627,11 @@ export async function startConferencePayment(
         "Failed to update conference registration with provider ref:",
         updateErr.message,
       );
+      return {
+        ok: false,
+        message:
+          "Payment session could not be saved. Please try again or contact support.",
+      };
     }
 
     return {
@@ -674,7 +708,7 @@ export async function getConferenceRegistration(id: string) {
 export async function confirmConferenceRegistration(
   id: string,
 
-  options: { force?: boolean; adminEmail?: string } = {},
+  options: { force?: boolean } = {},
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
 
@@ -910,6 +944,7 @@ export async function extendConferenceRegistrationExpiry(
 
 export async function resendConferencePaymentLink(
   id: string,
+  email?: string,
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
 
@@ -924,6 +959,11 @@ export async function resendConferencePaymentLink(
     .single();
 
   if (!reg) return { success: false, error: "Registration not found" };
+
+  // Dual-key verification: if email provided, it must match
+  if (email && reg.email.toLowerCase().trim() !== email.toLowerCase().trim()) {
+    return { success: false, error: "Email does not match registration" };
+  }
 
   if (reg.payment_status === "paid") {
     return { success: false, error: "Registration is already paid." };
@@ -1171,6 +1211,10 @@ export async function sendTemplateConferenceEmail(
 
   const template = cfg.emailTemplates[type];
 
+  if (!template) {
+    return { success: false, error: `Email template '${type}' not configured.` };
+  }
+
   const subject = resolve(template.subject);
 
   const body = resolve(template.body);
@@ -1190,20 +1234,26 @@ export async function sendTemplateConferenceEmail(
 // ── Delete conference registration (admin only) ────────────────────────────
 export async function deleteConferenceRegistration(
   registrationId: string,
+  email: string,
 ): Promise<{ success: boolean; error?: string }> {
   if (!registrationId) return { success: false, error: "Registration ID is required" }
+  if (!email?.trim()) return { success: false, error: "Email is required" }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!supabaseUrl || !serviceRoleKey) return { success: false, error: "Server configuration error" }
+  let supabase: ReturnType<typeof createServiceRoleClient>
+  try {
+    supabase = createServiceRoleClient()
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Server configuration error"
+    console.error("deleteConferenceRegistration: failed to create service client:", msg)
+    return { success: false, error: msg }
+  }
 
-  const supabase = createServiceClient(supabaseUrl, serviceRoleKey)
-
-  // Safety: only allow deleting cancelled registrations
+  // Dual-key check: must match both id and email to prevent ID guessing
   const { data: reg, error: fetchErr } = await supabase
     .from("conference_registrations")
     .select("id, status, full_name")
     .eq("id", registrationId)
+    .eq("email", email.trim().toLowerCase())
     .single()
 
   if (fetchErr || !reg) return { success: false, error: "Registration not found" }
