@@ -46,6 +46,29 @@ export interface StripeDonationContext {
 
 }
 
+function getSafeOverrideUrl(override: string | undefined, baseUrl: string): string | undefined {
+  if (!override) return undefined
+
+  try {
+    // Allow relative paths – normalise them against baseUrl
+    if (override.startsWith("/")) {
+      return new URL(override, baseUrl).toString()
+    }
+
+    // For absolute URLs, only allow if host matches baseUrl
+    const parsed = new URL(override)
+    const base = new URL(baseUrl)
+
+    if (parsed.host === base.host) {
+      return parsed.toString()
+    }
+  } catch {
+    // Fall through to undefined on parse/normalisation failure
+  }
+
+  return undefined
+}
+
 
 
 export interface StripeSessionVerificationResult {
@@ -264,9 +287,12 @@ export async function startStripeCheckout(
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
 
+    const overrideSuccessUrl = getSafeOverrideUrl(donation.successUrl, baseUrl)
+    const overrideCancelUrl = getSafeOverrideUrl(donation.cancelUrl, baseUrl)
+
     const successUrl =
 
-      donation.successUrl ||
+      overrideSuccessUrl ||
 
       process.env.STRIPE_SUCCESS_URL ||
 
@@ -274,7 +300,7 @@ export async function startStripeCheckout(
 
     const cancelUrl =
 
-      donation.cancelUrl ||
+      overrideCancelUrl ||
 
       process.env.STRIPE_CANCEL_URL ||
 
@@ -288,7 +314,7 @@ export async function startStripeCheckout(
 
       const mockSessionId = `cs_test_mock_${donation.id}`
 
-      const mockUrl = `${successUrl}?session_id=${mockSessionId}&mock=1`
+      const mockUrl = `${successUrl}${successUrl.includes("?") ? "&" : "?"}session_id=${mockSessionId}&mock=1`
 
 
 
@@ -306,49 +332,28 @@ export async function startStripeCheckout(
 
     const stripe = await getStripeClient()
 
-
+    // Validate amount before calling Stripe: finite, positive, at most 2 decimal places, optional max
+    const rawAmount = Number(donation.amount)
+    if (!Number.isFinite(rawAmount) || rawAmount <= 0) {
+      throw new Error("Invalid donation amount. Please enter a positive number.")
+    }
+    const MAX_AMOUNT = 999_999.99
+    if (rawAmount > MAX_AMOUNT) {
+      throw new Error("Donation amount exceeds the maximum allowed.")
+    }
+    const amountRounded = Number(rawAmount.toFixed(2))
+    if (Math.abs(rawAmount - amountRounded) > 1e-9) {
+      throw new Error("Donation amount must have at most two decimal places.")
+    }
 
     // Stripe expects amount in the smallest currency unit (cents)
-
-    // Use toFixed to avoid floating-point precision errors
-
-    const amountInMinorUnits = Math.round(Number(donation.amount.toFixed(2)) * 100)
+    const amountInMinorUnits = Math.round(amountRounded * 100)
 
 
 
     // For monthly donations, use subscription mode
 
     if (donation.isMonthly) {
-
-      // Create a product and price for the recurring donation
-
-      const product = await stripe.products.create({
-
-        name: "Monthly Donation",
-
-        description: `Monthly donation to deessa Foundation from ${donation.donorName}`,
-
-      })
-
-
-
-      const price = await stripe.prices.create({
-
-        product: product.id,
-
-        unit_amount: amountInMinorUnits,
-
-        currency: donation.currency.toLowerCase(),
-
-        recurring: {
-
-          interval: "month",
-
-        },
-
-      })
-
-
 
       const session = await stripe.checkout.sessions.create({
 
@@ -360,7 +365,27 @@ export async function startStripeCheckout(
 
           {
 
-            price: price.id,
+            price_data: {
+
+              currency: donation.currency.toLowerCase(),
+
+              product_data: {
+
+                name: "Monthly Donation",
+
+                description: `Monthly donation to Deesha Foundation from ${donation.donorName}`,
+
+              },
+
+              unit_amount: amountInMinorUnits,
+
+              recurring: {
+
+                interval: "month",
+
+              },
+
+            },
 
             quantity: 1,
 
