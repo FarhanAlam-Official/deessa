@@ -14,16 +14,33 @@ import {
 import { sendConferenceConfirmationEmail } from "@/lib/email/conference-mailer"
 
 /**
- * Verify HMAC-SHA256 signature for eSewa v2 API response
+ * Verify HMAC-SHA256 signature for eSewa v2 API response.
+ * Returns { valid: true } on success or { valid: false, reason } on failure.
+ * Reused by both the donation and conference registration branches.
  */
-function verifySignature(message: string, signature: string, secretKey: string): boolean {
+function verifyEsewaSignature(
+  responseData: any,
+  signed_field_names: string | undefined,
+  signature: string | undefined,
+  secretKey: string,
+): { valid: true } | { valid: false; reason: string } {
+  if (!signature || !signed_field_names) {
+    return { valid: false, reason: "missing_signature_fields" }
+  }
+  const fields = String(signed_field_names).split(",").map((s) => s.trim()).filter(Boolean)
+  const required = ["total_amount", "transaction_uuid", "product_code"]
+  if (!required.every((r) => fields.includes(r))) {
+    return { valid: false, reason: "signed_fields_missing_required" }
+  }
+  const message = fields.map((field) => `${field}=${responseData[field]}`).join(",")
   const hmac = crypto.createHmac("sha256", secretKey)
   hmac.update(message)
   const expectedSignature = hmac.digest("base64")
   try {
-    return crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(signature))
+    const isValid = crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(signature))
+    return isValid ? { valid: true } : { valid: false, reason: "signature_mismatch" }
   } catch {
-    return false
+    return { valid: false, reason: "signature_mismatch" }
   }
 }
 
@@ -111,12 +128,16 @@ export async function GET(request: Request) {
     if (reg) {
       // Validate status
       if (status !== "COMPLETE") {
+        logPaymentEvent("eSewa success - conference payment not completed", {
+          regId: reg.id,
+          status,
+          transactionUuid: maskSensitiveData(transaction_uuid),
+        }, "warn")
         await supabase.from("conference_registrations").update({ payment_status: "failed" }).eq("id", reg.id)
         return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&status=failed`, url.origin))
       }
-
       if (reg.payment_status === "paid") {
-        return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&rid=${reg.id}`, url.origin))
+        return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&paid=1`, url.origin))
       }
 
       // Amount verification
@@ -130,13 +151,51 @@ export async function GET(request: Request) {
         return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&status=review`, url.origin))
       }
 
-      await supabase.from("conference_registrations").update({
-        status: "confirmed",
-        payment_status: "paid",
-        payment_provider: "esewa",
-        payment_id: `esewa:${transaction_uuid}`,
-        provider_ref: transaction_uuid,
-      }).eq("id", reg.id)
+      // HMAC signature verification (required in live mode; skip for mock)
+      if (!isMock && mode === "live") {
+        const secretKey = process.env.ESEWA_SECRET_KEY
+        if (!secretKey) {
+          logPaymentEvent("eSewa success - missing ESEWA_SECRET_KEY in live mode", {}, "error")
+          return NextResponse.json({ error: "Server misconfigured" }, { status: 500 })
+        }
+        const sigResult = verifyEsewaSignature(responseData, signed_field_names, signature, secretKey)
+        if (!sigResult.valid) {
+          logPaymentEvent("eSewa success - conference registration signature invalid", {
+            regId: reg.id,
+            transactionUuid: maskSensitiveData(transaction_uuid),
+            reason: sigResult.reason,
+          }, "error")
+          await supabase
+            .from("conference_registrations")
+            .update({ payment_status: "failed" })
+            .eq("id", reg.id)
+          return NextResponse.redirect(
+            new URL(`/conference/register/payment-success?rid=${reg.id}&status=failed`, url.origin),
+          )
+        }
+      }
+
+      const { error: regUpdateError } = await supabase
+        .from("conference_registrations")
+        .update({
+          status: "confirmed",
+          payment_status: "paid",
+          payment_provider: "esewa",
+          payment_id: `esewa:${transaction_uuid}`,
+          provider_ref: transaction_uuid,
+        })
+        .eq("id", reg.id)
+
+      if (regUpdateError) {
+        logPaymentEvent("eSewa success - conference registration update failed", {
+          regId: reg.id,
+          transactionUuid: maskSensitiveData(transaction_uuid),
+          error: regUpdateError,
+        }, "error")
+        return NextResponse.redirect(
+          new URL(`/conference/register/payment-success?rid=${reg.id}&status=failed`, url.origin),
+        )
+      }
 
       sendConferenceConfirmationEmail({
         fullName: reg.full_name,
@@ -164,30 +223,12 @@ export async function GET(request: Request) {
       logPaymentEvent("eSewa success - missing ESEWA_SECRET_KEY in live mode", {}, "error")
       return NextResponse.json({ error: "Server misconfigured" }, { status: 500 })
     }
-    if (!signature || !signed_field_names) {
-      logPaymentEvent("eSewa success - missing signature fields in live mode", {
-        donationId: donation.id,
-        transactionUuid: maskSensitiveData(transaction_uuid),
-      }, "error")
-      return NextResponse.json({ error: "Invalid response signature" }, { status: 400 })
-    }
-
-    const fields = String(signed_field_names).split(",").map((s) => s.trim()).filter(Boolean)
-    const required = ["total_amount", "transaction_uuid", "product_code"]
-    if (!required.every((r) => fields.includes(r))) {
-      logPaymentEvent("eSewa success - signed fields missing required fields", {
-        donationId: donation.id,
-        signed_field_names,
-      }, "error")
-      return NextResponse.json({ error: "Invalid response signature" }, { status: 400 })
-    }
-
-    const message = fields.map((field) => `${field}=${responseData[field]}`).join(",")
-    const isValid = verifySignature(message, signature, secretKey)
-    if (!isValid) {
+    const sigResult = verifyEsewaSignature(responseData, signed_field_names, signature, secretKey)
+    if (!sigResult.valid) {
       logPaymentEvent("eSewa success - invalid signature", {
         donationId: donation.id,
         transactionUuid: maskSensitiveData(transaction_uuid),
+        reason: sigResult.reason,
       }, "error")
       return NextResponse.json({ error: "Invalid response signature" }, { status: 400 })
     }
