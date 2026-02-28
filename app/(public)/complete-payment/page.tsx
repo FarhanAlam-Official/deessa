@@ -66,7 +66,11 @@ export default function CompletePaymentPage() {
     setStage("loading")
 
     try {
-      const res = await fetch(`/api/conference/verify-registration?rid=${encodeURIComponent(rid)}&email=${encodeURIComponent(email.trim())}`)
+      const res = await fetch("/api/conference/verify-registration", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rid, email: email.trim() }),
+      })
       const data = await res.json()
 
       if (!data.ok) {
