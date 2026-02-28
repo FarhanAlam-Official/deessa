@@ -55,6 +55,33 @@ export async function GET(request: Request) {
     .single()
 
   if (searchError || !donation) {
+    // ── Conference registration fallback ────────────────────────────────────
+    const { data: reg } = await supabase
+      .from("conference_registrations")
+      .select("id, payment_status, status")
+      .eq("esewa_transaction_uuid", transaction_uuid)
+      .single()
+
+    if (reg) {
+      // Idempotency: already confirmed is not a failure
+      if (reg.payment_status === "paid") {
+        return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&paid=1`, url.origin))
+      }
+      // Mark as failed (non-blocking)
+      await supabase.from("conference_registrations")
+        .update({ payment_status: "failed" })
+        .eq("id", reg.id)
+
+      logPaymentEvent("eSewa failure - conference registration payment failed", {
+        regId: reg.id,
+        transactionUuid: maskSensitiveData(transaction_uuid),
+        status: status || "unknown",
+      })
+      return NextResponse.redirect(
+        new URL(`/conference/register/payment-success?rid=${reg.id}&status=failed${isMock ? "&mock=1" : ""}`, url.origin),
+      )
+    }
+
     logPaymentEvent("eSewa failure - donation not found", {
       transactionUuid: maskSensitiveData(transaction_uuid),
     }, "warn")

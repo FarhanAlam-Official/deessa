@@ -11,6 +11,7 @@ import {
   logPaymentEvent,
   maskSensitiveData,
 } from "@/lib/payments/security"
+import { sendConferenceConfirmationEmail } from "@/lib/email/conference-mailer"
 
 /**
  * Verify HMAC-SHA256 signature for eSewa v2 API response
@@ -99,6 +100,56 @@ export async function GET(request: Request) {
     .single()
 
   if (searchError || !donation) {
+    // ── Conference registration fallback branch ─────────────────────────────────
+    // eSewa may be paying for a conference registration instead of a donation.
+    const { data: reg } = await supabase
+      .from("conference_registrations")
+      .select("*")
+      .eq("esewa_transaction_uuid", transaction_uuid)
+      .single()
+
+    if (reg) {
+      // Validate status
+      if (status !== "COMPLETE") {
+        await supabase.from("conference_registrations").update({ payment_status: "failed" }).eq("id", reg.id)
+        return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&status=failed`, url.origin))
+      }
+
+      if (reg.payment_status === "paid") {
+        return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&rid=${reg.id}`, url.origin))
+      }
+
+      // Amount verification
+      const expectedAmt = parseFloat((reg.payment_amount || 0).toString())
+      const actualAmt = parseFloat(total_amount.toString())
+      const av = verifyAmountMatch(expectedAmt, actualAmt, "NPR", 0.01)
+      if (!av.valid) {
+        await supabase.from("conference_registrations")
+          .update({ payment_status: "review", esewa_transaction_uuid: transaction_uuid })
+          .eq("id", reg.id)
+        return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&status=review`, url.origin))
+      }
+
+      await supabase.from("conference_registrations").update({
+        status: "confirmed",
+        payment_status: "paid",
+        payment_provider: "esewa",
+        payment_id: `esewa:${transaction_uuid}`,
+        provider_ref: transaction_uuid,
+      }).eq("id", reg.id)
+
+      sendConferenceConfirmationEmail({
+        fullName: reg.full_name,
+        email: reg.email,
+        registrationId: reg.id,
+        attendanceMode: reg.attendance_mode || "",
+        role: reg.role || undefined,
+        workshops: reg.workshops || undefined,
+      }).catch((e) => console.error("Non-fatal: eSewa conference confirmation email:", e))
+
+      return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&paid=1`, url.origin))
+    }
+
     logPaymentEvent("eSewa success - donation not found", {
       transactionUuid: transaction_uuid,
       error: searchError,

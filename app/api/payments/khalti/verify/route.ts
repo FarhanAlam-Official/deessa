@@ -11,6 +11,7 @@ import {
   logPaymentEvent,
   maskSensitiveData,
 } from "@/lib/payments/security"
+import { sendConferenceConfirmationEmail } from "@/lib/email/conference-mailer"
 
 type KhaltiStatus =
   | "Completed"
@@ -69,14 +70,110 @@ export async function POST(request: Request) {
       .eq("khalti_pidx", pidx)
       .single()
 
-    // If donation still not found, return error
+    // If donation still not found, check conference_registrations
     if (!donation) {
+      const { data: reg } = await supabase
+        .from("conference_registrations")
+        .select("*")
+        .eq("khalti_pidx", pidx)
+        .single()
+
+      if (reg) {
+        // ── Conference registration Khalti branch ──────────────────────────
+        if (reg.payment_status === "paid") {
+          return NextResponse.json({ ok: true, status: "paid", message: "Already confirmed" }, { status: 200 })
+        }
+
+        // Mock mode — confirm immediately
+        if (mode === "mock") {
+          await supabase.from("conference_registrations").update({
+            status: "confirmed",
+            payment_status: "paid",
+            payment_provider: "khalti",
+            payment_id: `khalti:${pidx}`,
+            provider_ref: pidx,
+          }).eq("id", reg.id)
+          sendConferenceConfirmationEmail({
+            fullName: reg.full_name,
+            email: reg.email,
+            registrationId: reg.id,
+            attendanceMode: reg.attendance_mode || "",
+            role: reg.role || undefined,
+            workshops: reg.workshops || undefined,
+          }).catch((e) => console.error("Non-fatal: Khalti conference confirmation email:", e))
+          return NextResponse.json({ ok: true, status: "paid", mock: true }, { status: 200 })
+        }
+
+        // Live mode — call Khalti lookup API for this conference registration
+        logPaymentEvent("Khalti verify (conference) - live lookup", { regId: reg.id, pidx: maskSensitiveData(pidx) })
+
+        const secretKey2 = process.env.KHALTI_SECRET_KEY
+        const baseUrl2 = process.env.KHALTI_BASE_URL || "https://khalti.com/api/v2"
+        if (!secretKey2) {
+          return NextResponse.json({ ok: false, error: "Khalti not configured" }, { status: 500 })
+        }
+
+        let lookupRes: Response
+        try {
+          lookupRes = await fetchWithTimeout(
+            `${baseUrl2}/epayment/lookup/`,
+            { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Key ${secretKey2}` }, body: JSON.stringify({ pidx }) },
+            30000,
+          )
+        } catch (netErr) {
+          return NextResponse.json({ ok: false, error: "Failed to connect to Khalti" }, { status: 502 })
+        }
+
+        const lookupText = await lookupRes.text()
+        let lookupData: { pidx: string; total_amount: number; status: string; transaction_id: string | null; detail?: string; error_key?: string }
+        try { lookupData = JSON.parse(lookupText) } catch {
+          return NextResponse.json({ ok: false, error: "Invalid response from Khalti" }, { status: 502 })
+        }
+
+        if (!lookupRes.ok) {
+          return NextResponse.json({ ok: false, error: lookupData.detail || "Khalti lookup failed" }, { status: 400 })
+        }
+
+        if (lookupData.status !== "Completed") {
+          return NextResponse.json({ ok: true, status: "processing", khaltiStatus: lookupData.status }, { status: 200 })
+        }
+
+        // Amount verification (fail-closed)
+        const expectedPaisa = Math.round(Number(reg.payment_amount) * 100)
+        const amountCheck = verifyAmountMatch(expectedPaisa, lookupData.total_amount, "NPR", 1)
+        if (!amountCheck.valid) {
+          await supabase.from("conference_registrations")
+            .update({ payment_status: "review", payment_provider: "khalti", provider_ref: pidx })
+            .eq("id", reg.id)
+          return NextResponse.json({ ok: true, status: "review", error: "Amount mismatch — flagged for review" }, { status: 200 })
+        }
+
+        // Confirm the registration
+        await supabase.from("conference_registrations").update({
+          status: "confirmed",
+          payment_status: "paid",
+          payment_provider: "khalti",
+          payment_id: `khalti:${pidx}`,
+          provider_ref: pidx,
+          khalti_pidx: pidx,
+        }).eq("id", reg.id)
+
+        sendConferenceConfirmationEmail({
+          fullName: reg.full_name,
+          email: reg.email,
+          registrationId: reg.id,
+          attendanceMode: reg.attendance_mode || "",
+          role: reg.role || undefined,
+          workshops: reg.workshops || undefined,
+        }).catch((e) => console.error("Non-fatal: Khalti conference confirmation email:", e))
+
+        logPaymentEvent("Khalti verify (conference) - confirmed", { regId: reg.id })
+        return NextResponse.json({ ok: true, status: "paid", khaltiStatus: lookupData.status }, { status: 200 })
+      }
+
+      // Neither donation nor conference registration found
       return NextResponse.json(
-        {
-          ok: false,
-          error: "Donation not found",
-          message: "Could not find donation record. Please contact support with your payment ID.",
-        },
+        { ok: false, error: "Donation not found", message: "Could not find donation record. Please contact support with your payment ID." },
         { status: 404 },
       )
     }

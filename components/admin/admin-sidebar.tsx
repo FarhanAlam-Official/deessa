@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   FolderKanban,
   Calendar,
+  CalendarRange,
   FileText,
   Users,
   HandHeart,
@@ -102,6 +103,12 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
   ]
 
   const engagementNav = [
+    {
+      name: "Conference",
+      href: "/admin/conference",
+      icon: CalendarRange,
+      permission: null,
+    },
     {
       name: "Donations",
       href: "/admin/donations",
