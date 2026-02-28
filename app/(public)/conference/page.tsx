@@ -41,7 +41,8 @@ function buildEmbedUrl(mapsUrl: string): string {
   if (mapsUrl.includes("google.com/maps/embed")) return mapsUrl
   // For short links or place URLs, use the place query approach via the URL itself
   const query = encodeURIComponent("Hyatt Regency Kathmandu, Taragaon, Bouddha, Kathmandu")
-  return `https://www.google.com/maps/embed/v1/place?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&q=${query}`
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+  return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${query}`
 }
 
 export default async function ConferencePage() {

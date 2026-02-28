@@ -979,7 +979,7 @@ Currently implemented via in-memory `Map` — best-effort on serverless (resets 
 | `payment_events` idempotency for conference | Medium — `conference_registration_id` column added but not all webhook handlers may use it | Audit webhook handlers to confirm conference idempotency is fully wired |
 | `registrationFee = 0` edge case | Low — fee enabled but amount 0 blocks payment with config error | Better UX: disable payment gate UI if amount is 0 even when enabled |
 | Hardcoded `DEESSA-2026` prefix in short IDs | Low — will be wrong when conference year changes | Make year dynamic from `cfg.dateStart` |
-| Google Maps iframe uses hardcoded fallback query | Low — ignores `cfg.mapsUrl` for embed | Implement proper Maps Embed API integration using the configured URL |
+| ~~Google Maps iframe uses hardcoded fallback query~~ | ✅ **RESOLVED** — Now uses `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` environment variable | Maps API key properly secured in environment variables |
 | Timeline timestamps for confirm/cancel are `"—"` | Low — no DB column tracks when status changes occurred | Add `confirmed_at`, `cancelled_at` timestamptz columns |
 
 ---

@@ -355,13 +355,14 @@ cancelled   expired       (final state)
 |---|---|---|
 | **Next.js** | NODE_ENV, NEXT_PUBLIC_SITE_URL | 2 |
 | **Supabase** | NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY | 3 |
+| **Google Maps** | NEXT_PUBLIC_GOOGLE_MAPS_API_KEY | 1 |
 | **Email** | GOOGLE_EMAIL, GOOGLE_EMAIL_APP_PASSWORD | 2 |
 | **Stripe** | STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET | 3 |
 | **Khalti** | KHALTI_SECRET_KEY, KHALTI_PUBLIC_KEY | 2 |
 | **eSewa** | ESEWA_MERCHANT_CODE, ESEWA_SECRET_KEY, ESEWA_ENVIRONMENT | 3 |
 | **Cron** | CRON_SECRET | 1 |
 | **Optional** | SENTRY_DSN | 1 |
-| **TOTAL** | | 17 |
+| **TOTAL** | | 18 |
 
 ---
 
