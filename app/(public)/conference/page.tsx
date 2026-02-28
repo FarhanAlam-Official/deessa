@@ -48,9 +48,19 @@ function buildEmbedUrl(mapsUrl: string): string {
 export default async function ConferencePage() {
   const cfg = await getConferenceSettings()
 
+  // Defensive defaults to prevent runtime errors if data is incomplete
+  const agenda = Array.isArray(cfg.agenda) ? cfg.agenda : []
+  const venue = cfg.venue || ""
+  const venueAddress = cfg.venueAddress || ""
+  const name = cfg.name || "DEESSA National Conference 2026"
+  const dateDisplay = cfg.dateDisplay || ""
+  const mapsUrl = cfg.mapsUrl || "#"
+  const contactEmail = cfg.contactEmail || "conference@deessa.org.np"
+  const registrationDeadline = cfg.registrationDeadline || ""
+
   // Derive a "place" embed URL from the mapsUrl setting
   // We use the venueAddress as the search query to get a reliable embed
-  const mapEmbedQuery = encodeURIComponent(`${cfg.venue}, ${cfg.venueAddress}`)
+  const mapEmbedQuery = encodeURIComponent(`${venue}, ${venueAddress}`)
   const mapEmbedUrl = `https://maps.google.com/maps?q=${mapEmbedQuery}&output=embed&z=16`
 
   return (
@@ -71,7 +81,7 @@ export default async function ConferencePage() {
               <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/30 bg-white/20 px-3 py-1 backdrop-blur-sm">
                 <Calendar className="size-4 text-white" />
                 <span className="text-xs font-semibold uppercase tracking-wide text-white">
-                  {cfg.dateDisplay}
+                  {dateDisplay}
                 </span>
                 <span className="mx-1 h-3 w-px bg-white/40" />
                 <span className="text-xs font-semibold uppercase tracking-wide text-white">
@@ -80,7 +90,7 @@ export default async function ConferencePage() {
               </div>
 
               <h1 className="font-marissa text-4xl font-black leading-tight text-white sm:text-5xl md:text-6xl">
-                {cfg.name}
+                {name}
               </h1>
 
               <p className="max-w-lg text-lg font-medium text-white/90 sm:text-xl">
@@ -147,7 +157,7 @@ export default async function ConferencePage() {
                 <p className="text-sm text-foreground-muted">A quick look at Day 1&apos;s schedule.</p>
               </div>
               <div className="rounded-2xl border border-border bg-background p-6">
-                {cfg.agenda.map((item, idx) => (
+                {agenda.map((item, idx) => (
                   <div key={`${item.time}-${idx}`} className="grid grid-cols-[40px_1fr] gap-x-4">
                     <div className="flex flex-col items-center pt-1">
                       <div
@@ -157,11 +167,11 @@ export default async function ConferencePage() {
                       >
                         <Clock className="size-4" />
                       </div>
-                      {idx < cfg.agenda.length - 1 && (
+                      {idx < agenda.length - 1 && (
                         <div className="my-1 h-full w-0.5 bg-border" />
                       )}
                     </div>
-                    <div className={idx < cfg.agenda.length - 1 ? "pb-8" : ""}>
+                    <div className={idx < agenda.length - 1 ? "pb-8" : ""}>
                       <span
                         className={`text-xs font-semibold ${item.active ? "text-primary" : "text-foreground-muted"}`}
                       >
@@ -200,10 +210,10 @@ export default async function ConferencePage() {
                     <div className="flex items-start gap-3">
                       <MapPin className="mt-1 size-5 text-foreground-muted shrink-0" />
                       <div>
-                        <h4 className="font-bold text-foreground">{cfg.venue}</h4>
-                        <p className="text-sm text-foreground-muted">{cfg.venueAddress}</p>
+                        <h4 className="font-bold text-foreground">{venue}</h4>
+                        <p className="text-sm text-foreground-muted">{venueAddress}</p>
                         <a
-                          href={cfg.mapsUrl}
+                          href={mapsUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="mt-1 inline-block text-xs font-medium text-primary hover:underline"
@@ -217,15 +227,16 @@ export default async function ConferencePage() {
                       <div>
                         <h4 className="font-bold text-foreground">Email Us</h4>
                         <a
-                          href={`mailto:${cfg.contactEmail}`}
+                          href={`mailto:${contactEmail}`}
                           className="text-sm text-foreground-muted hover:text-primary transition-colors"
                         >
-                          {cfg.contactEmail}
+                          {contactEmail}
                         </a>
                       </div>
                     </div>
                   </div>
                   {/* Early bird reminder */}
+                  {registrationDeadline && (
                   <div className="mt-6 rounded-xl border border-primary/20 bg-primary/5 p-4">
                     <div className="flex items-start gap-3">
                       <span className="text-xl">🔔</span>
@@ -235,11 +246,12 @@ export default async function ConferencePage() {
                         </span>
                         <p className="mt-1 text-sm font-medium text-foreground">
                           Early bird registration closes on{" "}
-                          <span className="font-bold">{cfg.registrationDeadline}</span>. Secure your spot today.
+                          <span className="font-bold">{registrationDeadline}</span>. Secure your spot today.
                         </p>
                       </div>
                     </div>
                   </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -252,7 +264,7 @@ export default async function ConferencePage() {
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-2xl font-bold text-white sm:text-3xl">Ready to Join the Conversation?</h2>
           <p className="mt-3 text-white/80">
-            Secure your seat at the {cfg.name}.
+            Secure your seat at the {name}.
           </p>
           <Link
             href="/conference/register"
