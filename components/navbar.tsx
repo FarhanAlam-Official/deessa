@@ -57,12 +57,12 @@ export function Navbar() {
     >
       {/* Main Navigation */}
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center gap-4">
+        <div className="relative flex h-16 items-center">
           
-          {/* Logo Section - Leftmost */}
+          {/* Logo Section - centered on mobile, left-aligned on desktop */}
           <Link 
             href="/" 
-            className="group flex-shrink-0 -ml-[5%]"
+            className="group shrink-0 absolute left-1/2 -translate-x-1/2 lg:relative lg:left-auto lg:translate-x-0"
           >
             <div 
               data-navbar-logo
@@ -71,7 +71,7 @@ export function Navbar() {
                 hideNavbarLogo ? "opacity-0 scale-90" : "opacity-100 scale-100"
               )}
             >
-              <div className="relative w-24 h-24 flex items-center justify-center">
+              <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
                 <Image
                   src="/logo.png"
                   alt="Deesha Foundation"
@@ -115,39 +115,42 @@ export function Navbar() {
             </div>
           </div>
 
-          {/* Desktop CTA Section */}
-          <div className="hidden md:flex items-center gap-2 ml-auto">
-            <Link
-              href="/get-involved"
-              className="px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors duration-200 rounded-md hover:bg-slate-50 dark:hover:bg-slate-900"
-            >
-              Get Involved
-            </Link>
-            
-            <Button 
-              asChild 
-              className="bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow transition-all duration-200 rounded-md px-4 h-9 font-medium"
-            >
-              <Link href="/donate" className="flex items-center gap-1.5">
-                <Heart className="size-3.5 fill-current" />
-                <span>Donate</span>
+          {/* Right section: CTA + Mobile toggle */}
+          <div className="ml-auto flex items-center gap-2">
+            {/* Desktop CTA Section */}
+            <div className="hidden md:flex items-center gap-2">
+              <Link
+                href="/get-involved"
+                className="hidden lg:inline-flex px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors duration-200 rounded-md hover:bg-slate-50 dark:hover:bg-slate-900"
+              >
+                Get Involved
               </Link>
-            </Button>
-          </div>
+              
+              <Button 
+                asChild 
+                className="bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow transition-all duration-200 rounded-md px-4 h-9 font-medium"
+              >
+                <Link href="/donate" className="flex items-center gap-1.5">
+                  <Heart className="size-3.5 fill-current" />
+                  <span>Donate</span>
+                </Link>
+              </Button>
+            </div>
 
-          {/* Mobile Menu Button */}
-          <button 
-            className={cn(
-              "lg:hidden p-2 rounded-md transition-colors duration-200 relative z-50",
-              mobileMenuOpen 
-                ? "bg-primary text-white" 
-                : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-            )}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-          >
-            {mobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
-          </button>
+            {/* Mobile Menu Button */}
+            <button 
+              className={cn(
+                "lg:hidden p-2 rounded-md transition-colors duration-200 relative z-50",
+                mobileMenuOpen 
+                  ? "bg-primary text-white" 
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+              )}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            >
+              {mobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
+            </button>
+          </div>
         </div>
       </nav>
 
