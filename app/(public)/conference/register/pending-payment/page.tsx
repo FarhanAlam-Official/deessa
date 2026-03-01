@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Clock, CreditCard, AlertTriangle, CheckCircle, Loader2 } from "lucide-react"
@@ -33,7 +33,7 @@ function formatCountdown(expiresAt: string): string {
   return h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`
 }
 
-export default function PendingPaymentPage() {
+function PendingPaymentContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const rid = searchParams.get("rid") ?? ""
@@ -295,5 +295,17 @@ export default function PendingPaymentPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function PendingPaymentPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="size-8 animate-spin text-primary" />
+      </div>
+    }>
+      <PendingPaymentContent />
+    </Suspense>
   )
 }
