@@ -3,34 +3,34 @@
 import { useState, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Heart, Mail, MapPin, Phone, Facebook, Twitter, Instagram, Youtube, Settings } from "lucide-react"
+import { Heart, Mail, MapPin, Phone, Facebook, Twitter, Instagram, Youtube, Settings, Target, GraduationCap, HeartHandshake, Shield, Users, FileText, Award, Calendar, Download } from "lucide-react"
 import { NewsletterForm } from "@/components/newsletter-form"
 
 const footerLinks = {
   about: [
-    { label: "Our Mission", href: "/about" },
-    { label: "Our Team", href: "/about#team" },
-    { label: "Partners", href: "/about#partners" },
-    { label: "Press & Media", href: "/press" },
-    { label: "Annual Reports", href: "/impact#reports" },
+    { label: "Our Mission", href: "/about", icon: Target },
+    { label: "Our Team", href: "/about#team", icon: Users },
+    { label: "Partners", href: "/about#partners", icon: HeartHandshake },
+    { label: "Press & Media", href: "/press", icon: FileText },
+    { label: "Annual Reports", href: "/impact#reports", icon: Award },
   ],
   programs: [
-    { label: "Education", href: "/programs?category=education" },
-    { label: "Healthcare", href: "/programs?category=health" },
-    { label: "Women Empowerment", href: "/programs?category=empowerment" },
-    { label: "Disaster Relief", href: "/programs?category=relief" },
+    { label: "Education", href: "/programs?category=education", icon: GraduationCap },
+    { label: "Healthcare", href: "/programs?category=health", icon: Heart },
+    { label: "Women Empowerment", href: "/programs?category=empowerment", icon: Users },
+    { label: "Disaster Relief", href: "/programs?category=relief", icon: Shield },
   ],
   getInvolved: [
-    { label: "Donate", href: "/donate" },
-    { label: "Volunteer", href: "/get-involved#volunteer" },
-    { label: "Become a Member", href: "/get-involved#member" },
-    { label: "Events", href: "/events" },
+    { label: "Donate", href: "/donate", icon: Heart },
+    { label: "Volunteer", href: "/get-involved#volunteer", icon: HeartHandshake },
+    { label: "Become a Member", href: "/get-involved#member", icon: Users },
+    { label: "Events", href: "/events", icon: Calendar },
   ],
   resources: [
-    { label: "Brand Guidelines", href: "/deesa-resources/Deessa Brand Guidelines.pdf", download: true },
-    { label: "Organization Bio", href: "/deesa-resources/deessa Foundation_ Short Bio -2.pdf", download: true },
-    { label: "SWC Certificate", href: "/deesa-resources/SWC.jpg", download: true },
-    { label: "Contact Us", href: "/contact" },
+    { label: "Brand Guidelines", href: "/deesa-resources/Deessa Brand Guidelines.pdf", download: true, icon: Download },
+    { label: "Organization Bio", href: "/deesa-resources/deessa Foundation_ Short Bio -2.pdf", download: true, icon: Download },
+    { label: "SWC Certificate", href: "/deesa-resources/SWC.jpg", download: true, icon: Download },
+    { label: "Contact Us", href: "/contact", icon: Mail },
   ],
 }
 
@@ -95,161 +95,238 @@ export function Footer() {
   }
 
   return (
-    <footer className="relative bg-foreground text-white [&]:before:hidden [&]:after:hidden">
+    <footer className="relative bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
+      </div>
+      
       {/* Newsletter Section */}
-      <div className="border-b border-gray-800">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-12">
+      <div className="relative border-b border-gray-800/50 backdrop-blur-sm">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-16">
           <div className="max-w-2xl mx-auto text-center">
-            <h3 className="text-xl font-bold mb-2">Stay Updated</h3>
-            <p className="text-gray-400 text-sm mb-6">
-              Subscribe to our newsletter for updates on our work and ways to get involved.
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
+              <Mail className="size-4" />
+              <span>Newsletter</span>
+            </div>
+            <h3 className="text-2xl md:text-3xl font-bold mb-3 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              Stay Connected
+            </h3>
+            <p className="text-gray-400 text-base mb-8 leading-relaxed">
+              Get the latest updates on our impact, upcoming events, and new ways to make a difference in rural Nepal.
             </p>
-            <NewsletterForm variant="stacked" className="max-w-md mx-auto" />
+            <div className="bg-white/5 backdrop-blur-sm border border-gray-800/50 rounded-xl p-6">
+              <NewsletterForm variant="stacked" className="max-w-md mx-auto" />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Footer Content */}
-      <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12">
-          {/* Brand Column */}
-          <div className="lg:col-span-2">
-            <div onClick={handleLogoClick} className="mb-6 inline-block cursor-pointer">
-              <div className="w-24 h-24 flex items-center justify-center relative">
-                <Image
-                  src="/logo.png"
-                  alt="deessa Foundation Logo"
-                  width={96}
-                  height={96}
-                  className="object-contain scale-[250%]"
-                />
-              </div>
-            </div>
-            <p className="text-gray-400 text-sm leading-relaxed mb-6 max-w-sm">
+      <div className="relative max-w-[1400px] mx-auto px-4 md:px-8 py-12 lg:py-20">
+        {/* Mission Statement + Contact row */}
+        <div className="flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-16 mb-12 lg:mb-16">
+          {/* Mission Statement */}
+          <div className="lg:max-w-md">
+            <h4 className="text-xl font-semibold text-white mb-4">Our Mission</h4>
+            <p className="text-gray-400 leading-relaxed mb-6 text-base">
               Empowering communities in rural Nepal through sustainable education, healthcare, and livelihood
               initiatives since 2015.
             </p>
-            {/* Contact Info */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 text-sm text-gray-400">
-                <MapPin className="size-4 text-primary" />
-                <span>Kathmandu, Nepal</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-gray-400">
-                <Mail className="size-4 text-primary" />
-                <span>info@deessafoundation.org</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-gray-400">
-                <Phone className="size-4 text-primary" />
-                <span>+977 1-4123456</span>
-              </div>
+            <div className="bg-gradient-to-r from-primary/10 to-transparent p-4 rounded-lg border border-primary/20">
+              <p className="text-primary text-sm font-medium">Making a difference, one community at a time.</p>
             </div>
           </div>
 
-          {/* Links Columns */}
-          <div>
-            <h3 className="font-bold text-sm uppercase tracking-wider mb-4">About</h3>
-            <ul className="space-y-3">
-              {footerLinks.about.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-gray-400 text-sm hover:text-white transition-colors">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {/* Contact Info */}
+          <div className="lg:ml-auto">
+            <h4 className="text-lg font-semibold text-white mb-4">Get in Touch</h4>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-gray-800/50 hover:border-primary/30 transition-colors group">
+                <div className="p-2 bg-primary/20 rounded-lg group-hover:bg-primary/30 transition-colors">
+                  <MapPin className="size-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-gray-400 text-xs uppercase tracking-wider">Location</p>
+                  <p className="text-white text-sm font-medium">Kathmandu, Nepal</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-gray-800/50 hover:border-primary/30 transition-colors group">
+                <div className="p-2 bg-primary/20 rounded-lg group-hover:bg-primary/30 transition-colors">
+                  <Mail className="size-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-gray-400 text-xs uppercase tracking-wider">Email</p>
+                  <p className="text-white text-sm font-medium">info@deessafoundation.org</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-gray-800/50 hover:border-primary/30 transition-colors group">
+                <div className="p-2 bg-primary/20 rounded-lg group-hover:bg-primary/30 transition-colors">
+                  <Phone className="size-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-gray-400 text-xs uppercase tracking-wider">Phone</p>
+                  <p className="text-white text-sm font-medium">+977 1-4123456</p>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <div>
-            <h3 className="font-bold text-sm uppercase tracking-wider mb-4">Programs</h3>
+        {/* Links Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-primary/20 rounded-lg">
+                <Target className="size-4 text-primary" />
+              </div>
+              <h3 className="font-bold text-white text-sm uppercase tracking-wider">About</h3>
+            </div>
             <ul className="space-y-3">
-              {footerLinks.programs.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-gray-400 text-sm hover:text-white transition-colors">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-bold text-sm uppercase tracking-wider mb-4">Get Involved</h3>
-            <ul className="space-y-3">
-              {footerLinks.getInvolved.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-gray-400 text-sm hover:text-white transition-colors">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-bold text-sm uppercase tracking-wider mb-4">Resources</h3>
-            <ul className="space-y-3">
-              {footerLinks.resources.map((link) => (
-                <li key={link.href}>
-                  {link.download ? (
-                    <a
-                      href={link.href}
-                      download
-                      className="text-gray-400 text-sm hover:text-white transition-colors"
-                    >
-                      {link.label}
-                    </a>
-                  ) : (
-                    <Link href={link.href} className="text-gray-400 text-sm hover:text-white transition-colors">
-                      {link.label}
+              {footerLinks.about.map((link) => {
+                const IconComponent = link.icon;
+                return (
+                  <li key={link.href}>
+                    <Link href={link.href} className="flex items-center gap-2 text-gray-400 text-sm hover:text-primary transition-all duration-200 group">
+                      <IconComponent className="size-3.5 opacity-60 group-hover:opacity-100 group-hover:text-primary transition-all" />
+                      <span className="group-hover:translate-x-0.5 transition-transform">{link.label}</span>
                     </Link>
-                  )}
-                </li>
-              ))}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-primary/20 rounded-lg">
+                <GraduationCap className="size-4 text-primary" />
+              </div>
+              <h3 className="font-bold text-white text-sm uppercase tracking-wider">Programs</h3>
+            </div>
+            <ul className="space-y-3">
+              {footerLinks.programs.map((link) => {
+                const IconComponent = link.icon;
+                return (
+                  <li key={link.href}>
+                    <Link href={link.href} className="flex items-center gap-2 text-gray-400 text-sm hover:text-primary transition-all duration-200 group">
+                      <IconComponent className="size-3.5 opacity-60 group-hover:opacity-100 group-hover:text-primary transition-all" />
+                      <span className="group-hover:translate-x-0.5 transition-transform">{link.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-primary/20 rounded-lg">
+                <HeartHandshake className="size-4 text-primary" />
+              </div>
+              <h3 className="font-bold text-white text-sm uppercase tracking-wider">Get Involved</h3>
+            </div>
+            <ul className="space-y-3">
+              {footerLinks.getInvolved.map((link) => {
+                const IconComponent = link.icon;
+                return (
+                  <li key={link.href}>
+                    <Link href={link.href} className="flex items-center gap-2 text-gray-400 text-sm hover:text-primary transition-all duration-200 group">
+                      <IconComponent className="size-3.5 opacity-60 group-hover:opacity-100 group-hover:text-primary transition-all" />
+                      <span className="group-hover:translate-x-0.5 transition-transform">{link.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-primary/20 rounded-lg">
+                <FileText className="size-4 text-primary" />
+              </div>
+              <h3 className="font-bold text-white text-sm uppercase tracking-wider">Resources</h3>
+            </div>
+            <ul className="space-y-3">
+              {footerLinks.resources.map((link) => {
+                const IconComponent = link.icon;
+                return (
+                  <li key={link.href}>
+                    {link.download ? (
+                      <a
+                        href={link.href}
+                        download
+                        className="flex items-center gap-2 text-gray-400 text-sm hover:text-primary transition-all duration-200 group"
+                      >
+                        <IconComponent className="size-3.5 opacity-60 group-hover:opacity-100 group-hover:text-primary transition-all" />
+                        <span className="group-hover:translate-x-0.5 transition-transform">{link.label}</span>
+                      </a>
+                    ) : (
+                      <Link href={link.href} className="flex items-center gap-2 text-gray-400 text-sm hover:text-primary transition-all duration-200 group">
+                        <IconComponent className="size-3.5 opacity-60 group-hover:opacity-100 group-hover:text-primary transition-all" />
+                        <span className="group-hover:translate-x-0.5 transition-transform">{link.label}</span>
+                      </Link>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-gray-800">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-4">
-            <p className="text-gray-500 text-sm">© {new Date().getFullYear()} deessa Foundation. All rights reserved.</p>
-            <Link
-              href="/admin"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-gray-600 text-xs hover:text-gray-400 transition-colors"
-            >
-              <Settings className="size-3" />
-              <span>Admin</span>
-            </Link>
-          </div>
-          <div className="flex items-center gap-4">
-            {socialLinks.map((social) => (
-              social.isAlert ? (
-                <button
-                  key={social.label}
-                  onClick={handleTwitterClick}
-                  className="size-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-primary hover:text-white transition-colors"
-                  aria-label={social.label}
-                >
-                  <social.icon className="size-4" />
-                </button>
-              ) : (
-                <Link
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="size-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-primary hover:text-white transition-colors"
-                  aria-label={social.label}
-                >
-                  <social.icon className="size-4" />
-                </Link>
-              )
-            ))}
+      <div className="relative border-t border-gray-800/50 bg-gradient-to-r from-black/50 to-gray-950/50 backdrop-blur-sm">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
+              <p className="text-gray-400 text-sm text-center sm:text-left">
+                © {new Date().getFullYear()} deessa Foundation. All rights reserved.
+              </p>
+              <div className="h-4 w-px bg-gray-700 hidden sm:block"></div>
+              <Link
+                href="/admin"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-gray-500 text-xs hover:text-primary transition-colors group"
+              >
+                <Settings className="size-3 group-hover:rotate-90 transition-transform duration-300" />
+                <span>Admin</span>
+              </Link>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 text-xs mr-2">Follow us:</span>
+              {socialLinks.map((social) => (
+                social.isAlert ? (
+                  <button
+                    key={social.label}
+                    onClick={handleTwitterClick}
+                    className="relative size-10 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-gray-400 hover:text-white border border-gray-700/50 hover:border-primary/50 transition-all duration-300 group overflow-hidden"
+                    aria-label={social.label}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <social.icon className="size-4 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                  </button>
+                ) : (
+                  <Link
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="relative size-10 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-gray-400 hover:text-white border border-gray-700/50 hover:border-primary/50 transition-all duration-300 group overflow-hidden"
+                    aria-label={social.label}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <social.icon className="size-4 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                  </Link>
+                )
+              ))}
+            </div>
           </div>
         </div>
       </div>
