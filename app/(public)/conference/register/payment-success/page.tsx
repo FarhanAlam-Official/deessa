@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef } from "react"
+import { useEffect, useState, useCallback, useRef, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle, Clock, AlertTriangle, Loader2 } from "lucide-react"
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const searchParams = useSearchParams()
   const rid       = searchParams.get("rid") ?? ""
   const sessionId = searchParams.get("session_id") ?? ""   // Stripe appends this
@@ -247,5 +247,17 @@ export default function PaymentSuccessPage() {
         </Link>
       </div>
     </div>
+  )
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="size-8 animate-spin text-primary" />
+      </div>
+    }>
+      <PaymentSuccessContent />
+    </Suspense>
   )
 }
