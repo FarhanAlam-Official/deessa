@@ -35,6 +35,9 @@ execute-commits.ps1
 COMMIT_PLAN.md
 execute-conference-commits.ps1
 COMMIT_PLAN_FEB_15_28.md
+execute-refinements-commits.ps1
+COMMIT_PLAN_FEB27_MAR2.md
+execute-march-commits.ps1
 
 # Large media files
 public/websiteClip/*.mp4
@@ -51,3 +54,5 @@ public/websiteClip/*.MP3
 /.opencode
 /.qoder
 /skills-lock.json
+
+/.kiro

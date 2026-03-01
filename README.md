@@ -209,6 +209,66 @@ The platform supports multiple payment providers with a unified interface:
 
 Each provider is implemented with both live and mock modes for development/testing.
 
+### Payment Architecture V2
+
+The payment system has been refactored to provide production-grade security and reliability:
+
+- **Centralized Confirmation:** Single source of truth for payment state transitions
+- **Provider Abstraction:** Clean adapter pattern for easy provider integration
+- **Transactional Integrity:** Atomic database operations with row-level locking
+- **Idempotent Processing:** Safe webhook replay handling
+- **Async Post-Payment:** Non-blocking receipt generation and email delivery
+- **Comprehensive Monitoring:** Detailed logging and alerting for payment issues
+
+For detailed architecture documentation, see:
+- [Design Document](docs/payments-v2/DESIGN.md)
+- [Implementation Tasks](docs/payments-v2/TASKS.md)
+- [API Documentation](docs/api/PAYMENTS_V2.md)
+
+## 🔒 Security & Operations
+
+### Credential Management
+
+All payment credentials and API keys must be rotated quarterly for security. We provide comprehensive tools and documentation:
+
+**Documentation:**
+- [Credential Rotation Guide](docs/operations/CREDENTIAL_ROTATION_GUIDE.md) - Detailed step-by-step procedures
+- [Rotation Checklist](docs/operations/CREDENTIAL_ROTATION_CHECKLIST.md) - Quick reference checklist
+
+**Automation Scripts:**
+- `scripts/generate-secrets.ps1` / `.sh` - Generate all required secrets
+- `scripts/test-credentials.ps1` / `.sh` - Validate credential configuration
+
+**Quick Start:**
+```bash
+# Generate new secrets
+.\scripts\generate-secrets.ps1
+
+# Test credential configuration
+.\scripts\test-credentials.ps1
+```
+
+### Security Best Practices
+
+- ✅ All credentials stored in environment variables (never in code)
+- ✅ `.env` files excluded from version control
+- ✅ Webhook signature verification for all providers
+- ✅ Receipt downloads require authentication tokens
+- ✅ Rate limiting on all payment endpoints
+- ✅ Comprehensive audit logging for all payment events
+
+### Credential Rotation Schedule
+
+| Credential | Rotation Frequency | Last Rotated |
+|-----------|-------------------|--------------|
+| Stripe Webhook Secret | Quarterly | - |
+| Khalti Secret Key | Quarterly | - |
+| eSewa Secret Key | Quarterly | - |
+| Receipt Token Secret | Quarterly | - |
+| CRON Secret | Quarterly | - |
+
+**Next Rotation Due:** [Set after first rotation]
+
 ## 📊 Analytics & Reporting
 
 The admin dashboard includes:
