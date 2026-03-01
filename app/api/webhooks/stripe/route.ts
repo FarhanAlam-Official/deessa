@@ -149,7 +149,7 @@ async function confirmConferenceRegistrationFromWebhook(
 
         .from("conference_registrations")
 
-        .update({ payment_status: "review", stripe_session_id: session.id })
+        .update({ payment_status: "review", payment_review_at: new Date().toISOString(), stripe_session_id: session.id })
 
         .eq("id", registrationId);
 
@@ -172,7 +172,7 @@ async function confirmConferenceRegistrationFromWebhook(
 
         .from("conference_registrations")
 
-        .update({ payment_status: "review", stripe_session_id: session.id })
+        .update({ payment_status: "review", payment_review_at: new Date().toISOString(), stripe_session_id: session.id })
 
         .eq("id", registrationId);
 
@@ -227,6 +227,10 @@ async function confirmConferenceRegistrationFromWebhook(
       provider_ref: session.id,
 
       stripe_session_id: session.id,
+
+      payment_paid_at: new Date().toISOString(),
+
+      confirmed_at: new Date().toISOString(),
     })
 
     .eq("id", registrationId);
@@ -251,9 +255,16 @@ async function confirmConferenceRegistrationFromWebhook(
     role: reg.role || undefined,
 
     workshops: reg.workshops || undefined,
-  }).catch((err) =>
-    console.error("Non-fatal: webhook confirmation email failed:", err)
-  );
+  })
+    .then((r) => {
+      if (r.success)
+        supabase.from("conference_registrations")
+          .update({ last_confirmation_email_sent_at: new Date().toISOString() })
+          .eq("id", registrationId).then(() => {})
+    })
+    .catch((err) =>
+      console.error("Non-fatal: webhook confirmation email failed:", err)
+    );
 
   console.log(
     "Stripe webhook (conference): confirmed registration",
