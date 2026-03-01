@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
-import { Heart, Menu, X, ChevronRight, Sparkles, Home, Users, Briefcase, Award, FileText, Podcast, Calendar, Mail } from "lucide-react"
+import { Heart, Menu, X, ChevronRight, Sparkles, Home, Users, Briefcase, Award, FileText, Podcast, Calendar, Mail, ClipboardList } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -125,6 +125,14 @@ export function Navbar() {
               >
                 Get Involved
               </Link>
+
+              <Link
+                href="/conference/register"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border border-primary/40 text-primary hover:bg-primary/5 transition-all duration-200 rounded-md"
+              >
+                <ClipboardList className="size-3.5" />
+                Register
+              </Link>
               
               <Button 
                 asChild 
@@ -195,6 +203,15 @@ export function Navbar() {
                     className="flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors duration-200 rounded-md"
                   >
                     Get Involved
+                  </Link>
+
+                  <Link
+                    href="/conference/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-1.5 w-full px-4 py-2.5 text-sm font-medium border border-primary/40 text-primary hover:bg-primary/5 transition-colors duration-200 rounded-md"
+                  >
+                    <ClipboardList className="size-4" />
+                    Register for Conference
                   </Link>
                   
                   <Button 
