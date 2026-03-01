@@ -9,10 +9,11 @@ interface Props {
   registrationId: string
   shortId: string
   fullName: string
+  email: string
   status: string
 }
 
-export function DeleteRegistrationButton({ registrationId, shortId, fullName, status }: Props) {
+export function DeleteRegistrationButton({ registrationId, shortId, fullName, email, status }: Props) {
   const [open, setOpen]       = useState(false)
   const [confirm, setConfirm] = useState("")
   const [loading, setLoading] = useState(false)
@@ -41,7 +42,7 @@ export function DeleteRegistrationButton({ registrationId, shortId, fullName, st
     setError(null)
 
     try {
-      const result = await deleteConferenceRegistration(registrationId)
+      const result = await deleteConferenceRegistration(registrationId, email)
 
       if (result.success) {
         setOpen(false)
