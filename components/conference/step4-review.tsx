@@ -51,15 +51,11 @@ function ReviewSection({
             <p className="text-sm text-foreground-muted">{row.label}</p>
             {Array.isArray(row.value) ? (
               <div className="flex flex-wrap justify-end gap-1">
-                {row.value.length > 0 ? (
-                  row.value.map((v) => (
-                    <span key={v} className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                      {v}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-right text-sm font-semibold text-foreground-muted">—</span>
-                )}
+                {row.value.map((v, index) => (
+                  <span key={`${v}-${index}`} className="inline-block rounded bg-muted px-2 py-1 text-xs font-medium text-foreground">
+                    {v}
+                  </span>
+                ))}
               </div>
             ) : (
               <p className="text-right text-sm font-semibold text-foreground">
@@ -141,13 +137,13 @@ export function Step4Review({ data, onEdit, onSubmit, onBack, isSubmitting, erro
                 onChange={(e) => setConsentTerms(e.target.checked)}
                 className="mt-0.5 size-5 rounded border-border text-primary focus:ring-primary"
               />
-              <span className="text-sm text-foreground-muted">
+              {/* TODO: Update the links to the actual terms and privacy policy of the conference */}              <span className="text-sm text-foreground-muted">
                 I agree to the{" "}
-                <a href="#" className="font-semibold text-primary hover:underline">
+                <a href="https://deessa.org/terms" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
                   Terms and Conditions
                 </a>{" "}
                 and the{" "}
-                <a href="#" className="font-semibold text-primary hover:underline">
+                <a href="https://deessa.org/privacy" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
                   Data Privacy Policy
                 </a>{" "}
                 of the DEESSA Foundation Conference.
@@ -171,7 +167,7 @@ export function Step4Review({ data, onEdit, onSubmit, onBack, isSubmitting, erro
 
       {/* Error */}
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
           {error}
         </div>
       )}
