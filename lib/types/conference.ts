@@ -58,6 +58,22 @@ export interface ConferenceRegistration {
   // Lifecycle
   expires_at: string | null
   payment_override_by: string | null
+
+  // Email tracking (last-sent timestamps; null = never sent / pre-feature)
+  last_registration_email_sent_at: string | null
+  last_confirmation_email_sent_at: string | null
+  last_cancellation_email_sent_at: string | null
+  last_custom_email_sent_at: string | null
+
+  // Payment lifecycle timestamps (null = not yet reached / pre-feature)
+  payment_initiated_at: string | null
+  payment_paid_at: string | null
+  payment_failed_at: string | null
+  payment_review_at: string | null
+
+  // Status timestamps
+  confirmed_at: string | null
+  cancelled_at: string | null
 }
 
 /** Minimal shape returned by public verify-registration endpoint (PII) */
