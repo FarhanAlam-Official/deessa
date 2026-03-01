@@ -59,10 +59,11 @@ export function Step3AdditionalInfo({ data, onChange, onNext, onBack }: Step3Pro
 
       {/* Dietary Preferences */}
       <div className="flex flex-col gap-3">
-        <p className="text-xs font-bold uppercase tracking-wider text-foreground">
+        <label htmlFor="dietary-preference-select" className="text-xs font-bold uppercase tracking-wider text-foreground">
           Dietary Preferences
-        </p>
+        </label>
         <select
+          id="dietary-preference-select"
           value={data.dietaryPreference}
           onChange={(e) => onChange({ dietaryPreference: e.target.value })}
           className="h-14 w-full max-w-[540px] appearance-none rounded-xl border border-border bg-background px-4 text-base text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
@@ -118,6 +119,7 @@ export function Step3AdditionalInfo({ data, onChange, onNext, onBack }: Step3Pro
               <button
                 key={opt.value}
                 type="button"
+                aria-pressed={selected}
                 onClick={() => toggleHeardVia(opt.value)}
                 className={`rounded-full border px-4 py-2 text-sm font-medium transition-all ${
                   selected
@@ -139,8 +141,9 @@ export function Step3AdditionalInfo({ data, onChange, onNext, onBack }: Step3Pro
         </p>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-foreground">Contact Name</label>
+            <label className="text-sm font-medium text-foreground" htmlFor="emergencyContactName">Contact Name</label>
             <input
+              id="emergencyContactName"
               type="text"
               value={data.emergencyContactName}
               onChange={(e) => onChange({ emergencyContactName: e.target.value })}
@@ -149,8 +152,9 @@ export function Step3AdditionalInfo({ data, onChange, onNext, onBack }: Step3Pro
             />
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-foreground">Phone Number</label>
+            <label className="text-sm font-medium text-foreground" htmlFor="emergencyContactPhone">Phone Number</label>
             <input
+              id="emergencyContactPhone"
               type="tel"
               value={data.emergencyContactPhone}
               onChange={(e) => onChange({ emergencyContactPhone: e.target.value })}
