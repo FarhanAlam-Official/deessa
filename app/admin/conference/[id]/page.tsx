@@ -64,8 +64,8 @@ function DetailRow({ label, value }: { label: string; value: string | string[] |
       <p className="text-sm text-muted-foreground min-w-[160px]">{label}</p>
       {Array.isArray(value) ? (
         <div className="flex flex-wrap justify-end gap-1">
-          {value.map((v) => (
-            <span key={v} className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+          {value.map((v, idx) => (
+            <span key={`${v}-${idx}`} className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
               {v}
             </span>
           ))}
@@ -298,6 +298,7 @@ export default async function ConferenceRegistrantDetailPage({ params }: Props) 
                   registrationId={reg.id}
                   shortId={shortId}
                   fullName={reg.full_name}
+                  email={reg.email}
                   status={reg.status}
                 />
               </div>
@@ -315,7 +316,7 @@ export default async function ConferenceRegistrantDetailPage({ params }: Props) 
                   <p className="text-sm text-muted-foreground min-w-[160px]">Payment Status</p>
                   <PaymentBadge status={reg.payment_status} />
                 </div>
-                <DetailRow label="Amount" value={reg.payment_amount ? `${reg.payment_currency || "NPR"} ${Number(reg.payment_amount).toLocaleString()}` : null} />
+                <DetailRow label="Amount" value={reg.payment_amount ? `${reg.payment_currency || "NPR"} ${(Number.isFinite(Number(reg.payment_amount)) ? Number(reg.payment_amount).toLocaleString() : reg.payment_amount)}` : null} />
                 <DetailRow label="Provider" value={reg.payment_provider} />
                 {reg.payment_id && (
                   <div className="flex flex-col gap-1 border-b border-border py-3">
