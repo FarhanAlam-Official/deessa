@@ -1,20 +1,35 @@
 /**
- * Simple rate limiting using Supabase as storage.
- * Tracks attempts by composite key (identifier) with TTL expiry.
+ * Rate Limiting Utility - Supabase-backed distributed rate limiting
+ * 
+ * This module provides distributed rate limiting using Supabase as the storage backend.
+ * It's designed for serverless environments where in-memory rate limiting doesn't work
+ * across multiple function instances.
+ * 
+ * Architecture:
+ * - Uses Supabase database table `rate_limits` for state storage
+ * - Atomic increment via PostgreSQL RPC function `increment_rate_limit`
+ * - Sliding window algorithm with automatic expiry
+ * - Fail-open strategy (allows requests if rate limiting system fails)
+ * 
+ * Future Scaling:
+ * - For higher throughput (>1000 req/s), consider migrating to Redis/Upstash
+ * - Current Supabase implementation is sufficient for <500 donations/month
+ * 
+ * Requirements: 14.1, 14.2 (Payment Architecture V2)
  */
 
 import { createClient as createServiceClient } from "@supabase/supabase-js"
 
 interface RateLimitConfig {
-  identifier: string // Composite key: "resend-payment:ip:192.168.1.1" or "resend-payment:rid:abc-123"
+  identifier: string // Composite key: "endpoint:type:value" (e.g., "receipt-download:ip:192.168.1.1")
   maxAttempts: number // Max requests allowed in window
-  windowMinutes: number // Time window in minutes
+  windowMinutes: number // Time window in minutes (sliding window)
 }
 
 interface RateLimitResult {
-  allowed: boolean
-  remaining: number
-  resetAt: Date | null
+  allowed: boolean // Whether the request should be allowed
+  remaining: number // Remaining requests in current window
+  resetAt: Date | null // When the rate limit window resets
 }
 
 function createServiceRoleClient() {
