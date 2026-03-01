@@ -45,16 +45,18 @@ export default function PaymentOptionsPage() {
     // This button just provides reassurance and can re-trigger if needed.
     setSendingEmail(true)
     try {
-      await fetch("/api/conference/resend-payment-link", {
+      const res = await fetch("/api/conference/resend-payment-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ registrationId: rid, email }),
       })
+      if (res.ok) {
+        setEmailSent(true)
+      }
     } catch {
       // Non-critical — email was already sent on registration
     } finally {
       setSendingEmail(false)
-      setEmailSent(true)
     }
   }
 
@@ -76,7 +78,7 @@ export default function PaymentOptionsPage() {
             Registration Received{name ? `, ${name.split(" ")[0]}!` : "!"}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Your spot is reserved for <span className="font-semibold text-foreground">24 hours</span>.
+            Your spot is reserved for <span className="font-semibold text-foreground">{expiryHours} {expiryHours === 1 ? 'hour' : 'hours'}</span>.
             Complete payment to confirm your registration.
           </p>
         </div>
