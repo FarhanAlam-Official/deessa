@@ -54,35 +54,39 @@ export function ConferenceRegistrationForm() {
     setIsSubmitting(true)
     setSubmitError(null)
 
-    const result = await registerForConference({
-      ...step1,
-      ...step2,
-      ...step3,
-      ...consent,
-    })
+    try {
+      const result = await registerForConference({
+        ...step1,
+        ...step2,
+        ...step3,
+        ...consent,
+      })
 
-    if (result.success && result.registrationId) {
-      if (result.paymentRequired) {
-        // Payment gate: show Pay Now vs Pay Later choice
-        const params = new URLSearchParams({
-          rid: result.registrationId,
-          email: step1.email,
-          name: step1.fullName,
-          amount: String(result.paymentAmount ?? ""),
-          currency: result.paymentCurrency ?? "NPR",
-          expiryHours: String(result.expiryHours ?? 24),
-        })
-        router.push(`/conference/register/payment-options?${params.toString()}`)
+      if (result.success && result.registrationId) {
+        if (result.paymentRequired) {
+          const params = new URLSearchParams({
+            rid: result.registrationId,
+            email: step1.email,
+            name: step1.fullName,
+            amount: String(result.paymentAmount ?? ""),
+            currency: result.paymentCurrency ?? "NPR",
+            expiryHours: String(result.expiryHours ?? 24),
+          })
+          router.push(`/conference/register/payment-options?${params.toString()}`)
+        } else {
+          router.push(
+            `/conference/register/success?id=${result.registrationId}&name=${encodeURIComponent(step1.fullName)}&email=${encodeURIComponent(step1.email)}`
+          )
+        }
       } else {
-        // Free conference: go straight to success
-        router.push(
-          `/conference/register/success?id=${result.registrationId}&name=${encodeURIComponent(step1.fullName)}&email=${encodeURIComponent(step1.email)}`
-        )
+        setSubmitError(result.message || "Registration failed. Please try again.")
       }
-    } else {
-      router.push(
-        `/conference/register/failure?reason=${encodeURIComponent(result.message || "An unexpected error occurred.")}&email=${encodeURIComponent(step1.email)}`
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error ? err.message : "An unexpected error occurred. Please try again."
       )
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
