@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { CreditCard, Clock, CheckCircle, Loader2, AlertTriangle, ArrowRight, Mail } from "lucide-react"
@@ -10,7 +10,7 @@ import { CreditCard, Clock, CheckCircle, Loader2, AlertTriangle, ArrowRight, Mai
 //
 // URL: /conference/register/payment-options?rid=...&email=...&amount=...&currency=...
 
-export default function PaymentOptionsPage() {
+function PaymentOptionsContent() {
   const sp = useSearchParams()
   const rid     = sp.get("rid") ?? ""
   const email   = sp.get("email") ?? ""
@@ -173,5 +173,17 @@ export default function PaymentOptionsPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function PaymentOptionsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="size-8 animate-spin text-primary" />
+      </div>
+    }>
+      <PaymentOptionsContent />
+    </Suspense>
   )
 }
