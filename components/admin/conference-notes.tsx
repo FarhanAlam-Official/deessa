@@ -39,6 +39,11 @@ export function ConferenceNotes({ registrationId, initialNotes }: ConferenceNote
           description: result.error || "Please try again.",
         })
       }
+    } catch (error) {
+      notifications.showError({
+        title: "Failed to save notes",
+        description: "An unexpected error occurred. Please try again.",
+      })
     } finally {
       setSaving(false)
     }
@@ -50,6 +55,7 @@ export function ConferenceNotes({ registrationId, initialNotes }: ConferenceNote
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
         rows={5}
+        aria-label="Admin-notes"
         placeholder={`Add internal notes about this registrant…\ne.g. VIP guest, needs wheelchair access, speaker contact`}
         className="w-full resize-none rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
       />
