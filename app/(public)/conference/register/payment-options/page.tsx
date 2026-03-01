@@ -1,7 +1,7 @@
 "use client"
 
 import { Suspense, useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { CreditCard, Clock, CheckCircle, Loader2, AlertTriangle, ArrowRight, Mail } from "lucide-react"
 
@@ -19,8 +19,23 @@ function PaymentOptionsContent() {
   const name    = sp.get("name") ? decodeURIComponent(sp.get("name")!) : ""
   const expiryHours = sp.get("expiryHours") ? Number(sp.get("expiryHours")) : 24
 
+  const router = useRouter()
   const [emailSent, setEmailSent] = useState(false)
   const [sendingEmail, setSendingEmail] = useState(false)
+  const [countdown, setCountdown] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!emailSent) return
+    setCountdown(3)
+    const interval = setInterval(() => {
+      setCountdown(prev => (prev !== null && prev > 0 ? prev - 1 : 0))
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [emailSent])
+
+  useEffect(() => {
+    if (countdown === 0) router.push("/conference")
+  }, [countdown, router])
 
   // Safety — if there's no rid just send to register
   if (!rid || !email) {
@@ -156,6 +171,11 @@ function PaymentOptionsContent() {
                   ? `A payment link has been sent to ${email}. Use it within ${expiryHours}h.`
                   : `We'll send a payment link to ${email}. You have ${expiryHours} hours to complete it.`}
               </p>
+              {emailSent && countdown !== null && countdown > 0 && (
+                <p className="mt-1.5 text-xs font-medium text-green-600 animate-pulse">
+                  Redirecting to conference page in {countdown}s…
+                </p>
+              )}
             </div>
             {!emailSent && (
               <ArrowRight className="size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />

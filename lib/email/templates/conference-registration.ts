@@ -68,9 +68,13 @@ export function ConferenceRegistrationTemplate(props: ConferenceRegistrationTemp
                   <tr>
                     <td style="background:linear-gradient(135deg,#3FABDE 0%,#0B5F8A 100%);padding:48px 40px;text-align:center;">
                       <!-- Check circle -->
-                      <div style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;background:rgba(255,255,255,0.2);border-radius:50%;margin-bottom:20px;">
-                        <span style="font-size:36px;">✓</span>
-                      </div>
+                      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 20px;">
+                        <tr>
+                          <td style="width:72px;height:72px;background:rgba(255,255,255,0.2);border-radius:50%;text-align:center;vertical-align:middle;">
+                            <span style="font-size:36px;color:#fff;line-height:1;">✓</span>
+                          </td>
+                        </tr>
+                      </table>
                       <h1 style="margin:0 0 8px;color:#fff;font-size:28px;font-weight:800;line-height:1.2;">
                         You're On the List, ${safeFirstName}!
                       </h1>
