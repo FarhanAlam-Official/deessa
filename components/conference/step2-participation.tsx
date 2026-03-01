@@ -54,34 +54,37 @@ export function Step2Participation({ data, onChange, onNext, onBack }: Step2Prop
 
       {/* Role */}
       <div className="flex flex-col gap-3">
-        <label className="text-xs font-bold uppercase tracking-wider text-foreground">
-          Your Role <span className="text-red-500">*</span>
+        <label htmlFor="role-select" className="block text-sm font-medium text-foreground mb-2">
+          Your Role (required)
         </label>
         <select
+          id="role-select"
           required
           value={data.role}
           onChange={(e) => onChange({ role: e.target.value })}
-          className="h-14 w-full appearance-none rounded-xl border border-border bg-background px-4 text-base text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+          className="block w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
         >
-          <option value="">Select your role…</option>
-          {ROLES.map((r) => (
-            <option key={r.value} value={r.value}>
-              {r.label}
+          <option value="" disabled>
+            Select your role
+          </option>
+          {ROLES.map((role) => (
+            <option key={role.value} value={role.value}>
+              {role.label}
             </option>
           ))}
         </select>
       </div>
 
       {/* Attendance Mode */}
-      <div className="flex flex-col gap-3">
-        <label className="text-xs font-bold uppercase tracking-wider text-foreground">
+      <fieldset className="flex flex-col gap-3" aria-required="true">
+        <legend className="text-xs font-bold uppercase tracking-wider text-foreground mb-2">
           Attendance Mode <span className="text-red-500">*</span>
-        </label>
+        </legend>
         <div className="grid grid-cols-2 gap-4">
-          {[
+          {([
             { value: "in-person", label: "In-Person", sub: "Chicago, IL — Oct 15–17", icon: "🏛️" },
             { value: "online", label: "Online", sub: "Live-streamed sessions", icon: "💻" },
-          ].map((mode) => (
+          ]).map((mode) => (
             <label
               key={mode.value}
               className={`flex cursor-pointer flex-col gap-2 rounded-xl border-2 p-4 transition-all ${
@@ -105,7 +108,7 @@ export function Step2Participation({ data, onChange, onNext, onBack }: Step2Prop
             </label>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       {/* Workshops */}
       <div className="flex flex-col gap-3">
@@ -124,6 +127,7 @@ export function Step2Participation({ data, onChange, onNext, onBack }: Step2Prop
                 key={ws}
                 type="button"
                 disabled={maxReached}
+                aria-pressed={selected}
                 onClick={() => toggleWorkshop(ws)}
                 className={`rounded-full border px-4 py-2 text-sm font-medium transition-all ${
                   selected
