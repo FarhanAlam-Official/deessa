@@ -133,7 +133,7 @@ export async function GET(request: Request) {
           status,
           transactionUuid: maskSensitiveData(transaction_uuid),
         }, "warn")
-        await supabase.from("conference_registrations").update({ payment_status: "failed" }).eq("id", reg.id)
+        await supabase.from("conference_registrations").update({ payment_status: "failed", payment_failed_at: new Date().toISOString() }).eq("id", reg.id)
         return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&status=failed`, url.origin))
       }
       if (reg.payment_status === "paid") {
@@ -146,7 +146,7 @@ export async function GET(request: Request) {
       const av = verifyAmountMatch(expectedAmt, actualAmt, "NPR", 0.01)
       if (!av.valid) {
         await supabase.from("conference_registrations")
-          .update({ payment_status: "review", esewa_transaction_uuid: transaction_uuid })
+          .update({ payment_status: "review", esewa_transaction_uuid: transaction_uuid, payment_review_at: new Date().toISOString() })
           .eq("id", reg.id)
         return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&status=review`, url.origin))
       }
@@ -167,7 +167,7 @@ export async function GET(request: Request) {
           }, "error")
           await supabase
             .from("conference_registrations")
-            .update({ payment_status: "failed" })
+            .update({ payment_status: "failed", payment_failed_at: new Date().toISOString() })
             .eq("id", reg.id)
           return NextResponse.redirect(
             new URL(`/conference/register/payment-success?rid=${reg.id}&status=failed`, url.origin),
@@ -183,6 +183,8 @@ export async function GET(request: Request) {
           payment_provider: "esewa",
           payment_id: `esewa:${transaction_uuid}`,
           provider_ref: transaction_uuid,
+          payment_paid_at: new Date().toISOString(),
+          confirmed_at: new Date().toISOString(),
         })
         .eq("id", reg.id)
 
@@ -204,7 +206,14 @@ export async function GET(request: Request) {
         attendanceMode: reg.attendance_mode || "",
         role: reg.role || undefined,
         workshops: reg.workshops || undefined,
-      }).catch((e) => console.error("Non-fatal: eSewa conference confirmation email:", e))
+      })
+        .then((r) => {
+          if (r.success)
+            supabase.from("conference_registrations")
+              .update({ last_confirmation_email_sent_at: new Date().toISOString() })
+              .eq("id", reg.id).then(() => {})
+        })
+        .catch((e) => console.error("Non-fatal: eSewa conference confirmation email:", e))
 
       return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&paid=1`, url.origin))
     }

@@ -93,6 +93,8 @@ export async function POST(request: Request) {
             payment_provider: "khalti",
             payment_id: `khalti:${pidx}`,
             provider_ref: pidx,
+            payment_paid_at: new Date().toISOString(),
+            confirmed_at: new Date().toISOString(),
           }).eq("id", reg.id)
 
           if (updateError) {
@@ -111,7 +113,14 @@ export async function POST(request: Request) {
             attendanceMode: reg.attendance_mode || "",
             role: reg.role || undefined,
             workshops: reg.workshops || undefined,
-          }).catch((e) => console.error("Non-fatal: Khalti conference confirmation email:", e))
+          })
+            .then((r) => {
+              if (r.success)
+                supabase.from("conference_registrations")
+                  .update({ last_confirmation_email_sent_at: new Date().toISOString() })
+                  .eq("id", reg.id).then(() => {})
+            })
+            .catch((e) => console.error("Non-fatal: Khalti conference confirmation email:", e))
           return NextResponse.json({ ok: true, status: "paid", mock: true }, { status: 200 })
         }
 
@@ -165,7 +174,7 @@ export async function POST(request: Request) {
           case "Partially Refunded": {
             const { error: refundErr } = await supabase
               .from("conference_registrations")
-              .update({ payment_status: "failed", payment_provider: "khalti", provider_ref: pidx })
+              .update({ payment_status: "failed", payment_failed_at: new Date().toISOString(), payment_provider: "khalti", provider_ref: pidx })
               .eq("id", reg.id)
             if (refundErr) {
               logPaymentEvent("Khalti verify (conference) - refund update failed", {
@@ -186,7 +195,7 @@ export async function POST(request: Request) {
           case "User canceled": {
             const { error: cancelErr } = await supabase
               .from("conference_registrations")
-              .update({ payment_status: "failed", payment_provider: "khalti", provider_ref: pidx })
+              .update({ payment_status: "failed", payment_failed_at: new Date().toISOString(), payment_provider: "khalti", provider_ref: pidx })
               .eq("id", reg.id)
             if (cancelErr) {
               logPaymentEvent("Khalti verify (conference) - cancel/expire update failed", {
@@ -218,7 +227,7 @@ export async function POST(request: Request) {
         const amountCheck = verifyAmountMatch(expectedPaisa, lookupData.total_amount, "NPR", 1)
         if (!amountCheck.valid) {
           const { error: reviewErr } = await supabase.from("conference_registrations")
-            .update({ payment_status: "review", payment_provider: "khalti", provider_ref: pidx })
+            .update({ payment_status: "review", payment_review_at: new Date().toISOString(), payment_provider: "khalti", provider_ref: pidx })
             .eq("id", reg.id)
           
           if (reviewErr) {
@@ -240,6 +249,8 @@ export async function POST(request: Request) {
           payment_provider: "khalti",
           payment_id: `khalti:${pidx}`,
           provider_ref: pidx,
+          payment_paid_at: new Date().toISOString(),
+          confirmed_at: new Date().toISOString(),
         }).eq("id", reg.id)
 
         if (updateError) {
@@ -259,7 +270,14 @@ export async function POST(request: Request) {
           attendanceMode: reg.attendance_mode || "",
           role: reg.role || undefined,
           workshops: reg.workshops || undefined,
-        }).catch((e) => console.error("Non-fatal: Khalti conference confirmation email:", e))
+        })
+          .then((r) => {
+            if (r.success)
+              supabase.from("conference_registrations")
+                .update({ last_confirmation_email_sent_at: new Date().toISOString() })
+                .eq("id", reg.id).then(() => {})
+          })
+          .catch((e) => console.error("Non-fatal: Khalti conference confirmation email:", e))
 
         logPaymentEvent("Khalti verify (conference) - confirmed", { regId: reg.id })
         return NextResponse.json({ ok: true, status: "paid", khaltiStatus: lookupData.status }, { status: 200 })

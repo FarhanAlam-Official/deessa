@@ -92,7 +92,7 @@ export async function GET(request: Request) {
       // Mark as failed — awaited to guarantee completion in serverless environments
       const { error: regUpdateError } = await supabase
         .from("conference_registrations")
-        .update({ payment_status: "failed" })
+        .update({ payment_status: "failed", payment_failed_at: new Date().toISOString() })
         .eq("id", reg.id)
       if (regUpdateError) {
         logPaymentEvent("eSewa failure - conference registration update failed", {
