@@ -9,15 +9,15 @@ export const metadata = {
   title: "Conference Registrations | Admin",
 }
 
-function getInitials(name: string) {
-  return name
+function getInitials(name: string | null | undefined) {
+  return (name ?? "")
     .split(" ")
+    .filter(Boolean)
     .slice(0, 2)
     .map((n) => n[0])
     .join("")
     .toUpperCase()
 }
-
 const AVATAR_COLORS = [
   "bg-blue-100 text-blue-700",
   "bg-purple-100 text-purple-700",
@@ -27,9 +27,9 @@ const AVATAR_COLORS = [
   "bg-pink-100 text-pink-700",
 ]
 
-function avatarColor(name: string) {
+function avatarColor(name: string | null | undefined) {
   let hash = 0
-  for (const c of name) hash = (hash + c.charCodeAt(0)) % AVATAR_COLORS.length
+  for (const c of (name ?? "")) hash = (hash + c.charCodeAt(0)) % AVATAR_COLORS.length
   return AVATAR_COLORS[hash]
 }
 
@@ -58,7 +58,29 @@ function PaymentBadge({ status }: { status?: string | null }) {
 }
 
 export default async function ConferenceAdminPage() {
-  const registrations = await getConferenceRegistrations()
+  let registrations
+  try {
+    registrations = await getConferenceRegistrations()
+  } catch (err) {
+    // Log full error for debugging (server-side)
+    console.error("Failed to load conference registrations:", err)
+    const fetchError = "An unexpected error occurred. Please try again or contact support."
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Conference Registrations</h1>
+          <p className="text-sm text-muted-foreground">
+            DEESSA National Conference 2026 — Oct 15–17
+          </p>
+        </div>
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-6 text-center text-red-700">
+            <p className="font-semibold">Failed to load registrations</p>
+            <p className="mt-2 text-sm">{fetchError}</p>          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   const total = registrations.length
   const inPerson = registrations.filter((r) => r.attendance_mode === "in-person").length
@@ -187,7 +209,7 @@ export default async function ConferenceAdminPage() {
               <TableBody>
                 {registrations.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-16 text-center text-muted-foreground">
+                    <TableCell colSpan={7} className="py-16 text-center text-muted-foreground">
                       <div className="flex flex-col items-center gap-2">
                         <Users className="size-10 text-muted-foreground/40" />
                         <p className="font-medium">No registrations yet</p>
