@@ -33,33 +33,33 @@ This document covers all files that directly or indirectly affect the Conference
 
 This documentation serves multiple audiences:
 
-| Audience | Use Case |
-|---|---|
-| **New Developers** | Onboarding and understanding system architecture |
-| **Code Reviewers** | Conducting security and quality audits |
-| **System Architects** | Evaluating scalability and integration patterns |
-| **DevOps Engineers** | Understanding deployment and operational requirements |
-| **QA Engineers** | Designing test scenarios and edge case validation |
-| **Product Owners** | Understanding technical constraints and capabilities |
+| Audience              | Use Case                                              |
+| --------------------- | ----------------------------------------------------- |
+| **New Developers**    | Onboarding and understanding system architecture      |
+| **Code Reviewers**    | Conducting security and quality audits                |
+| **System Architects** | Evaluating scalability and integration patterns       |
+| **DevOps Engineers**  | Understanding deployment and operational requirements |
+| **QA Engineers**      | Designing test scenarios and edge case validation     |
+| **Product Owners**    | Understanding technical constraints and capabilities  |
 
 ### 1.3 Documentation Structure
 
 This documentation set is divided into 12 files:
 
-| File | Focus | Audience |
-|---|---|---|
-| `00-executive-summary.md` | Non-technical overview | Directors, program managers, stakeholders |
-| `01-overview.md` | **This file** - Technical scope and stack | All technical readers |
-| `02-architecture.md` | System topology, components, data flow | Architects, senior developers |
-| `03-database-schema.md` | Tables, relationships, indexes, migrations | Backend developers, DBAs |
-| `04-page-documentation.md` | Frontend pages and components | Frontend developers |
-| `05-api-documentation.md` | API endpoints, request/response specs | Backend developers, integrators |
-| `06-payment-flows.md` | Payment state machines and provider integration | Payment engineers, QA |
-| `07-admin-documentation.md` | Admin interface and workflows | Full-stack developers, support staff |
-| `08-security.md` | Authentication, authorization, data protection | Security engineers, auditors |
-| `09-deployment-operations.md` | Environment variables, deployment, runbooks | DevOps, SRE, operations |
-| `10-improvements-risks.md` | Known limitations, technical debt, roadmap | Product managers, architects |
-| `11-appendix.md` | File inventory, glossary, changelog | All audiences |
+| File                          | Focus                                           | Audience                                  |
+| ----------------------------- | ----------------------------------------------- | ----------------------------------------- |
+| `00-executive-summary.md`     | Non-technical overview                          | Directors, program managers, stakeholders |
+| `01-overview.md`              | **This file** - Technical scope and stack       | All technical readers                     |
+| `02-architecture.md`          | System topology, components, data flow          | Architects, senior developers             |
+| `03-database-schema.md`       | Tables, relationships, indexes, migrations      | Backend developers, DBAs                  |
+| `04-page-documentation.md`    | Frontend pages and components                   | Frontend developers                       |
+| `05-api-documentation.md`     | API endpoints, request/response specs           | Backend developers, integrators           |
+| `06-payment-flows.md`         | Payment state machines and provider integration | Payment engineers, QA                     |
+| `07-admin-documentation.md`   | Admin interface and workflows                   | Full-stack developers, support staff      |
+| `08-security.md`              | Authentication, authorization, data protection  | Security engineers, auditors              |
+| `09-deployment-operations.md` | Environment variables, deployment, runbooks     | DevOps, SRE, operations                   |
+| `10-improvements-risks.md`    | Known limitations, technical debt, roadmap      | Product managers, architects              |
+| `11-appendix.md`              | File inventory, glossary, changelog             | All audiences                             |
 
 ---
 
@@ -67,30 +67,30 @@ This documentation set is divided into 12 files:
 
 ### 2.1 Core Framework
 
-| Layer | Technology | Version | Rationale |
-|---|---|---|---|
-| **Framework** | Next.js | 14 (App Router) | Modern React framework with SSR, API routes, and optimal bundling |
-| **Language** | TypeScript | 5.x | Type safety, improved IDE support, reduced runtime errors |
-| **Runtime** | Node.js | 18+ | Long-term support, serverless compatibility |
-| **Package Manager** | pnpm | Latest | Faster installs, efficient disk usage, strict dependencies |
+| Layer               | Technology | Version         | Rationale                                                         |
+| ------------------- | ---------- | --------------- | ----------------------------------------------------------------- |
+| **Framework**       | Next.js    | 14 (App Router) | Modern React framework with SSR, API routes, and optimal bundling |
+| **Language**        | TypeScript | 5.x             | Type safety, improved IDE support, reduced runtime errors         |
+| **Runtime**         | Node.js    | 18+             | Long-term support, serverless compatibility                       |
+| **Package Manager** | pnpm       | Latest          | Faster installs, efficient disk usage, strict dependencies        |
 
 ### 2.2 Backend Services
 
-| Service | Technology | Purpose |
-|---|---|---|
-| **Database** | Supabase (PostgreSQL 15) | Primary data store with real-time capabilities |
-| **Authentication** | Supabase Auth | Admin authentication (public pages unauthenticated) |
-| **Email** | Nodemailer + Gmail SMTP | Transactional email delivery |
-| **Cron Scheduling** | Vercel Cron Jobs | Time-based task automation |
-| **File Storage** | Supabase Storage | Future-ready for PDF receipts, attachments |
+| Service             | Technology               | Purpose                                             |
+| ------------------- | ------------------------ | --------------------------------------------------- |
+| **Database**        | Supabase (PostgreSQL 15) | Primary data store with real-time capabilities      |
+| **Authentication**  | Supabase Auth            | Admin authentication (public pages unauthenticated) |
+| **Email**           | Nodemailer + Gmail SMTP  | Transactional email delivery                        |
+| **Cron Scheduling** | Vercel Cron Jobs         | Time-based task automation                          |
+| **File Storage**    | Supabase Storage         | Future-ready for PDF receipts, attachments          |
 
 ### 2.3 Payment Providers
 
-| Provider | Region | Currency | Use Case |
-|---|---|---|---|
+| Provider   | Region | Currency                     | Use Case                                          |
+| ---------- | ------ | ---------------------------- | ------------------------------------------------- |
 | **Stripe** | Global | USD, EUR, NPR (configurable) | International credit/debit cards, digital wallets |
-| **Khalti** | Nepal | NPR only | Nepali banks, mobile wallets, local cards |
-| **eSewa** | Nepal | NPR only | Nepali digital wallet (very popular domestically) |
+| **Khalti** | Nepal  | NPR only                     | Nepali banks, mobile wallets, local cards         |
+| **eSewa**  | Nepal  | NPR only                     | Nepali digital wallet (very popular domestically) |
 
 **Key Characteristics:**
 
@@ -100,23 +100,23 @@ This documentation set is divided into 12 files:
 
 ### 2.4 Frontend
 
-| Layer | Technology | Rationale |
-|---|---|---|
-| **UI Library** | React 18 | Virtual DOM, component reusability, ecosystem |
-| **Styling** | Tailwind CSS | Utility-first, small bundle size, consistency |
-| **UI Components** | Shadcn/ui | Accessible, customizable, Radix UI primitives |
-| **Forms** | React Hook Form | Performance, minimal re-renders, built-in validation |
+| Layer                | Technology               | Rationale                                                 |
+| -------------------- | ------------------------ | --------------------------------------------------------- |
+| **UI Library**       | React 18                 | Virtual DOM, component reusability, ecosystem             |
+| **Styling**          | Tailwind CSS             | Utility-first, small bundle size, consistency             |
+| **UI Components**    | Shadcn/ui                | Accessible, customizable, Radix UI primitives             |
+| **Forms**            | React Hook Form          | Performance, minimal re-renders, built-in validation      |
 | **State Management** | React Context + useState | Sufficient for form wizard state (no global state needed) |
-| **Icons** | Lucide React | Consistent icon set, tree-shakeable |
+| **Icons**            | Lucide React             | Consistent icon set, tree-shakeable                       |
 
 ### 2.5 Hosting & Infrastructure
 
-| Component | Provider | Tier | Key Features |
-|---|---|---|---|
-| **Application Hosting** | Vercel | Pro (recommended) | Edge network, auto-scaling, zero-config deployment |
-| **Database Hosting** | Supabase | Pro (recommended) | Automatic backups, point-in-time recovery, connection pooling |
-| **Email Relay** | Gmail SMTP | Google Workspace | 2000 emails/day limit, enterprise-grade delivery |
-| **Domain & SSL** | Vercel | Included | Automatic SSL, custom domain support |
+| Component               | Provider   | Tier              | Key Features                                                  |
+| ----------------------- | ---------- | ----------------- | ------------------------------------------------------------- |
+| **Application Hosting** | Vercel     | Pro (recommended) | Edge network, auto-scaling, zero-config deployment            |
+| **Database Hosting**    | Supabase   | Pro (recommended) | Automatic backups, point-in-time recovery, connection pooling |
+| **Email Relay**         | Gmail SMTP | Google Workspace  | 2000 emails/day limit, enterprise-grade delivery              |
+| **Domain & SSL**        | Vercel     | Included          | Automatic SSL, custom domain support                          |
 
 **Cost Profile:**
 
@@ -129,33 +129,33 @@ This documentation set is divided into 12 files:
 
 ### 3.1 Public Features (No Authentication Required)
 
-| Feature | Description | Entry Point |
-|---|---|---|
-| **Conference Landing Page** | Marketing page with dynamic content from DB | `/conference` |
-| **Registration Form** | 4-step wizard collecting attendee data | `/conference/register` |
-| **Payment Options** | Pay Now vs. Pay Later decision page | `/conference/register/payment-options` |
-| **Payment Processing** | Multi-gateway payment initiation | `/conference/register/pending-payment` |
-| **Payment Verification** | Post-payment status confirmation | `/conference/register/payment-success` |
-| **Success Confirmation** | Registration complete (free events) | `/conference/register/success` |
+| Feature                     | Description                                 | Entry Point                            |
+| --------------------------- | ------------------------------------------- | -------------------------------------- |
+| **Conference Landing Page** | Marketing page with dynamic content from DB | `/conference`                          |
+| **Registration Form**       | 4-step wizard collecting attendee data      | `/conference/register`                 |
+| **Payment Options**         | Pay Now vs. Pay Later decision page         | `/conference/register/payment-options` |
+| **Payment Processing**      | Multi-gateway payment initiation            | `/conference/register/pending-payment` |
+| **Payment Verification**    | Post-payment status confirmation            | `/conference/register/payment-success` |
+| **Success Confirmation**    | Registration complete (free events)         | `/conference/register/success`         |
 
 ### 3.2 Admin Features (Authentication Required)
 
-| Feature | Description | Entry Point |
-|---|---|---|
-| **Registration Dashboard** | Statistics and full registration list | `/admin/conference` |
-| **Registration Detail** | Full PII view + admin actions | `/admin/conference/[id]` |
-| **Conference Settings** | Configure event details, pricing, emails | `/admin/conference/settings` |
-| **CSV Export** | Download all registration data | `/api/admin/conference/export` |
+| Feature                    | Description                              | Entry Point                    |
+| -------------------------- | ---------------------------------------- | ------------------------------ |
+| **Registration Dashboard** | Statistics and full registration list    | `/admin/conference`            |
+| **Registration Detail**    | Full PII view + admin actions            | `/admin/conference/[id]`       |
+| **Conference Settings**    | Configure event details, pricing, emails | `/admin/conference/settings`   |
+| **CSV Export**             | Download all registration data           | `/api/admin/conference/export` |
 
 ### 3.3 Automated Processes
 
-| Process | Trigger | Implementation |
-|---|---|---|
-| **Registration Email** | On form submit | Inline function call in server action |
-| **Payment Link Email** | On pending_payment creation | Inline function call in server action |
-| **Confirmation Email** | On payment verified OR admin confirm | Inline function call after status update |
-| **Cancellation Email** | On admin cancel | Inline function call in cancel action |
-| **Expiry Cron** | Hourly (Vercel Cron) | `GET /api/cron/expire-conference-registrations` |
+| Process                | Trigger                              | Implementation                                  |
+| ---------------------- | ------------------------------------ | ----------------------------------------------- |
+| **Registration Email** | On form submit                       | Inline function call in server action           |
+| **Payment Link Email** | On pending_payment creation          | Inline function call in server action           |
+| **Confirmation Email** | On payment verified OR admin confirm | Inline function call after status update        |
+| **Cancellation Email** | On admin cancel                      | Inline function call in cancel action           |
+| **Expiry Cron**        | Hourly (Vercel Cron)                 | `GET /api/cron/expire-conference-registrations` |
 
 ---
 
@@ -180,19 +180,19 @@ This documentation set is divided into 12 files:
 
 ### 4.2 Rendering Strategy
 
-| Page Type | Rendering Mode | Rationale |
-|---|---|---|
-| Conference landing page | Server-Side Rendering (SSR) | SEO-critical, content changes frequently |
-| Registration form | Client-Side Rendering (CSR) | Interactive wizard with complex state |
-| Admin pages | Server-Side Rendering (SSR) | Real-time data, no client-side caching needed |
-| Payment pages | Client-Side Rendering (CSR) | External redirects, polling logic |
+| Page Type               | Rendering Mode              | Rationale                                     |
+| ----------------------- | --------------------------- | --------------------------------------------- |
+| Conference landing page | Server-Side Rendering (SSR) | SEO-critical, content changes frequently      |
+| Registration form       | Client-Side Rendering (CSR) | Interactive wizard with complex state         |
+| Admin pages             | Server-Side Rendering (SSR) | Real-time data, no client-side caching needed |
+| Payment pages           | Client-Side Rendering (CSR) | External redirects, polling logic             |
 
 ### 4.3 Data Access Pattern
 
 **Server Actions** (preferred for mutations):
 
 ```typescript
-'use server'
+"use server";
 export async function registerForConference(data: FormData) {
   // Direct DB access, no API route needed
 }
@@ -212,13 +212,13 @@ export async function registerForConference(data: FormData) {
 
 ### 4.4 Security Model
 
-| Layer | Mechanism |
-|---|---|
-| **Admin Access** | Supabase Auth session (cookie-based, server-side verified) |
-| **Public API Endpoints** | Dual-key verification (registrationId + email) |
-| **Database** | Row-Level Security (RLS) policies + service-role bypass where needed |
-| **Payment Webhooks** | HMAC signature verification (provider-specific) |
-| **Cron Endpoints** | Bearer token (`CRON_SECRET`) |
+| Layer                    | Mechanism                                                            |
+| ------------------------ | -------------------------------------------------------------------- |
+| **Admin Access**         | Supabase Auth session (cookie-based, server-side verified)           |
+| **Public API Endpoints** | Dual-key verification (registrationId + email)                       |
+| **Database**             | Row-Level Security (RLS) policies + service-role bypass where needed |
+| **Payment Webhooks**     | HMAC signature verification (provider-specific)                      |
+| **Cron Endpoints**       | Bearer token (`CRON_SECRET`)                                         |
 
 **Note**: Public conference pages are **intentionally unauthenticated** - registrants do not create user accounts. Identity is managed via registration ID + email pairs.
 
@@ -243,8 +243,10 @@ Auth: GOOGLE_EMAIL + GOOGLE_EMAIL_APP_PASSWORD
 **Failure Handling**:
 
 - Email sends are **non-blocking** (`.catch()` used)
-- Email failures logged but never crash registration workflow
-- Admins can manually resend emails via dashboard
+- Email failures are logged to the application logs (server console and Vercel dashboard); no centralized log sink (e.g., ELK) is currently configured
+- Monitoring/alerting for email failures is planned but not yet implemented; no integration with PagerDuty, CloudWatch, or Sentry as of February 2026
+- When email failures are detected (via logs or admin report), admins should manually resend emails using the dashboard's "Resend" button on the affected registration; no automated notification is sent to admins, so regular log review is recommended
+- SLA: Admins are expected to review logs and address email failures within 24 hours during active registration periods
 
 **Rate Limits**:
 
@@ -403,13 +405,13 @@ Vercel Cron triggers hourly
 
 ### 7.1 Expected Load Profile
 
-| Metric | Typical Conference | Large Conference |
-|---|---|---|
-| **Total Registrations** | 100-300 | 500-1000 |
+| Metric                       | Typical Conference       | Large Conference  |
+| ---------------------------- | ------------------------ | ----------------- |
+| **Total Registrations**      | 100-300                  | 500-1000          |
 | **Peak Registration Period** | 2-3 days before deadline | Week before event |
-| **Peak Requests/Hour** | ~50-100 | ~200-500 |
-| **Database Queries/Request** | 2-5 | 2-5 (same) |
-| **Email Volume** | 300-900 total | 1500-3000 total |
+| **Peak Requests/Hour**       | ~50-100                  | ~200-500          |
+| **Database Queries/Request** | 2-5                      | 2-5 (same)        |
+| **Email Volume**             | 300-900 total            | 1500-3000 total   |
 
 **Bottleneck Analysis**:
 
@@ -419,11 +421,11 @@ Vercel Cron triggers hourly
 
 ### 7.2 Caching Strategy
 
-| Data | Cache Level | Invalidation |
-|---|---|---|
-| **Conference Settings** | Server-side (no cache) | N/A (read on every request) |
-| **Admin Registration List** | None | Real-time data shown |
-| **Public Landing Page** | Browser cache (5 minutes) | Manual revalidation on settings update |
+| Data                        | Cache Level               | Invalidation                           |
+| --------------------------- | ------------------------- | -------------------------------------- |
+| **Conference Settings**     | Server-side (no cache)    | N/A (read on every request)            |
+| **Admin Registration List** | None                      | Real-time data shown                   |
+| **Public Landing Page**     | Browser cache (5 minutes) | Manual revalidation on settings update |
 
 **Opportunities**:
 
@@ -488,6 +490,8 @@ Vercel Cron triggers hourly
 ---
 
 ## 9. Monitoring & Observability
+
+> These are recommendations; monitoring is not yet implemented as of February 2026. Metrics, logging, and error tracking are planned for future releases. See Section 10: Improvements & Risks for implementation roadmap.
 
 ### 9.1 Recommended Metrics
 
@@ -650,14 +654,14 @@ Fixes #123
 
 ### 11.1 Critical Dependencies
 
-| Package | Version | Purpose | Risk Level |
-|---|---|---|---|
-| `next` | ^14.0.0 | Framework core | Low (stable) |
-| `@supabase/supabase-js` | ^2.39.0 | Database client | Low (stable) |
-| `stripe` | ^14.0.0 | Payment processing | Low (stable, versioned API) |
-| `nodemailer` | ^6.9.0 | Email sending | Low (mature) |
-| `react-hook-form` | ^7.49.0 | Form management | Low (stable) |
-| `zod` | ^3.22.0 | Input validation | Low (stable) |
+| Package                 | Version | Purpose            | Risk Level                  |
+| ----------------------- | ------- | ------------------ | --------------------------- |
+| `next`                  | ^14.0.0 | Framework core     | Low (stable)                |
+| `@supabase/supabase-js` | ^2.39.0 | Database client    | Low (stable)                |
+| `stripe`                | ^14.0.0 | Payment processing | Low (stable, versioned API) |
+| `nodemailer`            | ^6.9.0  | Email sending      | Low (mature)                |
+| `react-hook-form`       | ^7.49.0 | Form management    | Low (stable)                |
+| `zod`                   | ^3.22.0 | Input validation   | Low (stable)                |
 
 ### 11.2 Update Strategy
 
@@ -678,10 +682,10 @@ Fixes #123
 
 ## 12. Version History
 
-| Version | Date | Changes | Migration Required |
-|---|---|---|---|
-| 1.0.0 | Feb 2026 | Initial production release | Database setup (see migration files) |
-| - | - | (Future versions listed here) | - |
+| Version | Date     | Changes                       | Migration Required                   |
+| ------- | -------- | ----------------------------- | ------------------------------------ |
+| 1.0.0   | Feb 2026 | Initial production release    | Database setup (see migration files) |
+| -       | -        | (Future versions listed here) | -                                    |
 
 ---
 

@@ -1,11 +1,9 @@
-"use server"
-
 import { NextResponse } from "next/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
 
 /**
  * Public status-polling endpoint for the payment-success page.
- * Only returns safe public fields (no full PII).
+ * Returns registration status and full name for payment confirmation display.
  * Accessed by rid only — used after the payment redirect.
  */
 export async function GET(request: Request) {

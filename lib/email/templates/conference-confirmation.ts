@@ -13,14 +13,23 @@ interface ConferenceConfirmationTemplateProps {
 
 export function ConferenceConfirmationTemplate(props: ConferenceConfirmationTemplateProps): string {
   const { fullName, registrationId, attendanceMode, role, workshops } = props
+
+  // Escape all user-supplied values before interpolating into HTML
+  const escapeHtml = (str: string): string =>
+    str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;")
+
   const shortId = `DEESSA-2026-${registrationId.slice(0, 6).toUpperCase()}`
-  const firstName = fullName.split(" ")[0]
-  const workshopList = workshops?.length ? workshops.join(", ") : "None selected"
+  const firstName = escapeHtml(fullName.split(" ")[0])
+  const safeFullName = escapeHtml(fullName)
+  const safeRole = escapeHtml(role ?? "")
+  const safeAttendanceMode = escapeHtml(attendanceMode ?? "")
+  const workshopList = workshops?.length ? workshops.map(escapeHtml).join(", ") : "None selected"
   const isInPerson = attendanceMode === "in-person"
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deessafoundation.org.np"
 
   // Google Calendar link
   const gcalTitle = encodeURIComponent("DEESSA National Conference 2026")
-  const gcalDates = "20261015/20261018" // Oct 15–17
+  const gcalDates = encodeURIComponent("20261015T000000Z/20261018T000000Z") // Oct 15–17 (end exclusive)
   const gcalDetails = encodeURIComponent(`Your registration: ${shortId}`)
   const gcalLocation = encodeURIComponent("Hyatt Regency, Kathmandu, Nepal")
   const gcalLink = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${gcalTitle}&dates=${gcalDates}&details=${gcalDetails}&location=${gcalLocation}`
@@ -55,6 +64,7 @@ export function ConferenceConfirmationTemplate(props: ConferenceConfirmationTemp
           <!-- Main Card -->
           <tr>
             <td style="background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.07);">
+              <table width="100%" cellpadding="0" cellspacing="0">
 
               <!-- Celebration Header -->
               <tr>
@@ -111,15 +121,15 @@ export function ConferenceConfirmationTemplate(props: ConferenceConfirmationTemp
                             <td style="font-size:11px;color:#64748B;font-weight:600;text-transform:uppercase;padding-bottom:4px;width:50%;">Mode</td>
                           </tr>
                           <tr>
-                            <td style="font-size:14px;font-weight:600;color:#0F172A;padding-bottom:12px;">${fullName}</td>
-                            <td style="font-size:14px;font-weight:600;color:#0F172A;padding-bottom:12px;text-transform:capitalize;">${attendanceMode || "—"}</td>
+                            <td style="font-size:14px;font-weight:600;color:#0F172A;padding-bottom:12px;">${safeFullName}</td>
+                            <td style="font-size:14px;font-weight:600;color:#0F172A;padding-bottom:12px;text-transform:capitalize;">${safeAttendanceMode || "—"}</td>
                           </tr>
                           <tr>
                             <td style="font-size:11px;color:#64748B;font-weight:600;text-transform:uppercase;padding-bottom:4px;">Role</td>
                             <td style="font-size:11px;color:#64748B;font-weight:600;text-transform:uppercase;padding-bottom:4px;">Workshop(s)</td>
                           </tr>
                           <tr>
-                            <td style="font-size:14px;font-weight:600;color:#0F172A;text-transform:capitalize;">${role || "Attendee"}</td>
+                            <td style="font-size:14px;font-weight:600;color:#0F172A;text-transform:capitalize;">${safeRole || "Attendee"}</td>
                             <td style="font-size:14px;font-weight:600;color:#0F172A;">${workshopList}</td>
                           </tr>
                         </table>
@@ -139,7 +149,7 @@ export function ConferenceConfirmationTemplate(props: ConferenceConfirmationTemp
                     </tr>
                     <tr>
                       <td align="center">
-                        <a href="${process.env.NEXT_PUBLIC_SITE_URL}/conference"
+                        <a href="${siteUrl}/conference"
                            style="display:inline-block;background:#F0F4F8;color:#0F172A;font-size:14px;font-weight:600;text-decoration:none;border-radius:12px;padding:12px 28px;">
                           View Conference Info
                         </a>
@@ -179,6 +189,8 @@ export function ConferenceConfirmationTemplate(props: ConferenceConfirmationTemp
                   </p>
                 </td>
               </tr>
+
+              </table>
             </td>
           </tr>
 
@@ -187,7 +199,7 @@ export function ConferenceConfirmationTemplate(props: ConferenceConfirmationTemp
             <td align="center" style="padding:28px 0;">
               <p style="margin:0 0 4px;font-size:12px;color:#94A3B8;">DEESSA Foundation — Empowering Communities Across Nepal</p>
               <p style="margin:0;font-size:11px;color:#CBD5E1;">
-                <a href="${process.env.NEXT_PUBLIC_SITE_URL}" style="color:#3FABDE;">deessafoundation.org.np</a>
+                <a href="${siteUrl}" style="color:#3FABDE;">deessafoundation.org.np</a>
               </p>
             </td>
           </tr>

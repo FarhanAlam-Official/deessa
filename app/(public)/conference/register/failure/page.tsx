@@ -1,5 +1,13 @@
 import Link from "next/link"
 
+function safeDecodeURIComponent(value: string): string {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
+}
+
 export const metadata = {
   title: "Registration Failed | DEESSA National Conference 2026",
 }
@@ -10,8 +18,8 @@ interface FailurePageProps {
 
 export default async function RegistrationFailurePage({ searchParams }: FailurePageProps) {
   const params = await searchParams
-  const reason = params.reason ? decodeURIComponent(params.reason) : null
-  const email = params.email ? decodeURIComponent(params.email) : null
+  const reason = params.reason ? safeDecodeURIComponent(params.reason) : null
+  const email = params.email ? safeDecodeURIComponent(params.email) : null
 
   return (
     <>

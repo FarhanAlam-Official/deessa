@@ -4,6 +4,15 @@
  * Theme: warm red-orange to clearly signal cancellation
  */
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
 interface ConferenceCancellationTemplateProps {
   fullName: string
   registrationId: string
@@ -11,8 +20,10 @@ interface ConferenceCancellationTemplateProps {
 
 export function ConferenceCancellationTemplate(props: ConferenceCancellationTemplateProps): string {
   const { fullName, registrationId } = props
-  const shortId = `DEESSA-2026-${registrationId.slice(0, 6).toUpperCase()}`
+  const shortId = escapeHtml(`DEESSA-2026-${registrationId.slice(0, 6).toUpperCase()}`)
   const firstName = fullName.split(" ")[0]
+  const safeFullName = escapeHtml(fullName)
+  const safeFirstName = escapeHtml(firstName)
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -61,7 +72,7 @@ export function ConferenceCancellationTemplate(props: ConferenceCancellationTemp
                     Registration Cancelled
                   </h1>
                   <p style="margin:0;color:rgba(255,255,255,0.92);font-size:15px;line-height:1.6;">
-                    Hi ${firstName}, your registration for the<br />
+                    Hi ${safeFirstName}, your registration for the<br />
                     <strong>DEESSA National Conference 2026</strong><br />
                     has been cancelled.
                   </p>
@@ -92,7 +103,7 @@ export function ConferenceCancellationTemplate(props: ConferenceCancellationTemp
                         Attendee
                       </td>
                       <td style="padding:14px 20px;font-size:14px;color:#1E293B;border-bottom:1px solid #FEE2E2;">
-                        ${fullName}
+                        ${safeFullName}
                       </td>
                     </tr>
                     <tr style="background:#FFF5F5;">
@@ -141,7 +152,7 @@ export function ConferenceCancellationTemplate(props: ConferenceCancellationTemp
                   </table>
 
                   <p style="margin:0;font-size:12px;color:#9CA3AF;line-height:1.7;text-align:center;">
-                    Questions? Email us at{" "}
+                    Questions? Email us at
                     <a href="mailto:conference@deessa.org.np" style="color:#DC2626;">conference@deessa.org.np</a>
                   </p>
                 </td>

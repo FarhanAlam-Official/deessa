@@ -69,13 +69,18 @@ export function ConferenceSettingsForm({ settings }: ConferenceSettingsFormProps
   const [payment, setPayment] = useState<{
     registrationFeeEnabled: boolean
     registrationFee: number
-    registrationFeeCurrency: "NPR" | "USD"
+    registrationFeeCurrency: "NPR" | "USD" | "EUR" | "GBP" | "INR"
     registrationFeeByMode: Record<string, number | null>
     registrationExpiryHours: number
   }>({
     registrationFeeEnabled: settings.registrationFeeEnabled ?? false,
     registrationFee: settings.registrationFee ?? 0,
-    registrationFeeCurrency: (settings.registrationFeeCurrency ?? "NPR") as "NPR" | "USD",
+    registrationFeeCurrency: (settings.registrationFeeCurrency ?? "NPR") as
+      | "NPR"
+      | "USD"
+      | "EUR"
+      | "GBP"
+      | "INR",
     registrationFeeByMode: (settings.registrationFeeByMode ?? {}) as Record<string, number | null>,
     registrationExpiryHours: settings.registrationExpiryHours ?? 24,
   })
@@ -102,7 +107,12 @@ export function ConferenceSettingsForm({ settings }: ConferenceSettingsFormProps
     const settingsToSave = {
       registrationFeeEnabled: payment.registrationFeeEnabled,
       registrationFee: Number.isFinite(payment.registrationFee) ? payment.registrationFee : 0,
-      registrationFeeCurrency: payment.registrationFeeCurrency as "NPR" | "USD",
+      registrationFeeCurrency: payment.registrationFeeCurrency as
+        | "NPR"
+        | "USD"
+        | "EUR"
+        | "GBP"
+        | "INR",
       registrationFeeByMode: cleanByMode,
       registrationExpiryHours: Number.isFinite(payment.registrationExpiryHours) ? payment.registrationExpiryHours : 24,
     }
@@ -132,7 +142,13 @@ export function ConferenceSettingsForm({ settings }: ConferenceSettingsFormProps
   const addAgendaItem = () => {
     setAgenda((prev) => [
       ...prev,
-      { time: "", title: "New Session", desc: "", active: false },
+      {
+        id: `agenda-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        time: "",
+        title: "New Session",
+        desc: "",
+        active: false,
+      },
     ])
   }
 
@@ -314,6 +330,13 @@ export function ConferenceSettingsForm({ settings }: ConferenceSettingsFormProps
             </div>
             <button
               onClick={() => setPayment((p) => ({ ...p, registrationFeeEnabled: !p.registrationFeeEnabled }))}
+              onKeyDown={(e) => {
+                if (e.key === " " || e.key === "Enter") {
+                  setPayment((p) => ({ ...p, registrationFeeEnabled: !p.registrationFeeEnabled }))
+                  if (e.key === " ") e.preventDefault()
+                }
+              }}
+              tabIndex={0}
               className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus:outline-none ${
                 payment.registrationFeeEnabled ? "bg-primary" : "bg-muted-foreground/30"
               }`}
@@ -334,7 +357,17 @@ export function ConferenceSettingsForm({ settings }: ConferenceSettingsFormProps
             <p className="mb-2 text-xs text-muted-foreground">All fees are charged in this currency.</p>
             <select
               value={payment.registrationFeeCurrency}
-              onChange={(e) => setPayment((p) => ({ ...p, registrationFeeCurrency: e.target.value as "NPR" | "USD" }))}
+              onChange={(e) =>
+                setPayment((p) => ({
+                  ...p,
+                  registrationFeeCurrency: e.target.value as
+                    | "NPR"
+                    | "USD"
+                    | "EUR"
+                    | "GBP"
+                    | "INR",
+                }))
+              }
               className="w-44 rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm text-foreground focus:border-primary focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
             >
               <option value="NPR">NPR — Nepali Rupee</option>
@@ -488,7 +521,7 @@ export function ConferenceSettingsForm({ settings }: ConferenceSettingsFormProps
           <div className="flex flex-col gap-3">
             {agenda.map((item, idx) => (
               <div
-                key={idx}
+                key={item.id}
                 className={`rounded-xl border p-4 transition-colors ${
                   item.active ? "border-primary/30 bg-primary/5" : "border-border bg-muted/20"
                 }`}

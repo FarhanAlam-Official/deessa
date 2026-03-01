@@ -80,36 +80,57 @@ export function ConferenceQuickActions({
   // ── Re-send emails ────────────────────────────────────────────────────────────
   const handleResendRegistration = async () => {
     setResending("registration")
-    const result = await resendConferenceRegistrationEmail(registrationId)
-    setResending(null)
-    result.success
-      ? notifications.showSuccess({ title: "Email re-sent ✓", description: `Registration email sent to ${email}.` })
-      : notifications.showError({ title: "Failed to send", description: result.error || "Something went wrong." })
+    try {
+      const result = await resendConferenceRegistrationEmail(registrationId)
+      if (result.success) {
+        notifications.showSuccess({ title: "Email re-sent ✓", description: `Registration email sent to ${email}.` })
+      } else {
+        notifications.showError({ title: "Failed to send", description: result.error || "Something went wrong." })
+      }
+    } catch (err: any) {
+      notifications.showError({ title: "Failed to send", description: err?.message || String(err) || "Something went wrong." })
+    } finally {
+      setResending(null)
+    }
   }
 
   const handleResendConfirmation = async () => {
     setResending("confirmation")
-    const result = await resendConferenceConfirmationEmail(registrationId)
-    setResending(null)
-    result.success
-      ? notifications.showSuccess({ title: "Email re-sent ✓", description: `Confirmation email sent to ${email}.` })
-      : notifications.showError({ title: "Failed to send", description: result.error || "Something went wrong." })
+    try {
+      const result = await resendConferenceConfirmationEmail(registrationId)
+      if (result.success) {
+        notifications.showSuccess({ title: "Email re-sent ✓", description: `Confirmation email sent to ${email}.` })
+      } else {
+        notifications.showError({ title: "Failed to send", description: result.error || "Something went wrong." })
+      }
+    } catch (err: any) {
+      notifications.showError({ title: "Failed to send", description: err?.message || String(err) || "Something went wrong." })
+    } finally {
+      setResending(null)
+    }
   }
 
   // ── Template send ─────────────────────────────────────────────────────────────
   const handleSendTemplate = async (type: TemplateType) => {
     setSendingTemplate(type)
-    const result = await sendTemplateConferenceEmail(registrationId, type)
-    setSendingTemplate(null)
-    const template = TEMPLATES.find((t) => t.type === type)!
-    result.success
-      ? notifications.showSuccess({
+    try {
+      const result = await sendTemplateConferenceEmail(registrationId, type)
+      const template = TEMPLATES.find((t) => t.type === type)!
+      if (result.success) {
+        notifications.showSuccess({
           title: `${template.label} sent ✓`,
           description: `Email sent to ${email}.`,
         })
-      : notifications.showError({ title: "Failed to send", description: result.error || "Something went wrong." })
+      } else {
+        notifications.showError({ title: "Failed to send", description: result.error || "Something went wrong." })
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err)
+      notifications.showError({ title: "Failed to send", description: message || "Something went wrong." })
+    } finally {
+      setSendingTemplate(null)
+    }
   }
-
   // ── Custom email ──────────────────────────────────────────────────────────────
   const handleSendCustom = async () => {
     if (!subject.trim() || !body.trim()) {
@@ -117,15 +138,20 @@ export function ConferenceQuickActions({
       return
     }
     setSending(true)
-    const result = await sendCustomConferenceEmail(registrationId, subject, body)
-    setSending(false)
-    if (result.success) {
-      notifications.showSuccess({ title: "Email sent ✓", description: `Custom email sent to ${email}.` })
-      setShowCompose(false)
-      setSubject("")
-      setBody("")
-    } else {
-      notifications.showError({ title: "Failed to send", description: result.error || "Something went wrong." })
+    try {
+      const result = await sendCustomConferenceEmail(registrationId, subject, body)
+      if (result.success) {
+        notifications.showSuccess({ title: "Email sent ✓", description: `Custom email sent to ${email}.` })
+        setShowCompose(false)
+        setSubject("")
+        setBody("")
+      } else {
+        notifications.showError({ title: "Failed to send", description: result.error || "Something went wrong." })
+      }
+    } catch (err: any) {
+      notifications.showError({ title: "Failed to send", description: err?.message || String(err) || "Something went wrong." })
+    } finally {
+      setSending(false)
     }
   }
 
@@ -240,7 +266,7 @@ export function ConferenceQuickActions({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <label htmlFor="compose-subject" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Message
               </label>
               <textarea

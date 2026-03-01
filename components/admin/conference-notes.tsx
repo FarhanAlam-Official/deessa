@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Save, StickyNote, Loader2 } from "lucide-react"
 import { notifications } from "@/lib/notifications"
 import { updateConferenceRegistrationNotes } from "@/lib/actions/conference-registration"
@@ -13,24 +13,39 @@ interface ConferenceNotesProps {
 
 export function ConferenceNotes({ registrationId, initialNotes }: ConferenceNotesProps) {
   const [notes, setNotes] = useState(initialNotes ?? "")
+  const [savedNotes, setSavedNotes] = useState(initialNotes ?? "")
   const [saving, setSaving] = useState(false)
 
-  const isDirty = notes !== (initialNotes ?? "")
+  // Update savedNotes when initialNotes prop changes
+  useEffect(() => {
+    setSavedNotes(initialNotes ?? "")
+  }, [initialNotes])
+
+  const isDirty = notes !== savedNotes
 
   const handleSave = async () => {
     setSaving(true)
-    const result = await updateConferenceRegistrationNotes(registrationId, notes)
-    setSaving(false)
-    if (result.success) {
-      notifications.showSuccess({
-        title: "Notes saved",
-        description: "Admin notes have been saved successfully.",
-      })
-    } else {
+    try {
+      const result = await updateConferenceRegistrationNotes(registrationId, notes)
+      if (result.success) {
+        setSavedNotes(notes) // Update savedNotes to current notes after successful save
+        notifications.showSuccess({
+          title: "Notes saved",
+          description: "Admin notes have been saved successfully.",
+        })
+      } else {
+        notifications.showError({
+          title: "Failed to save notes",
+          description: result.error || "Please try again.",
+        })
+      }
+    } catch (error) {
       notifications.showError({
         title: "Failed to save notes",
-        description: result.error || "Please try again.",
+        description: "An unexpected error occurred. Please try again.",
       })
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -40,6 +55,7 @@ export function ConferenceNotes({ registrationId, initialNotes }: ConferenceNote
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
         rows={5}
+        aria-label="Admin-notes"
         placeholder={`Add internal notes about this registrant…\ne.g. VIP guest, needs wheelchair access, speaker contact`}
         className="w-full resize-none rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
       />

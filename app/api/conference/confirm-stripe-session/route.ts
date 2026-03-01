@@ -1,5 +1,3 @@
-"use server"
-
 import { NextResponse } from "next/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { getPaymentMode } from "@/lib/payments/config"
@@ -59,7 +57,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, status: "confirmed", alreadyConfirmed: true })
     }
 
-    // Verify the sessionId belongs to this registration
+    // Early check: if session already stored, it must match
+    // (Full ownership verification happens after fetching Stripe session)
     if (reg.stripe_session_id && reg.stripe_session_id !== sessionId) {
       return NextResponse.json({ ok: false, error: "Session ID mismatch" }, { status: 403 })
     }
@@ -74,6 +73,19 @@ export async function POST(request: Request) {
     }
 
     const session = verification.session
+
+    // Ownership verification: if stripe_session_id not yet stored, verify via email
+    if (!reg.stripe_session_id) {
+      const sessionEmail = String(session.customer_email || "").toLowerCase().trim()
+      const regEmail = String(reg.email || "").toLowerCase().trim()
+
+      if (!sessionEmail || sessionEmail !== regEmail) {
+        return NextResponse.json(
+          { ok: false, error: "Session ownership verification failed" },
+          { status: 403 },
+        )
+      }
+    }
 
     // Only proceed if Stripe reports the session as paid
     if (session.payment_status !== "paid") {
@@ -97,19 +109,45 @@ export async function POST(request: Request) {
 
       if (expectedMinor !== actualMinor) {
         // Amount mismatch — flag for admin review
-        await supabase
+        const { error: reviewErr } = await supabase
           .from("conference_registrations")
           .update({ payment_status: "review", stripe_session_id: sessionId })
           .eq("id", rid)
+
+        if (reviewErr) {
+          console.error("confirm-stripe-session: Failed to flag for review", {
+            rid,
+            sessionId,
+            error: reviewErr,
+          })
+          return NextResponse.json(
+            { ok: false, error: "Failed to flag payment for review" },
+            { status: 500 },
+          )
+        }
+
         return NextResponse.json({ ok: true, status: "review" })
       }
 
       // Currency mismatch is non-fatal — sync DB to Stripe (from previous bug fix)
       if (regCurrency !== sessionCurrency) {
-        await supabase
+        const { error: currencyErr } = await supabase
           .from("conference_registrations")
           .update({ payment_currency: sessionCurrency.toUpperCase() })
           .eq("id", rid)
+
+        if (currencyErr) {
+          console.error("confirm-stripe-session: Failed to sync payment_currency", {
+            rid,
+            sessionId,
+            sessionCurrency,
+            error: currencyErr,
+          })
+          return NextResponse.json(
+            { ok: false, error: "Failed to update payment currency" },
+            { status: 500 },
+          )
+        }
       }
     }
 

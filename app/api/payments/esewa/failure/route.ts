@@ -56,21 +56,51 @@ export async function GET(request: Request) {
 
   if (searchError || !donation) {
     // ── Conference registration fallback ────────────────────────────────────
-    const { data: reg } = await supabase
+    const { data: reg, error: regError } = await supabase
       .from("conference_registrations")
       .select("id, payment_status, status")
       .eq("esewa_transaction_uuid", transaction_uuid)
       .single()
+
+    // Handle real database errors (not just "not found")
+    if (regError && regError.code !== "PGRST116") {
+      logPaymentEvent("eSewa failure - conference registration query failed", {
+        transactionUuid: maskSensitiveData(transaction_uuid),
+        error: regError,
+      }, "error")
+      return NextResponse.json(
+        { error: "Database error while checking registration" },
+        { status: 500 }
+      )
+    }
 
     if (reg) {
       // Idempotency: already confirmed is not a failure
       if (reg.payment_status === "paid") {
         return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&paid=1`, url.origin))
       }
-      // Mark as failed (non-blocking)
-      await supabase.from("conference_registrations")
+      // Idempotency: already failed — skip redundant DB write, redirect immediately
+      if (reg.payment_status === "failed") {
+        logPaymentEvent("eSewa failure - conference registration already failed", {
+          regId: reg.id,
+          transactionUuid: maskSensitiveData(transaction_uuid),
+        }, "warn")
+        return NextResponse.redirect(
+          new URL(`/conference/register/payment-success?rid=${reg.id}&status=failed${isMock ? "&mock=1" : ""}`, url.origin),
+        )
+      }
+      // Mark as failed — awaited to guarantee completion in serverless environments
+      const { error: regUpdateError } = await supabase
+        .from("conference_registrations")
         .update({ payment_status: "failed" })
         .eq("id", reg.id)
+      if (regUpdateError) {
+        logPaymentEvent("eSewa failure - conference registration update failed", {
+          regId: reg.id,
+          transactionUuid: maskSensitiveData(transaction_uuid),
+          error: regUpdateError,
+        }, "error")
+      }
 
       logPaymentEvent("eSewa failure - conference registration payment failed", {
         regId: reg.id,

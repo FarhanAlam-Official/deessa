@@ -1,5 +1,3 @@
-"use server"
-
 import { NextResponse } from "next/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
 

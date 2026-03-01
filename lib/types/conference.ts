@@ -60,7 +60,7 @@ export interface ConferenceRegistration {
   payment_override_by: string | null
 }
 
-/** Minimal shape returned by public verify-registration endpoint (no PII) */
+/** Minimal shape returned by public verify-registration endpoint (PII) */
 export interface ConferenceRegistrationPublic {
   id: string
   status: ConferenceRegistrationStatus

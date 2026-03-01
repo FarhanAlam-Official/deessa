@@ -1,5 +1,3 @@
-"use server"
-
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
@@ -83,16 +81,29 @@ export async function POST(request: Request) {
         if (reg.payment_status === "paid") {
           return NextResponse.json({ ok: true, status: "paid", message: "Already confirmed" }, { status: 200 })
         }
+        if (reg.payment_status === "failed") {
+          return NextResponse.json({ ok: false, status: "failed", message: "Payment previously failed" }, { status: 200 })
+        }
 
         // Mock mode — confirm immediately
         if (mode === "mock") {
-          await supabase.from("conference_registrations").update({
+          const { error: updateError } = await supabase.from("conference_registrations").update({
             status: "confirmed",
             payment_status: "paid",
             payment_provider: "khalti",
             payment_id: `khalti:${pidx}`,
             provider_ref: pidx,
           }).eq("id", reg.id)
+
+          if (updateError) {
+            logPaymentEvent("Khalti verify (conference mock) - update failed", {
+              regId: reg.id,
+              pidx: maskSensitiveData(pidx),
+              error: updateError,
+            }, "error")
+            return NextResponse.json({ ok: false, error: "Failed to update registration" }, { status: 500 })
+          }
+
           sendConferenceConfirmationEmail({
             fullName: reg.full_name,
             email: reg.email,
@@ -134,29 +145,112 @@ export async function POST(request: Request) {
           return NextResponse.json({ ok: false, error: lookupData.detail || "Khalti lookup failed" }, { status: 400 })
         }
 
-        if (lookupData.status !== "Completed") {
-          return NextResponse.json({ ok: true, status: "processing", khaltiStatus: lookupData.status }, { status: 200 })
+        // Exhaustive status handling — mirrors the donation branch's switch statement
+        switch (lookupData.status) {
+          case "Completed":
+            // Fall through to amount verification + confirmation below
+            break
+
+          case "Pending":
+          case "Initiated":
+            // Payment in flight — hold, do not confirm or fail yet
+            logPaymentEvent("Khalti verify (conference) - pending status", {
+              regId: reg.id,
+              pidx: maskSensitiveData(pidx),
+              khaltiStatus: lookupData.status,
+            }, "warn")
+            return NextResponse.json({ ok: true, status: "processing", khaltiStatus: lookupData.status }, { status: 200 })
+
+          case "Refunded":
+          case "Partially Refunded": {
+            const { error: refundErr } = await supabase
+              .from("conference_registrations")
+              .update({ payment_status: "failed", payment_provider: "khalti", provider_ref: pidx })
+              .eq("id", reg.id)
+            if (refundErr) {
+              logPaymentEvent("Khalti verify (conference) - refund update failed", {
+                regId: reg.id,
+                pidx: maskSensitiveData(pidx),
+                error: refundErr,
+              }, "error")
+            }
+            logPaymentEvent("Khalti verify (conference) - refunded", {
+              regId: reg.id,
+              pidx: maskSensitiveData(pidx),
+              khaltiStatus: lookupData.status,
+            }, "warn")
+            return NextResponse.json({ ok: false, status: "failed", khaltiStatus: lookupData.status, error: "Payment was refunded" }, { status: 200 })
+          }
+
+          case "Expired":
+          case "User canceled": {
+            const { error: cancelErr } = await supabase
+              .from("conference_registrations")
+              .update({ payment_status: "failed", payment_provider: "khalti", provider_ref: pidx })
+              .eq("id", reg.id)
+            if (cancelErr) {
+              logPaymentEvent("Khalti verify (conference) - cancel/expire update failed", {
+                regId: reg.id,
+                pidx: maskSensitiveData(pidx),
+                error: cancelErr,
+              }, "error")
+            }
+            logPaymentEvent("Khalti verify (conference) - expired/cancelled", {
+              regId: reg.id,
+              pidx: maskSensitiveData(pidx),
+              khaltiStatus: lookupData.status,
+            }, "warn")
+            return NextResponse.json({ ok: false, status: "failed", khaltiStatus: lookupData.status, error: "Payment expired or was cancelled" }, { status: 200 })
+          }
+
+          default:
+            // Unknown status — hold transaction, log for manual review
+            logPaymentEvent("Khalti verify (conference) - unknown status", {
+              regId: reg.id,
+              pidx: maskSensitiveData(pidx),
+              khaltiStatus: lookupData.status,
+            }, "warn")
+            return NextResponse.json({ ok: true, status: "processing", khaltiStatus: lookupData.status }, { status: 200 })
         }
 
         // Amount verification (fail-closed)
         const expectedPaisa = Math.round(Number(reg.payment_amount) * 100)
         const amountCheck = verifyAmountMatch(expectedPaisa, lookupData.total_amount, "NPR", 1)
         if (!amountCheck.valid) {
-          await supabase.from("conference_registrations")
+          const { error: reviewErr } = await supabase.from("conference_registrations")
             .update({ payment_status: "review", payment_provider: "khalti", provider_ref: pidx })
             .eq("id", reg.id)
+          
+          if (reviewErr) {
+            logPaymentEvent("Khalti verify (conference) - amount mismatch update failed", {
+              regId: reg.id,
+              pidx: maskSensitiveData(pidx),
+              error: reviewErr,
+            }, "error")
+            return NextResponse.json({ ok: false, error: "Failed to update registration" }, { status: 500 })
+          }
+
           return NextResponse.json({ ok: true, status: "review", error: "Amount mismatch — flagged for review" }, { status: 200 })
         }
 
         // Confirm the registration
-        await supabase.from("conference_registrations").update({
+        const { error: updateError } = await supabase.from("conference_registrations").update({
           status: "confirmed",
           payment_status: "paid",
           payment_provider: "khalti",
           payment_id: `khalti:${pidx}`,
           provider_ref: pidx,
-          khalti_pidx: pidx,
         }).eq("id", reg.id)
+
+        if (updateError) {
+          logPaymentEvent("Khalti verify (conference) - update failed", {
+            regId: reg.id,
+            pidx: maskSensitiveData(pidx),
+            sessionId: lookupData.transaction_id,
+            error: updateError,
+          }, "error")
+          return NextResponse.json({ ok: false, error: "Failed to update registration" }, { status: 500 })
+        }
 
         sendConferenceConfirmationEmail({
           fullName: reg.full_name,
@@ -173,7 +267,7 @@ export async function POST(request: Request) {
 
       // Neither donation nor conference registration found
       return NextResponse.json(
-        { ok: false, error: "Donation not found", message: "Could not find donation record. Please contact support with your payment ID." },
+        { ok: false, error: "Payment record not found", message: "Could not find donation or conference registration record. Please contact support with your payment ID." },
         { status: 404 },
       )
     }
@@ -362,10 +456,19 @@ export async function POST(request: Request) {
         warning: amountVerification.error,
       }, "warn")
       // Fail-closed: do not complete on amount mismatch.
-      await supabase
+      const { error: updateError } = await supabase
         .from("donations")
         .update({ payment_status: "review", provider: "khalti", provider_ref: pidx })
         .eq("id", donation.id)
+      
+      if (updateError) {
+        logPaymentEvent("Khalti verify - amount mismatch update failed", {
+          donationId: donation.id,
+          error: updateError,
+        }, "error")
+        return NextResponse.json({ ok: false, error: "Failed to update donation status" }, { status: 500 })
+      }
+
       return NextResponse.json(
         { ok: false, status: "failed", error: "Amount mismatch; requires manual review" },
         { status: 400 },
@@ -422,33 +525,11 @@ export async function POST(request: Request) {
     }
 
     if (shouldUpdate) {
-      // Replay/idempotency protection using payment_events ledger (best-effort if table exists)
-      if (newStatus === "completed" || newStatus === "failed") {
-        try {
-          const eventId = data.transaction_id ? `tx:${data.transaction_id}` : `pidx:${pidx}`
-          const { error: eventErr } = await supabase
-            .from("payment_events")
-            .insert({ provider: "khalti", event_id: eventId, donation_id: donation.id })
-          if (eventErr) {
-            if ((eventErr as any).code === "23505" || String((eventErr as any).message || "").toLowerCase().includes("duplicate")) {
-              return NextResponse.json(
-                { ok: true, status: donation.payment_status, message: "Transaction already processed" },
-                { status: 200 },
-              )
-            }
-          }
-        } catch {
-          // ignore if ledger missing
-        }
-      }
-
-      // Update payment_status and ensure payment_id is set correctly
+      // Update donation status first — ledger insert must only run after this succeeds
       const updateData: { payment_status: string; payment_id?: string } = {
         payment_status: newStatus,
+        payment_id: `khalti:${pidx}`,
       }
-
-      // If payment_id is not set or doesn't match, update it
-      updateData.payment_id = `khalti:${pidx}`
 
       const { error: updateError } = await supabase
         .from("donations")
@@ -458,6 +539,27 @@ export async function POST(request: Request) {
       if (updateError) {
         logPaymentEvent("Khalti verify - update failed", { donationId: donation.id, error: updateError }, "error")
         return NextResponse.json({ error: "Failed to update donation status" }, { status: 500 })
+      }
+
+      // Record in payment_events ledger AFTER successful donation update (best-effort)
+      // A duplicate here is safe — it means the donation was already confirmed on a prior call.
+      if (newStatus === "completed" || newStatus === "failed") {
+        try {
+          const eventId = data.transaction_id ? `tx:${data.transaction_id}` : `pidx:${pidx}`
+          const { error: eventErr } = await supabase
+            .from("payment_events")
+            .insert({ provider: "khalti", event_id: eventId, donation_id: donation.id })
+          if (eventErr) {
+            if ((eventErr as any).code === "23505" || String((eventErr as any).message || "").toLowerCase().includes("duplicate")) {
+              logPaymentEvent("Khalti verify - payment_events duplicate (idempotent)", {
+                donationId: donation.id,
+                eventId,
+              })
+            }
+          }
+        } catch {
+          // ignore if ledger table missing
+        }
       }
     }
 

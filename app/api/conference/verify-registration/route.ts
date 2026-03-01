@@ -1,28 +1,19 @@
-"use server"
-
 import { NextResponse } from "next/server"
 import { headers } from "next/headers"
 import { getConferenceRegistrationByToken } from "@/lib/actions/conference-registration"
 import { getConferenceSettings } from "@/lib/actions/conference-settings"
+import { checkRateLimit, getClientIP } from "@/lib/rate-limit"
 
-// In-memory rate limiter
-const ipHits = new Map<string, { count: number; resetAt: number }>()
-function shouldRateLimit(ip: string, now: number): boolean {
-  const entry = ipHits.get(ip)
-  if (!entry || entry.resetAt <= now) {
-    ipHits.set(ip, { count: 1, resetAt: now + 60_000 })
-    return false
-  }
-  entry.count += 1
-  return entry.count > 60
-}
+// Configuration from environment variables
+const VERIFY_RATE_LIMIT = parseInt(process.env.VERIFY_REGISTRATION_LIMIT || "60", 10)
+const VERIFY_WINDOW_MINUTES = parseInt(process.env.VERIFY_REGISTRATION_WINDOW_MINUTES || "1", 10)
 
 // Normalise DB attendance_mode key ("in-person") to settings key ("inPerson")
 function normaliseModeKey(mode: string) {
   return mode.replace(/-([a-z])/g, (_: string, c: string) => c.toUpperCase())
 }
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
   try {
     const headersList = await headers()
     const ip =
@@ -30,17 +21,35 @@ export async function GET(request: Request) {
       headersList.get("x-real-ip") ||
       "unknown"
 
-    if (shouldRateLimit(ip, Date.now())) {
-      return NextResponse.json({ ok: false, error: "Too many requests" }, { status: 429 })
+    // Distributed rate limiting (cross-instance enforcement)
+    const rateLimit = await checkRateLimit({
+      identifier: `verify-registration:ip:${ip}`,
+      maxAttempts: VERIFY_RATE_LIMIT,
+      windowMinutes: VERIFY_WINDOW_MINUTES,
+    })
+
+    if (!rateLimit.allowed) {
+      console.warn("Rate limit exceeded (verify-registration)", {
+        ip,
+        resetAt: rateLimit.resetAt,
+      })
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Too many requests. Please try again later.",
+          resetAt: rateLimit.resetAt?.toISOString(),
+        },
+        { status: 429 },
+      )
     }
 
-    const { searchParams } = new URL(request.url)
-    const rid = searchParams.get("rid")?.trim()
-    const email = searchParams.get("email")?.trim()
+    const body = await request.json()
+    const rid = body.rid?.trim()
+    const email = body.email?.trim()
 
     if (!rid || !email) {
       return NextResponse.json(
-        { ok: false, error: "rid and email parameters are required" },
+        { ok: false, error: "rid and email are required" },
         { status: 400 },
       )
     }

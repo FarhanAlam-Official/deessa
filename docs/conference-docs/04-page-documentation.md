@@ -266,8 +266,6 @@ const handleSubmit = async () => {
 | `email` | Yes | string | Registrant email |
 | `amount` | Yes | number | Payment amount |
 | `currency` | Yes | string | Currency code (NPR/USD) |
-| `name` | Yes | string | Registrant name |
-| `expiryHours` | Yes | number | Hours until expiry |
 
 **Example**:
 
@@ -661,6 +659,8 @@ const pollInterval = setInterval(() => {
     <p className="text-sm text-muted-foreground text-center">
       Need help? Contact us at {settings.contactEmail}
     </p>
+
+// Note: The settings object (with contactEmail) should be loaded via getConferenceSettings() on the server or using a client-side hook (e.g., useConferenceSettings) in the CSR component. Pass the resulting settings prop into the Payment Failure page/component to access settings.contactEmail.
   </CardContent>
 </Card>
 ```

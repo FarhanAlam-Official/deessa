@@ -8,6 +8,7 @@ export interface ConferenceEmailTemplate {
 }
 
 export interface AgendaItem {
+  id: string
   time: string
   title: string
   desc: string
@@ -36,7 +37,7 @@ export interface ConferenceSettings {
   registrationFeeEnabled: boolean
   // Fee in the specified currency. Read server-side only — never trusted from client.
   registrationFee: number
-  registrationFeeCurrency: "NPR" | "USD"
+  registrationFeeCurrency: "NPR" | "USD" | "EUR" | "GBP" | "INR"
   // Per attendance-mode fees (optional). When set, overrides registrationFee.
   // e.g. { "in-person": 2500, "online": 0 }
   registrationFeeByMode: Record<string, number>
@@ -56,24 +57,28 @@ export const CONFERENCE_DEFAULTS: ConferenceSettings = {
   registrationDeadline: "October 1st, 2026",
   agenda: [
     {
+      id: "agenda-opening-ceremony",
       time: "09:00 AM",
       title: "Opening Ceremony & Keynote",
       desc: "Welcome address followed by keynote on the future of philanthropy.",
       active: true,
     },
     {
+      id: "agenda-panel-future-of-innovation",
       time: "10:30 AM",
       title: "Panel: Future of Innovation",
       desc: "Expert panel discussion on emerging trends and new opportunities.",
       active: false,
     },
     {
+      id: "agenda-networking-lunch",
       time: "12:00 PM",
       title: "Networking Lunch",
       desc: "Buffet lunch and structured networking circles.",
       active: false,
     },
     {
+      id: "agenda-breakout-skills-lab",
       time: "01:30 PM",
       title: "Breakout Sessions: Skills Lab",
       desc: "Choose from 6 different skill-building workshops.",

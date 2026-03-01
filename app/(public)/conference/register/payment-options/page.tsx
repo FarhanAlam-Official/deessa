@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { CreditCard, Clock, CheckCircle, Loader2, AlertTriangle, ArrowRight, Mail } from "lucide-react"
@@ -10,7 +10,7 @@ import { CreditCard, Clock, CheckCircle, Loader2, AlertTriangle, ArrowRight, Mai
 //
 // URL: /conference/register/payment-options?rid=...&email=...&amount=...&currency=...
 
-export default function PaymentOptionsPage() {
+function PaymentOptionsContent() {
   const sp = useSearchParams()
   const rid     = sp.get("rid") ?? ""
   const email   = sp.get("email") ?? ""
@@ -45,16 +45,18 @@ export default function PaymentOptionsPage() {
     // This button just provides reassurance and can re-trigger if needed.
     setSendingEmail(true)
     try {
-      await fetch("/api/conference/resend-payment-link", {
+      const res = await fetch("/api/conference/resend-payment-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ registrationId: rid, email }),
       })
+      if (res.ok) {
+        setEmailSent(true)
+      }
     } catch {
       // Non-critical — email was already sent on registration
     } finally {
       setSendingEmail(false)
-      setEmailSent(true)
     }
   }
 
@@ -76,7 +78,7 @@ export default function PaymentOptionsPage() {
             Registration Received{name ? `, ${name.split(" ")[0]}!` : "!"}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Your spot is reserved for <span className="font-semibold text-foreground">24 hours</span>.
+            Your spot is reserved for <span className="font-semibold text-foreground">{expiryHours} {expiryHours === 1 ? 'hour' : 'hours'}</span>.
             Complete payment to confirm your registration.
           </p>
         </div>
@@ -171,5 +173,17 @@ export default function PaymentOptionsPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function PaymentOptionsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="size-8 animate-spin text-primary" />
+      </div>
+    }>
+      <PaymentOptionsContent />
+    </Suspense>
   )
 }

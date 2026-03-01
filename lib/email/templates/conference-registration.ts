@@ -3,6 +3,15 @@
  * Sent immediately on successful registration (status: pending)
  */
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
 interface ConferenceRegistrationTemplateProps {
   fullName: string
   email: string
@@ -14,9 +23,14 @@ interface ConferenceRegistrationTemplateProps {
 
 export function ConferenceRegistrationTemplate(props: ConferenceRegistrationTemplateProps): string {
   const { fullName, registrationId, attendanceMode, role, workshops } = props
-  const shortId = `DEESSA-2026-${registrationId.slice(0, 6).toUpperCase()}`
+  const shortId = escapeHtml(`DEESSA-2026-${registrationId.slice(0, 6).toUpperCase()}`)
   const firstName = fullName.split(" ")[0]
   const workshopList = workshops?.length ? workshops.join(", ") : "None selected"
+  const safeFirstName = escapeHtml(firstName)
+  const safeFullName = escapeHtml(fullName)
+  const safeAttendanceMode = escapeHtml(attendanceMode || "—")
+  const safeRole = escapeHtml(role || "Attendee")
+  const safeWorkshopList = escapeHtml(workshopList)
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -48,22 +62,25 @@ export function ConferenceRegistrationTemplate(props: ConferenceRegistrationTemp
           <!-- Main Card -->
           <tr>
             <td style="background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.07);">
-
               <!-- Top bar -->
-              <tr>
-                <td style="background:linear-gradient(135deg,#3FABDE 0%,#0B5F8A 100%);padding:48px 40px;text-align:center;">
-                  <!-- Check circle -->
-                  <div style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;background:rgba(255,255,255,0.2);border-radius:50%;margin-bottom:20px;">
-                    <span style="font-size:36px;">✓</span>
-                  </div>
-                  <h1 style="margin:0 0 8px;color:#fff;font-size:28px;font-weight:800;line-height:1.2;">
-                    You're On the List, ${firstName}!
-                  </h1>
-                  <p style="margin:0;color:rgba(255,255,255,0.85);font-size:16px;line-height:1.5;">
-                    We've received your registration for the<br /><strong>DEESSA National Conference 2026</strong>
-                  </p>
-                </td>
-              </tr>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                <tbody>
+                  <tr>
+                    <td style="background:linear-gradient(135deg,#3FABDE 0%,#0B5F8A 100%);padding:48px 40px;text-align:center;">
+                      <!-- Check circle -->
+                      <div style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;background:rgba(255,255,255,0.2);border-radius:50%;margin-bottom:20px;">
+                        <span style="font-size:36px;">✓</span>
+                      </div>
+                      <h1 style="margin:0 0 8px;color:#fff;font-size:28px;font-weight:800;line-height:1.2;">
+                        You're On the List, ${safeFirstName}!
+                      </h1>
+                      <p style="margin:0;color:rgba(255,255,255,0.85);font-size:16px;line-height:1.5;">
+                        We've received your registration for the<br /><strong>DEESSA National Conference 2026</strong>
+                      </p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
               <!-- Body -->
               <tr>
@@ -102,7 +119,7 @@ export function ConferenceRegistrationTemplate(props: ConferenceRegistrationTemp
                         Full Name
                       </td>
                       <td style="padding:12px 20px;border-bottom:1px solid #E2E8F0;font-size:14px;color:#0F172A;">
-                        ${fullName}
+                        ${safeFullName}
                       </td>
                     </tr>
                     <tr style="background:#F8FAFC;">
@@ -110,7 +127,7 @@ export function ConferenceRegistrationTemplate(props: ConferenceRegistrationTemp
                         Attendance Mode
                       </td>
                       <td style="padding:12px 20px;border-bottom:1px solid #E2E8F0;font-size:14px;color:#0F172A;text-transform:capitalize;">
-                        ${attendanceMode || "—"}
+                        ${safeAttendanceMode}
                       </td>
                     </tr>
                     <tr>
@@ -118,7 +135,7 @@ export function ConferenceRegistrationTemplate(props: ConferenceRegistrationTemp
                         Role
                       </td>
                       <td style="padding:12px 20px;border-bottom:1px solid #E2E8F0;font-size:14px;color:#0F172A;text-transform:capitalize;">
-                        ${role || "Attendee"}
+                        ${safeRole}
                       </td>
                     </tr>
                     <tr style="background:#F8FAFC;">
@@ -126,7 +143,7 @@ export function ConferenceRegistrationTemplate(props: ConferenceRegistrationTemp
                         Workshops
                       </td>
                       <td style="padding:12px 20px;font-size:14px;color:#0F172A;">
-                        ${workshopList}
+                        ${safeWorkshopList}
                       </td>
                     </tr>
                   </table>

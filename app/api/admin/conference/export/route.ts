@@ -11,6 +11,21 @@ export async function GET() {
       return new NextResponse("Unauthorized", { status: 401 })
     }
 
+    // Verify admin role
+    const { data: adminUser, error: adminError } = await supabase
+      .from("admin_users")
+      .select("id, role, is_active")
+      .eq("user_id", user.id)
+      .single()
+
+    if (adminError || !adminUser) {
+      return new NextResponse("Forbidden - Admin access required", { status: 403 })
+    }
+
+    if (!adminUser.is_active) {
+      return new NextResponse("Forbidden - Admin account is deactivated", { status: 403 })
+    }
+
     const { data: registrations, error } = await supabase
       .from("conference_registrations")
       .select("*")
@@ -43,13 +58,18 @@ export async function GET() {
 
     const escape = (val: string | null | undefined) => {
       if (val == null) return ""
-      const str = String(val)
-      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+      let str = String(val)
+      
+      // Neutralize CSV formula injection by prefixing dangerous characters
+      if (str.length > 0 && /^[=+\-@]/.test(str)) {
+        str = "'" + str
+      }
+      
+      if (str.includes(",") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
         return `"${str.replace(/"/g, '""')}"`
       }
       return str
     }
-
     const rows = (registrations || []).map((r) =>
       [
         r.id,
@@ -68,7 +88,7 @@ export async function GET() {
         r.consent_terms ? "Yes" : "No",
         r.consent_newsletter ? "Yes" : "No",
         r.status || "pending",
-        new Date(r.created_at).toISOString(),
+        r.created_at ? new Date(r.created_at).toISOString() : "",
       ]
         .map(escape)
         .join(",")

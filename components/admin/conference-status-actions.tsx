@@ -61,13 +61,18 @@ export function ConferenceStatusActions({
   const handleConfirm = async () => {
     setLoading("confirm")
     setInlineMessage(null)
-    const result = await confirmConferenceRegistration(registrationId, { force: !isPaid })
-    setLoading(null)
-    if (result.success) {
-      showFeedback("success", `Confirmed. Confirmation email sent to ${email}.`, "Registration Confirmed ✓")
-      router.refresh()
-    } else {
-      showFeedback("error", result.error || "Failed to confirm. Please try again.", "Confirm Failed")
+    try {
+      const result = await confirmConferenceRegistration(registrationId, { force: !isPaid })
+      if (result.success) {
+        showFeedback("success", `Confirmed. Confirmation email sent to ${email}.`, "Registration Confirmed ✓")
+        router.refresh()
+      } else {
+        showFeedback("error", result.error || "Failed to confirm. Please try again.", "Confirm Failed")
+      }
+    } catch (err) {
+      showFeedback("error", err instanceof Error ? err.message : "An unexpected error occurred.", "Confirm Failed")
+    } finally {
+      setLoading(null)
     }
   }
 
@@ -76,13 +81,18 @@ export function ConferenceStatusActions({
     setShowCancelModal(false)
     setLoading("cancel")
     setInlineMessage(null)
-    const result = await cancelConferenceRegistration(registrationId)
-    setLoading(null)
-    if (result.success) {
-      showFeedback("error", `Cancelled. Cancellation email sent to ${email}.`, "Registration Cancelled")
-      router.refresh()
-    } else {
-      showFeedback("error", result.error || "Failed to cancel.", "Cancel Failed")
+    try {
+      const result = await cancelConferenceRegistration(registrationId)
+      if (result.success) {
+        showFeedback("success", `Cancelled. Cancellation email sent to ${email}.`, "Registration Cancelled")
+        router.refresh()
+      } else {
+        showFeedback("error", result.error || "Failed to cancel.", "Cancel Failed")
+      }
+    } catch (err) {
+      showFeedback("error", err instanceof Error ? err.message : "An unexpected error occurred.", "Cancel Failed")
+    } finally {
+      setLoading(null)
     }
   }
 
@@ -91,13 +101,18 @@ export function ConferenceStatusActions({
     setShowMarkPaidModal(false)
     setLoading("markPaid")
     setInlineMessage(null)
-    const result = await markConferencePaymentManual(registrationId)
-    setLoading(null)
-    if (result.success) {
-      showFeedback("success", `Marked as paid and confirmed. Confirmation email sent to ${email}.`, "Marked as Paid ✓")
-      router.refresh()
-    } else {
-      showFeedback("error", result.error || "Failed to mark as paid.", "Override Failed")
+    try {
+      const result = await markConferencePaymentManual(registrationId)
+      if (result.success) {
+        showFeedback("success", `Marked as paid and confirmed. Confirmation email sent to ${email}.`, "Marked as Paid ✓")
+        router.refresh()
+      } else {
+        showFeedback("error", result.error || "Failed to mark as paid.", "Override Failed")
+      }
+    } catch (err) {
+      showFeedback("error", err instanceof Error ? err.message : "An unexpected error occurred.", "Override Failed")
+    } finally {
+      setLoading(null)
     }
   }
 
@@ -105,12 +120,17 @@ export function ConferenceStatusActions({
   const handleResendLink = async () => {
     setLoading("resendLink")
     setInlineMessage(null)
-    const result = await resendConferencePaymentLink(registrationId)
-    setLoading(null)
-    if (result.success) {
-      showFeedback("success", `Payment link re-sent to ${email}.`, "Link Sent ✓")
-    } else {
-      showFeedback("error", result.error || "Failed to resend payment link.", "Send Failed")
+    try {
+      const result = await resendConferencePaymentLink(registrationId)
+      if (result.success) {
+        showFeedback("success", `Payment link re-sent to ${email}.`, "Link Sent ✓")
+      } else {
+        showFeedback("error", result.error || "Failed to resend payment link.", "Send Failed")
+      }
+    } catch (err) {
+      showFeedback("error", err instanceof Error ? err.message : "An unexpected error occurred.", "Send Failed")
+    } finally {
+      setLoading(null)
     }
   }
 
@@ -118,13 +138,18 @@ export function ConferenceStatusActions({
   const handleExtendExpiry = async () => {
     setLoading("extendExpiry")
     setInlineMessage(null)
-    const result = await extendConferenceRegistrationExpiry(registrationId, 24)
-    setLoading(null)
-    if (result.success) {
-      showFeedback("success", `Expiry extended by 24 hours.`, "Expiry Extended ✓")
-      router.refresh()
-    } else {
-      showFeedback("error", result.error || "Failed to extend expiry.", "Extend Failed")
+    try {
+      const result = await extendConferenceRegistrationExpiry(registrationId, 24)
+      if (result.success) {
+        showFeedback("success", `Expiry extended by 24 hours.`, "Expiry Extended ✓")
+        router.refresh()
+      } else {
+        showFeedback("error", result.error || "Failed to extend expiry.", "Extend Failed")
+      }
+    } catch (err) {
+      showFeedback("error", err instanceof Error ? err.message : "An unexpected error occurred.", "Extend Failed")
+    } finally {
+      setLoading(null)
     }
   }
 

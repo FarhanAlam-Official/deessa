@@ -4,6 +4,26 @@ import type { PaymentMode } from "./config"
 import { validateAmount, validateEmail, validateName, fetchWithTimeout, logPaymentEvent } from "./security"
 import { KhaltiError } from "./errors"
 
+/** Only allows relative paths or absolute URLs whose host matches baseUrl. Returns null if invalid. */
+function getSafeReturnUrl(returnUrl: string, baseUrl: string): string | null {
+  try {
+    if (returnUrl.startsWith("/") && !returnUrl.startsWith("//")) {
+      return new URL(returnUrl, baseUrl).toString()
+    }
+    if (returnUrl.startsWith("//")) {
+      return null
+    }
+    const parsed = new URL(returnUrl)
+    const base = new URL(baseUrl)
+    if (parsed.host === base.host) {
+      return parsed.toString()
+    }
+  } catch {
+    // Fall through to null on parse failure
+  }
+  return null
+}
+
 export interface KhaltiInitResult {
   redirectUrl: string
   pidx: string
@@ -47,10 +67,20 @@ export async function startKhaltiPayment(
   }
 
   const baseUrl = process.env.KHALTI_BASE_URL || "https://khalti.com/api/v2"
-  const returnUrl =
-    donation.returnUrl ||
-    process.env.KHALTI_RETURN_URL ||
-    `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/payments/khalti/return`
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+
+  let returnUrl: string
+  if (donation.returnUrl != null && donation.returnUrl !== "") {
+    const validated = getSafeReturnUrl(donation.returnUrl, siteUrl)
+    if (validated == null) {
+      throw new KhaltiError("Invalid return URL")
+    }
+    returnUrl = validated
+  } else {
+    returnUrl =
+      process.env.KHALTI_RETURN_URL ||
+      `${siteUrl}/payments/khalti/return`
+  }
 
   if (mode === "mock") {
     const mockPidx = `khalti_mock_${donation.id}`
@@ -80,7 +110,7 @@ export async function startKhaltiPayment(
   }
 
   // Check if using sandbox key with production URL (common mistake)
-  const isSandboxKey = trimmedKey.includes("test") || baseUrl.includes("dev.khalti.com")
+  const isSandboxKey = trimmedKey.includes("test")
   const isProductionUrl = baseUrl.includes("khalti.com/api/v2") && !baseUrl.includes("dev")
   
   if (isSandboxKey && isProductionUrl) {
@@ -160,7 +190,7 @@ export async function startKhaltiPayment(
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Key ${secretKey}`,
+          Authorization: `Key ${trimmedKey}`,
         },
         body: JSON.stringify(payload),
       },

@@ -35,10 +35,15 @@ export default function PaymentSuccessPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ rid, sessionId }),
         })
-        const data = await res.json()
-        if (data.ok && data.status === "confirmed") await fetchStatus()
-        else if (data.ok && data.status === "review") setStatus("review")
-        // else polling will handle it
+        try {
+          const data = await res.json()
+          if (data.ok && data.status === "confirmed") await fetchStatus()
+          else if (data.ok && data.status === "review") setStatus("review")
+          // else polling will handle it
+        } catch (parseErr) {
+          console.warn("Stripe response JSON parse error:", parseErr)
+          // Non-JSON response — fall through to polling
+        }
       } else if (pidx) {
         // ── Khalti ──────────────────────────────────────────────────────────
         const res = await fetch("/api/payments/khalti/verify", {
@@ -46,10 +51,15 @@ export default function PaymentSuccessPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ pidx, purchase_order_id: rid }),
         })
-        const data = await res.json()
-        if (data.ok && (data.status === "paid" || data.status === "completed")) await fetchStatus()
-        else if (data.ok && data.status === "review") setStatus("review")
-        // else polling will handle it
+        try {
+          const data = await res.json()
+          if (data.ok && (data.status === "paid" || data.status === "completed")) await fetchStatus()
+          else if (data.ok && data.status === "review") setStatus("review")
+          // else polling will handle it
+        } catch (parseErr) {
+          console.warn("Khalti response JSON parse error:", parseErr)
+          // Non-JSON response — fall through to polling
+        }
       }
     } catch (err) {
       console.warn("payment verify error:", err)
@@ -66,19 +76,24 @@ export default function PaymentSuccessPage() {
     const res = await fetch(`/api/conference/status?rid=${encodeURIComponent(rid)}`)
     if (!res.ok) { setStatus("failed"); return }
 
-    const data = await res.json()
-    if (!data.ok) { setStatus("failed"); return }
+    try {
+      const data = await res.json()
+      if (!data.ok) { setStatus("failed"); return }
 
-    setReg({ fullName: data.fullName, attendanceMode: data.attendanceMode, expiresAt: data.expiresAt })
+      setReg({ fullName: data.fullName, attendanceMode: data.attendanceMode, expiresAt: data.expiresAt })
 
-    if (data.paymentStatus === "paid" && data.status === "confirmed") {
-      setStatus("confirmed")
-    } else if (data.paymentStatus === "review") {
-      setStatus("review")
-    } else if (data.status === "cancelled" || data.status === "expired") {
+      if (data.paymentStatus === "paid" && data.status === "confirmed") {
+        setStatus("confirmed")
+      } else if (data.paymentStatus === "review") {
+        setStatus("review")
+      } else if (data.status === "cancelled" || data.status === "expired") {
+        setStatus("failed")
+      } else {
+        setStatus("processing")
+      }
+    } catch (parseErr) {
+      console.warn("Status endpoint JSON parse error:", parseErr)
       setStatus("failed")
-    } else {
-      setStatus("processing")
     }
   }, [rid])
 
@@ -95,13 +110,11 @@ export default function PaymentSuccessPage() {
   useEffect(() => {
     if (status !== "processing" || pollCount >= MAX_POLLS) return
     const t = setTimeout(async () => {
-      // On first poll re-attempt, try provider verify again in case DB update was delayed
-      if (pollCount === 0 && (sessionId || pidx)) await confirmViaProvider()
       setPollCount((c) => c + 1)
       await fetchStatus()
     }, 5_000)
     return () => clearTimeout(t)
-  }, [status, pollCount, fetchStatus, confirmViaProvider, sessionId, pidx])
+  }, [status, pollCount, fetchStatus])
 
   const shortId = rid ? `DEESSA-2026-${rid.slice(0, 6).toUpperCase()}` : ""
 
@@ -227,7 +240,7 @@ export default function PaymentSuccessPage() {
           link.
         </p>
         <Link
-          href={`/complete-payment?rid=${rid}`}
+          href={`/complete-payment?rid=${encodeURIComponent(rid)}`}
           className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-8 text-sm font-bold text-white transition hover:opacity-90"
         >
           Try Again →

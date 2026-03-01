@@ -12,9 +12,20 @@ interface SuccessPageProps {
 
 export default async function RegistrationSuccessPage({ searchParams }: SuccessPageProps) {
   const params = await searchParams
+  
+  // Safe decode helper to prevent crashes from malformed URL params
+  const safeDecode = (str: string | undefined, fallback: string): string => {
+    if (!str) return fallback
+    try {
+      return decodeURIComponent(str)
+    } catch {
+      return fallback
+    }
+  }
+
   const registrationId = params.id ?? ""
-  const name = params.name ? decodeURIComponent(params.name) : "Attendee"
-  const email = params.email ? decodeURIComponent(params.email) : ""
+  const name = safeDecode(params.name, "Attendee")
+  const email = safeDecode(params.email, "")
   const firstName = name.split(" ")[0]
   const shortId = registrationId
     ? `DEESSA-2026-${registrationId.slice(0, 6).toUpperCase()}`
@@ -26,7 +37,7 @@ export default async function RegistrationSuccessPage({ searchParams }: SuccessP
   const gcalStart = cfg.dateStart.replace(/-/g, "")
   const gcalEnd = (() => {
     const d = new Date(cfg.dateEnd)
-    d.setDate(d.getDate() + 1)
+    d.setUTCDate(d.getUTCDate() + 1)
     return d.toISOString().slice(0, 10).replace(/-/g, "")
   })()
   const gcalDates = `${gcalStart}/${gcalEnd}`
@@ -72,7 +83,7 @@ export default async function RegistrationSuccessPage({ searchParams }: SuccessP
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-primary/10" />
         {/* Decorative blobs */}
         <div className="pointer-events-none absolute -top-32 -right-32 size-[480px] rounded-full bg-primary/10 blur-[120px]" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 size-[360px] rounded-full bg-primary/8 blur-[100px]" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 size-[360px] rounded-full bg-primary/10 blur-[100px]" />
         {/* Subtle dot grid */}
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.03]"
@@ -122,7 +133,7 @@ export default async function RegistrationSuccessPage({ searchParams }: SuccessP
                 </h1>
                 <p className="mx-auto max-w-md text-lg text-foreground-muted">
                   Your seat at the{" "}
-                  <span className="font-semibold text-foreground">DEESSA National Conference 2026</span>{" "}
+                  <span className="font-semibold text-foreground">{cfg.name}</span>{" "}
                   is secured. See you in Kathmandu!
                 </p>
               </div>
@@ -140,10 +151,10 @@ export default async function RegistrationSuccessPage({ searchParams }: SuccessP
                   <div className="flex items-start justify-between gap-4 flex-wrap">
                     <div className="flex flex-col gap-1">
                       <p className="text-xs font-bold uppercase tracking-wider text-primary">
-                        DEESSA National Conference 2026
+                        {cfg.name}
                       </p>
-                      <p className="text-2xl font-bold text-foreground">Oct 15–17, 2026</p>
-                      <p className="text-sm text-foreground-muted">Hyatt Regency, Kathmandu, Nepal</p>
+                      <p className="text-2xl font-bold text-foreground">{cfg.dateDisplay}</p>
+                      <p className="text-sm text-foreground-muted">{cfg.venue}</p>
                     </div>
                     {/* QR placeholder */}
                     <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-muted text-xs text-foreground-muted font-mono">
@@ -209,19 +220,9 @@ export default async function RegistrationSuccessPage({ searchParams }: SuccessP
                     A confirmation has been <br className="sm:hidden" />sent to your inbox.
                   </p>
                 </div>
-              </div>
-            </div>
-
-            {/* ── What's Next ── */}
-            <div className="animate-fade-up-3 w-full flex flex-col gap-5">
-              <p className="text-center text-xs font-bold uppercase tracking-widest text-foreground-muted">
-                While you wait…
-              </p>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {/* Join Community */}
-                <a
-                  href="#"
-                  className="group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-border bg-card p-5 transition-all hover:border-green-300 hover:shadow-lg hover:shadow-green-100"
+                {/* TODO: Add real WhatsApp community link */}
+                <div
+                  className="group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-border bg-card p-5 opacity-60 cursor-not-allowed"
                 >
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-green-50/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                   <div className="relative flex size-12 shrink-0 items-center justify-center rounded-2xl bg-green-50 text-2xl shadow-sm transition-transform group-hover:scale-110">
@@ -234,7 +235,7 @@ export default async function RegistrationSuccessPage({ searchParams }: SuccessP
                   <svg className="relative ml-auto size-4 shrink-0 text-foreground-muted transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
-                </a>
+                </div>
 
                 {/* Podcast Hub */}
                 <Link
