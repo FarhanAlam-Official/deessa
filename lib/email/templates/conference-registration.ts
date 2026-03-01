@@ -23,7 +23,8 @@ interface ConferenceRegistrationTemplateProps {
 
 export function ConferenceRegistrationTemplate(props: ConferenceRegistrationTemplateProps): string {
   const { fullName, registrationId, attendanceMode, role, workshops } = props
-  const shortId = escapeHtml(`DEESSA-2026-${registrationId.slice(0, 6).toUpperCase()}`)  const firstName = fullName.split(" ")[0]
+  const shortId = escapeHtml(`DEESSA-2026-${registrationId.slice(0, 6).toUpperCase()}`)
+  const firstName = fullName.split(" ")[0]
   const workshopList = workshops?.length ? workshops.join(", ") : "None selected"
   const safeFirstName = escapeHtml(firstName)
   const safeFullName = escapeHtml(fullName)
