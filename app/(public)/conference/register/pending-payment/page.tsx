@@ -63,7 +63,11 @@ export default function PendingPaymentPage() {
       return
     }
 
-    fetch(`/api/conference/verify-registration?rid=${encodeURIComponent(rid)}&email=${encodeURIComponent(email)}`)
+    fetch("/api/conference/verify-registration", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rid: rid.trim(), email: email.trim() }),
+    })
       .then((r) => r.json())
       .then((data) => {
         if (!data.ok) {
@@ -91,7 +95,7 @@ export default function PendingPaymentPage() {
       })
       .catch(() => setError("Failed to load registration. Please try again."))
       .finally(() => setLoading(false))
-  }, [rid, email])
+  }, [rid, email, router])
 
   const handlePay = async () => {
     if (!reg) return
