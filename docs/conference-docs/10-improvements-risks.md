@@ -21,44 +21,43 @@
 
 ### 1.1 Functional Limitations
 
-| Limitation | Impact | Workaround | Effort to Fix |
-|---|---|---|---|
-| **No user accounts** | Users cannot view past registrations | Users must save confirmation emails | Medium (3-5 days) |
-| **Single conference only** | Cannot run multiple concurrent events | Must modify data model | High (1-2 weeks) |
-| **No refund automation** | Refunds must be processed manually via gateway dashboard | Admin manually refunds + updates DB | Medium (2-3 days) |
-| **No discount codes** | Cannot offer early-bird or group discounts | Manually adjust pricing in settings | Low (1-2 days) |
-| **No partial payments** | Cannot split payment across methods | User must pay full amount at once | High (1 week) |
-| **No guest limit per attendance mode** | Cannot cap "In-person" to 500 seats | Manual monitoring required | Low (1 day) |
-| **No waitlist** | When sold out, users are rejected | Must manually manage waitlist | Medium (2-3 days) |
-| **Limited custom fields** | Registration form fixed (8 fields) | Requires code changes to add fields | Medium (depends on field type) |
-| **No certificate generation** | Cannot auto-generate attendance certificates | Buy from external service or build | High (1-2 weeks) |
-| **No QR code check-in** | No automated event check-in | Manual list-based check-in | Medium (3-4 days) |
+| Limitation                             | Impact                                                   | Workaround                          | Effort to Fix                  |
+| -------------------------------------- | -------------------------------------------------------- | ----------------------------------- | ------------------------------ |
+| **No user accounts**                   | Users cannot view past registrations                     | Users must save confirmation emails | Medium (3-5 days)              |
+| **Single conference only**             | Cannot run multiple concurrent events                    | Must modify data model              | High (1-2 weeks)               |
+| **No refund automation**               | Refunds must be processed manually via gateway dashboard | Admin manually refunds + updates DB | Medium (2-3 days)              |
+| **No discount codes**                  | Cannot offer early-bird or group discounts               | Manually adjust pricing in settings | Low (1-2 days)                 |
+| **No partial payments**                | Cannot split payment across methods                      | User must pay full amount at once   | High (1 week)                  |
+| **No guest limit per attendance mode** | Cannot cap "In-person" to 500 seats                      | Manual monitoring required          | Low (1 day)                    |
+| **No waitlist**                        | When sold out, users are rejected                        | Must manually manage waitlist       | Medium (2-3 days)              |
+| **Limited custom fields**              | Registration form fixed (8 fields)                       | Requires code changes to add fields | Medium (depends on field type) |
+| **No certificate generation**          | Cannot auto-generate attendance certificates             | Buy from external service or build  | High (1-2 weeks)               |
+| **No QR code check-in**                | No automated event check-in                              | Manual list-based check-in          | Medium (3-4 days)              |
 
 ### 1.2 Technical Limitations
 
-| Limitation | Impact | Severity |
-|---|---|---|
-| **6228-line monolith** | Hard to maintain, slow TypeScript compilation | High |
-| **In-memory rate limiting** | Resets on serverless function cold start, ineffective for distributed systems | Medium |
-| **No request ID tracing** | Hard to debug issues across function invocations | Medium |
-| **No structured logging** | Logs are plain console statements, hard to search | Medium |
-| **No integration tests** | Only manual testing, risk of regressions | High |
-| **No load testing** | Unknown performance under 1000+ concurrent users | Medium |
-| **Email rate limit (2000/day)** | Cannot send >2000 emails from Gmail | Low (unlikely to hit) |
-| **Fixed 24-hour expiry** | Not configurable per event | Low |
-| **Amount stored as NUMERIC** | Potential floating-point precision issues (though mitigated by rounding) | Low |
-| **No webhook retry logic** | If webhook fails 3 times, no manual re-queue | Medium |
+| Limitation                      | Impact                                                                        | Severity              |
+| ------------------------------- | ----------------------------------------------------------------------------- | --------------------- | --- | -------------------------- | -------------------------------------------- | ------ |
+| **6228-line monolith**          | Hard to maintain, slow TypeScript compilation                                 | High                  |
+| **In-memory rate limiting**     | Resets on serverless function cold start, ineffective for distributed systems | Medium                |
+| **No request ID tracing**       | Hard to debug issues across function invocations                              | Medium                |
+| **No structured logging**       | Logs are plain console statements, hard to search                             | Medium                |
+| **No integration tests**        | Only manual testing, risk of regressions                                      | High                  |
+| **No load testing**             | Unknown performance under 1000+ concurrent users                              | Medium                |
+| **Email rate limit (2000/day)** | Cannot send >2000 emails from Gmail                                           | Low (unlikely to hit) |
+| **Fixed 24-hour expiry**        | Not configurable per event                                                    | Low                   |
+| **Amount stored as NUMERIC**    | NUMERIC provides exact precision; no floating-point issues                    | Low                   |     | **No webhook retry logic** | If webhook fails 3 times, no manual re-queue | Medium |
 
 ### 1.3 Business Limitations
 
-| Limitation | Impact | Priority to Address |
-|---|---|---|
-| **No multi-event support** | Cannot reuse system for other conferences/workshops | High (if NGO expands) |
-| **No reporting dashboard** | Admins export CSV manually for analysis | Medium (nice-to-have) |
-| **No payment analytics** | Cannot track conversion rates, abandonment | Low (can extract from DB) |
-| **No user segmentation** | Cannot email specific groups (e.g., "In-person attendees") | Medium |
-| **No attendance tracking** | Cannot mark who attended vs. who registered | Low (unless  certificates needed) |
-| **No feedback collection** | Post-conference survey must be separate tool | Low (use external form) |
+| Limitation                 | Impact                                                     | Priority to Address              |
+| -------------------------- | ---------------------------------------------------------- | -------------------------------- |
+| **No multi-event support** | Cannot reuse system for other conferences/workshops        | High (if NGO expands)            |
+| **No reporting dashboard** | Admins export CSV manually for analysis                    | Medium (nice-to-have)            |
+| **No payment analytics**   | Cannot track conversion rates, abandonment                 | Low (can extract from DB)        |
+| **No user segmentation**   | Cannot email specific groups (e.g., "In-person attendees") | Medium                           |
+| **No attendance tracking** | Cannot mark who attended vs. who registered                | Low (unless certificates needed) |
+| **No feedback collection** | Post-conference survey must be separate tool               | Low (use external form)          |
 
 ---
 
@@ -119,8 +118,8 @@ export function createServerClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
-      auth: { persistSession: false, autoRefreshToken: false }
-    }
+      auth: { persistSession: false, autoRefreshToken: false },
+    },
   );
 }
 
@@ -130,8 +129,8 @@ export async function sendEmail(to: string, subject: string, html: string) {
 }
 
 // Then import everywhere:
-import { createServerClient } from '@/lib/supabase/server';
-import { sendEmail } from '@/lib/email/send';
+import { createServerClient } from "@/lib/supabase/server";
+import { sendEmail } from "@/lib/email/send";
 ```
 
 **Estimated Effort**: 2 days
@@ -158,17 +157,17 @@ const requestCounts = new Map<string, { count: number; resetAt: number }>();
 
 ```typescript
 // lib/rate-limit.ts
-import { Redis } from '@upstash/redis';
+import { Redis } from "@upstash/redis";
 
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_URL,
-  token: process.env.UPSTASH_REDIS_TOKEN
+  token: process.env.UPSTASH_REDIS_TOKEN,
 });
 
 export async function checkRateLimit(
   key: string,
   limit: number,
-  window: number
+  window: number,
 ): Promise<boolean> {
   const count = await redis.incr(key);
   if (count === 1) {
@@ -180,8 +179,8 @@ export async function checkRateLimit(
 // Usage:
 const allowed = await checkRateLimit(`api:start-payment:${email}`, 10, 60);
 if (!allowed) {
-  return new Response(JSON.stringify({ error: 'RATE_LIMIT_EXCEEDED' }), {
-    status: 429
+  return new Response(JSON.stringify({ error: "RATE_LIMIT_EXCEEDED" }), {
+    status: 429,
   });
 }
 ```
@@ -209,17 +208,17 @@ if (!allowed) {
 
 ```typescript
 // middleware.ts
-import { nanoid } from 'nanoid';
+import { nanoid } from "nanoid";
 
 export function middleware(req: NextRequest) {
   const reqId = nanoid();
-  req.headers.set('X-Request-ID', reqId);
+  req.headers.set("X-Request-ID", reqId);
   return NextResponse.next();
 }
 
 // In API routes:
 export async function POST(req: Request) {
-  const reqId = req.headers.get('X-Request-ID');
+  const reqId = req.headers.get("X-Request-ID");
   console.log(`[${reqId}] Starting payment...`);
   // Now logs include: [abc123xyz] Starting payment...
 }
@@ -245,13 +244,19 @@ export async function POST(req: Request) {
 
 ```typescript
 // __tests__/lib/conference/payment-service.test.ts
-describe('calculateAmount', () => {
+describe("calculateAmount", () => {
   it('returns USD for "In-person"', () => {
-    expect(calculateAmount('In-person', 20, 800)).toEqual({ amount: 20, currency: 'USD' });
+    expect(calculateAmount("In-person", 20, 800)).toEqual({
+      amount: 20,
+      currency: "USD",
+    });
   });
-  
+
   it('returns NPR for "Virtual"', () => {
-    expect(calculateAmount('Virtual', 20, 800)).toEqual({ amount: 800, currency: 'NPR' });
+    expect(calculateAmount("Virtual", 20, 800)).toEqual({
+      amount: 800,
+      currency: "NPR",
+    });
   });
 });
 ```
@@ -260,20 +265,20 @@ describe('calculateAmount', () => {
 
 ```typescript
 // tests/e2e/registration-flow.spec.ts
-test('user can register and pay with Stripe', async ({ page }) => {
-  await page.goto('/conference/register');
-  await page.fill('[name="fullName"]', 'John Doe');
-  await page.fill('[name="email"]', 'john@example.com');
-  await page.selectOption('[name="attendanceMode"]', 'In-person');
+test("user can register and pay with Stripe", async ({ page }) => {
+  await page.goto("/conference/register");
+  await page.fill('[name="fullName"]', "John Doe");
+  await page.fill('[name="email"]', "john@example.com");
+  await page.selectOption('[name="attendanceMode"]', "In-person");
   await page.click('button:has-text("Register")');
-  
-  await page.click('text=Stripe');
+
+  await page.click("text=Stripe");
   await page.waitForURL(/checkout.stripe.com/);
-  
+
   // Fill Stripe test card
-  await page.fill('[name="cardNumber"]', '4242424242424242');
+  await page.fill('[name="cardNumber"]', "4242424242424242");
   // ... complete payment
-  
+
   await expect(page).toHaveURL(/\/conference\/success/);
 });
 ```
@@ -291,8 +296,8 @@ test('user can register and pay with Stripe', async ({ page }) => {
 ```typescript
 // Current (BAD): Fetches settings separately
 const { data: registrations } = await supabase
-  .from('conference_registrations')
-  .select('*');
+  .from("conference_registrations")
+  .select("*");
 
 const settings = await getSettingsFromDB(); // Separate query
 ```
@@ -302,8 +307,8 @@ const settings = await getSettingsFromDB(); // Separate query
 ```typescript
 // Fetch all in parallel
 const [registrationsResult, settingsResult] = await Promise.all([
-  supabase.from('conference_registrations').select('*'),
-  getSettingsFromDB()
+  supabase.from("conference_registrations").select("*"),
+  getSettingsFromDB(),
 ]);
 ```
 
@@ -327,7 +332,7 @@ function sendRegistrationEmail(user: User, settings: Settings) {
       </body>
     </html>
   `;
-  return sendEmail(user.email, 'Registration Confirmed', html);
+  return sendEmail(user.email, "Registration Confirmed", html);
 }
 ```
 
@@ -335,14 +340,14 @@ function sendRegistrationEmail(user: User, settings: Settings) {
 
 ```typescript
 // Pre-compile templates at build time
-import Handlebars from 'handlebars';
+import Handlebars from "handlebars";
 const registrationTemplate = Handlebars.compile(
-  fs.readFileSync('templates/registration.html', 'utf-8')
+  fs.readFileSync("templates/registration.html", "utf-8"),
 );
 
 function sendRegistrationEmail(user: User, settings: Settings) {
   const html = registrationTemplate({ user, settings });
-  return sendEmail(user.email, 'Registration Confirmed', html);
+  return sendEmail(user.email, "Registration Confirmed", html);
 }
 ```
 
@@ -361,17 +366,17 @@ function sendRegistrationEmail(user: User, settings: Settings) {
 const CACHE_TTL = 300; // 5 minutes
 
 export async function getCachedSettings(): Promise<Settings> {
-  const cached = await redis.get('conference:settings');
+  const cached = await redis.get("conference:settings");
   if (cached) return JSON.parse(cached);
-  
+
   const settings = await getSettingsFromDB();
-  await redis.setex('conference:settings', CACHE_TTL, JSON.stringify(settings));
+  await redis.setex("conference:settings", CACHE_TTL, JSON.stringify(settings));
   return settings;
 }
 
 // Invalidate on settings update
 export async function invalidateSettingsCache() {
-  await redis.del('conference:settings');
+  await redis.del("conference:settings");
 }
 ```
 
@@ -389,26 +394,26 @@ export async function invalidateSettingsCache() {
 // API: Add pagination
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const page = parseInt(searchParams.get('page') || '1');
+  const page = parseInt(searchParams.get("page") || "1");
   const limit = 50;
   const offset = (page - 1) * limit;
-  
+
   const { data, count } = await supabase
-    .from('conference_registrations')
-    .select('*', { count: 'exact' })
+    .from("conference_registrations")
+    .select("*", { count: "exact" })
     .range(offset, offset + limit - 1)
-    .order('created_at', { ascending: false });
-  
+    .order("created_at", { ascending: false });
+
   return Response.json({ data, total: count, page, limit });
 }
 
 // Frontend: Virtual table (react-window)
-import { FixedSizeList } from 'react-window';
+import { FixedSizeList } from "react-window";
 
 function AdminList() {
   const [registrations, setRegistrations] = useState([]);
   const [page, setPage] = useState(1);
-  
+
   // Load data on scroll
   // Render only visible rows
 }
@@ -422,49 +427,49 @@ function AdminList() {
 
 ### 4.1 Technical Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| **Database failure** | Low | Critical | Daily backups, 2-hour RTO with Supabase restore |
-| **Payment gateway outage** | Medium | High | Support 3 gateways, fallback to manual payment |
-| **Vercel downtime** | Low | High | Deploy to secondary platform (Netlify) as backup |
-| **Email service failure** | Medium | Medium | Implement retry logic, use Sendgrid as fallback |
-| **Cron job failure** | Medium | Low | Registrations don't expire (acceptable delay) |
-| **DDoS attack** | Medium | Medium | Vercel has built-in DDoS protection |
-| **Data breach** | Low | Critical | RLS policies, no PII in logs, encrypted at rest |
-| **Serverless cold starts** | High | Low | Users may experience 1-2s delay (acceptable) |
-| **Stripe webhook miss** | Medium | Medium | Dual-path verification (polling + webhook) |
-| **Gmail rate limit hit** | Low | Medium | Unlikely (<2000 registrations/day), use Sendgrid |
+| Risk                       | Likelihood | Impact   | Mitigation                                       |
+| -------------------------- | ---------- | -------- | ------------------------------------------------ |
+| **Database failure**       | Low        | Critical | Daily backups, 2-hour RTO with Supabase restore  |
+| **Payment gateway outage** | Medium     | High     | Support 3 gateways, fallback to manual payment   |
+| **Vercel downtime**        | Low        | High     | Deploy to secondary platform (Netlify) as backup |
+| **Email service failure**  | Medium     | Medium   | Implement retry logic, use Sendgrid as fallback  |
+| **Cron job failure**       | Medium     | Low      | Registrations don't expire (acceptable delay)    |
+| **DDoS attack**            | Medium     | Medium   | Vercel has built-in DDoS protection              |
+| **Data breach**            | Low        | Critical | RLS policies, no PII in logs, encrypted at rest  |
+| **Serverless cold starts** | High       | Low      | Users may experience 1-2s delay (acceptable)     |
+| **Stripe webhook miss**    | Medium     | Medium   | Dual-path verification (polling + webhook)       |
+| **Gmail rate limit hit**   | Low        | Medium   | Unlikely (<2000 registrations/day), use Sendgrid |
 
 ### 4.2 Business Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| **Conference cancelled** | Low | Low | System allows admin to cancel + refund all |
-| **Pricing error** | Medium | High | Manual review before launch, test payments |
-| **Overbooking** | Low | High | Implement seat limits (requires dev work) |
-| **Payment disputes** | Medium | Medium | Clear refund policy, keep detailed payment logs |
-| **User data loss** | Low | Critical | Daily backups, 30-day retention |
-| **Fraud registrations** | Low | Medium | Manual review via admin dashboard, mark as spam |
-| **Developer unavailable** | High | Medium | Good documentation, code should be maintainable by any Next.js developer |
+| Risk                      | Likelihood | Impact   | Mitigation                                                               |
+| ------------------------- | ---------- | -------- | ------------------------------------------------------------------------ |
+| **Conference cancelled**  | Low        | Low      | System allows admin to cancel + refund all                               |
+| **Pricing error**         | Medium     | High     | Manual review before launch, test payments                               |
+| **Overbooking**           | Low        | High     | Implement seat limits (requires dev work)                                |
+| **Payment disputes**      | Medium     | Medium   | Clear refund policy, keep detailed payment logs                          |
+| **User data loss**        | Low        | Critical | Daily backups, 30-day retention                                          |
+| **Fraud registrations**   | Low        | Medium   | Manual review via admin dashboard, mark as spam                          |
+| **Developer unavailable** | High       | Medium   | Good documentation, code should be maintainable by any Next.js developer |
 
 ### 4.3 Compliance Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| **GDPR violation** | Low | High | Data retention policy (auto-delete after N months), privacy policy, explicit consent |
-| **Payment data exposure** | Low | Critical | No card data stored locally, gateway handles PCI compliance |
-| **Accessibility non-compliance** | Medium | Low | Add ARIA labels, keyboard navigation, screen reader support |
-| **Email spam complaints** | Low | Medium | Clear unsubscribe mechanism, send only transactional emails |
+| Risk                             | Likelihood | Impact   | Mitigation                                                                           |
+| -------------------------------- | ---------- | -------- | ------------------------------------------------------------------------------------ |
+| **GDPR violation**               | Low        | High     | Data retention policy (auto-delete after N months), privacy policy, explicit consent |
+| **Payment data exposure**        | Low        | Critical | No card data stored locally, gateway handles PCI compliance                          |
+| **Accessibility non-compliance** | Medium     | Low      | Add ARIA labels, keyboard navigation, screen reader support                          |
+| **Email spam complaints**        | Low        | Medium   | Clear unsubscribe mechanism, send only transactional emails                          |
 
 ### 4.4 Dependency Risks
 
-| Dependency | Risk | Current Version | Update Strategy |
-|---|---|---|---|
-| **Next.js** | Major version breaking changes | 14.1.0 | Pin to 14.x, test before upgrading |
-| **Supabase JS** | API changes | 2.39.0 | Pin to 2.x, review changelog before upgrade |
-| **Stripe SDK** | Deprecations | 14.14.0 | Monitor Stripe API version changes |
-| **Tailwind CSS** | Class name changes | 3.4.1 | Pin to 3.x, minimal risk |
-| **Zod** | Schema API changes | 3.22.4 | Low risk (stable library) |
+| Dependency       | Risk                           | Current Version | Update Strategy                             |
+| ---------------- | ------------------------------ | --------------- | ------------------------------------------- |
+| **Next.js**      | Major version breaking changes | 14.1.0          | Pin to 14.x, test before upgrading          |
+| **Supabase JS**  | API changes                    | 2.39.0          | Pin to 2.x, review changelog before upgrade |
+| **Stripe SDK**   | Deprecations                   | 14.14.0         | Monitor Stripe API version changes          |
+| **Tailwind CSS** | Class name changes             | 3.4.1           | Pin to 3.x, minimal risk                    |
+| **Zod**          | Schema API changes             | 3.22.4          | Low risk (stable library)                   |
 
 **Approach**: Pin major versions in `package.json`, test minor updates in staging before production.
 
@@ -564,7 +569,7 @@ ADD COLUMN conference_id uuid REFERENCES conferences(id);
 ```typescript
 interface DiscountCode {
   code: string; // e.g., "EARLYBIRD"
-  type: 'percentage' | 'fixed';
+  type: "percentage" | "fixed";
   value: number; // 20 (for 20% off) or 5 (for $5 off)
   validFrom: Date;
   validUntil: Date;
