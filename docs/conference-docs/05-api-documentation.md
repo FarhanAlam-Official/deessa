@@ -26,12 +26,12 @@
 
 ### 1.2 Authentication Methods
 
-| API Type | Auth Method | Header/Param |
-|---|---|---|
-| Public Conference APIs | Dual-key (rid + email) | Query params or body |
-| Admin APIs | Supabase Auth Session | Cookie (automatic) |
-| Cron Jobs | Bearer Token | `Authorization: Bearer {CRON_SECRET}` |
-| Webhooks | HMAC Signature | Provider-specific headers |
+| API Type               | Auth Method            | Header/Param                          |
+| ---------------------- | ---------------------- | ------------------------------------- |
+| Public Conference APIs | Dual-key (rid + email) | Query params or body                  |
+| Admin APIs             | Supabase Auth Session  | Cookie (automatic)                    |
+| Cron Jobs              | Bearer Token           | `Authorization: Bearer {CRON_SECRET}` |
+| Webhooks               | HMAC Signature         | Provider-specific headers             |
 
 ### 1.3 Response Format
 
@@ -80,7 +80,7 @@
 **Validation**:
 
 - `registrationId`: Non-empty string, must be valid UUID
-- `email`: Must contain `@`
+- `email`: Must pass robust validation (RFC 5322-compatible regex or a dedicated email validation library such as validator.js). Acceptable format: local@domain with proper local part and domain, no bare `@` or multiple successive `@`. Recommended: use validator.js `isEmail()` or equivalent strict check.
 - `provider`: Must be in `['stripe', 'khalti', 'esewa']`
 
 **Success Response (Stripe/Khalti)**:
@@ -118,17 +118,17 @@
 
 **Error Responses**:
 
-| Status | Error Message | Scenario |
-|---|---|---|
-| 400 | "Registration ID and email are required" | Missing required fields |
-| 400 | "Invalid email format" | Email doesn't contain @ |
-| 400 | "Invalid payment provider" | Provider not recognized |
-| 404 | "Registration not found. Please check your ID and email." | Invalid rid+email combination |
-| 400 | "Registration already confirmed" | Already paid/confirmed |
-| 400 | "Registration has been cancelled" | Admin cancelled |
-| 400 | "Registration has expired" | Past expiry window |
-| 500 | "Registration fee not configured" | Fee enabled but amount = 0 |
-| 500 | "No payment methods available" | No providers configured |
+| Status | Error Message                                             | Scenario                      |
+| ------ | --------------------------------------------------------- | ----------------------------- |
+| 400    | "Registration ID and email are required"                  | Missing required fields       |
+| 400    | "Invalid email format"                                    | Email doesn't contain @       |
+| 400    | "Invalid payment provider"                                | Provider not recognized       |
+| 404    | "Registration not found. Please check your ID and email." | Invalid rid+email combination |
+| 400    | "Registration already confirmed"                          | Already paid/confirmed        |
+| 400    | "Registration has been cancelled"                         | Admin cancelled               |
+| 400    | "Registration has expired"                                | Past expiry window            |
+| 500    | "Registration fee not configured"                         | Fee enabled but amount = 0    |
+| 500    | "No payment methods available"                            | No providers configured       |
 
 **Example cURL**:
 
@@ -191,13 +191,13 @@ curl -X POST https://deessa.org/api/conference/start-payment \
 
 **Error Responses**:
 
-| Status | Error | Scenario |
-|---|---|---|
-| 400 | "Registration ID and session ID are required" | Missing params |
-| 404 | "Registration not found" | Invalid rid |
-| 403 | "Session ID mismatch" | sessionId doesn't match DB record |
-| 400 | "Stripe session not found" | Session ID expired or invalid |
-| 500 | "Payment verification failed" | Stripe API error |
+| Status | Error                                         | Scenario                          |
+| ------ | --------------------------------------------- | --------------------------------- |
+| 400    | "Registration ID and session ID are required" | Missing params                    |
+| 404    | "Registration not found"                      | Invalid rid                       |
+| 403    | "Session ID mismatch"                         | sessionId doesn't match DB record |
+| 400    | "Stripe session not found"                    | Session ID expired or invalid     |
+| 500    | "Payment verification failed"                 | Stripe API error                  |
 
 **Security**:
 
@@ -257,11 +257,11 @@ curl -X POST https://deessa.org/api/conference/confirm-stripe-session \
 
 **Error Responses**:
 
-| Status | Error | Scenario |
-|---|---|---|
-| 400 | "Registration ID and email are required" | Missing params |
-| 400 | "Invalid registration ID format" | Not a valid UUID |
-| 404 | "Registration not found. Please check your ID and email." | Invalid combination |
+| Status | Error                                                     | Scenario            |
+| ------ | --------------------------------------------------------- | ------------------- |
+| 400    | "Registration ID and email are required"                  | Missing params      |
+| 400    | "Invalid registration ID format"                          | Not a valid UUID    |
+| 404    | "Registration not found. Please check your ID and email." | Invalid combination |
 
 **Example cURL**:
 
@@ -298,10 +298,10 @@ curl "https://deessa.org/api/conference/verify-registration?rid=a1b2c3d4&email=u
 
 **Error Responses**:
 
-| Status | Error | Scenario |
-|---|---|---|
-| 400 | "Registration ID is required" | Missing rid param |
-| 404 | "Registration not found" | Invalid rid |
+| Status | Error                         | Scenario          |
+| ------ | ----------------------------- | ----------------- |
+| 400    | "Registration ID is required" | Missing rid param |
+| 404    | "Registration not found"      | Invalid rid       |
 
 **Example cURL**:
 
@@ -337,13 +337,13 @@ curl "https://deessa.org/api/conference/status?rid=a1b2c3d4"
 
 **Error Responses**:
 
-| Status | Error | Scenario |
-|---|---|---|
-| 400 | "Registration ID and email are required" | Missing params |
-| 404 | "Registration not found" | Invalid rid+email |
-| 400 | "Payment already completed" | Already paid |
-| 400 | "Registration expired" | Past expiry window |
-| 500 | "Failed to send email" | SMTP error |
+| Status | Error                                    | Scenario           |
+| ------ | ---------------------------------------- | ------------------ |
+| 400    | "Registration ID and email are required" | Missing params     |
+| 404    | "Registration not found"                 | Invalid rid+email  |
+| 400    | "Payment already completed"              | Already paid       |
+| 400    | "Registration expired"                   | Past expiry window |
+| 500    | "Failed to send email"                   | SMTP error         |
 
 **Note**: Email is sent to the stored DB email, not the email in request body (prevents email redirect attacks).
 
@@ -383,10 +383,10 @@ a1b2c3d4-...,Jane Doe,jane@example.com,+9771234567890,ACME Corp,attendee,in-pers
 
 **Error Responses**:
 
-| Status | Error | Scenario |
-|---|---|---|
-| 401 | "Unauthorized" | No auth session |
-| 500 | "Export failed" | Database error |
+| Status | Error           | Scenario        |
+| ------ | --------------- | --------------- |
+| 401    | "Unauthorized"  | No auth session |
+| 500    | "Export failed" | Database error  |
 
 **Example cURL**:
 
@@ -438,11 +438,11 @@ RETURNING id;
 
 **Error Responses**:
 
-| Status | Error | Scenario |
-|---|---|---|
-| 401 | "Unauthorized" | Missing or invalid CRON_SECRET |
-| 500 | "CRON_SECRET not configured" | Environment variable not set |
-| 500 | "Expiry job failed" | Database error |
+| Status | Error                        | Scenario                       |
+| ------ | ---------------------------- | ------------------------------ |
+| 401    | "Unauthorized"               | Missing or invalid CRON_SECRET |
+| 500    | "CRON_SECRET not configured" | Environment variable not set   |
+| 500    | "Expiry job failed"          | Database error                 |
 
 **Example cURL**:
 
@@ -477,37 +477,37 @@ curl "https://deessa.org/api/cron/expire-conference-registrations" \
 **Logic**:
 
 ```typescript
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
 function checkRateLimit(ip: string, limit: number, windowMs: number): boolean {
-  const now = Date.now()
-  const record = rateLimitMap.get(ip)
-  
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+
   if (!record || now > record.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + windowMs })
-    return true
+    rateLimitMap.set(ip, { count: 1, resetAt: now + windowMs });
+    return true;
   }
-  
+
   if (record.count >= limit) {
-    return false // Rate limit exceeded
+    return false; // Rate limit exceeded
   }
-  
-  record.count++
-  return true
+
+  record.count++;
+  return true;
 }
 ```
 
 ### 5.2 Rate Limits by Endpoint
 
-| Endpoint | Limit | Window | IP-Based |
-|---|---|---|---|
-| `/api/conference/start-payment` | 10 req | 60s | Yes |
-| `/api/conference/verify-registration` | 60 req | 60s | Yes |
-| `/api/conference/status` | 120 req | 60s | Yes |
-| `/api/conference/confirm-stripe-session` | 30 req | 60s | Yes |
-| `/api/conference/resend-payment-link` | 5 req | 60s | Yes |
-| Admin APIs | Unlimited | - | No |
-| Cron APIs | N/A | - | No (token-based) |
+| Endpoint                                 | Limit     | Window | IP-Based         |
+| ---------------------------------------- | --------- | ------ | ---------------- |
+| `/api/conference/start-payment`          | 10 req    | 60s    | Yes              |
+| `/api/conference/verify-registration`    | 60 req    | 60s    | Yes              |
+| `/api/conference/status`                 | 120 req   | 60s    | Yes              |
+| `/api/conference/confirm-stripe-session` | 30 req    | 60s    | Yes              |
+| `/api/conference/resend-payment-link`    | 5 req     | 60s    | Yes              |
+| Admin APIs                               | Unlimited | -      | No               |
+| Cron APIs                                | N/A       | -      | No (token-based) |
 
 ### 5.3 Rate Limit Error Response
 
@@ -539,16 +539,17 @@ Retry-After: 45
 **Example**:
 
 ```typescript
-import { Ratelimit } from "@upstash/ratelimit"
-import { Redis } from "@upstash/redis"
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
   limiter: Ratelimit.slidingWindow(10, "60 s"),
-})
+});
 
-const { success } = await ratelimit.limit(ip)
-if (!success) return Response.json({ error: "Rate limit exceeded" }, { status: 429 })
+const { success } = await ratelimit.limit(ip);
+if (!success)
+  return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
 ```
 
 ---
@@ -559,67 +560,65 @@ if (!success) return Response.json({ error: "Rate limit exceeded" }, { status: 4
 
 ```typescript
 interface ErrorResponse {
-  ok: false
-  error: string          // Human-readable message
-  code?: string          // Machine-readable code (optional)
-  details?: any          // Additional debug info (dev only)
+  ok: false;
+  error: string; // Human-readable message
+  code?: string; // Machine-readable code (optional)
+  details?: any; // Additional debug info (dev only)
 }
 ```
 
 ### 6.2 Standard Error Codes
 
-| Code | HTTP Status | Meaning |
-|---|---|---|
-| `VALIDATION_ERROR` | 400 | Request body/params invalid |
-| `NOT_FOUND` | 404 | Resource doesn't exist |
-| `UNAUTHORIZED` | 401 | Missing or invalid auth |
-| `FORBIDDEN` | 403 | Authenticated but not allowed |
-| `RATE_LIMIT_EXCEEDED` | 429 | Too many requests |
-| `EXPIRED` | 400 | Registration expired |
-| `ALREADY_CONFIRMED` | 400 | Action not allowed (already done) |
-| `PAYMENT_FAILED` | 400 | Payment gateway declined |
-| `INTERNAL_ERROR` | 500 | Unexpected server error |
-| `SERVICE_UNAVAILABLE` | 503 | External dependency down |
+| Code                  | HTTP Status | Meaning                           |
+| --------------------- | ----------- | --------------------------------- |
+| `VALIDATION_ERROR`    | 400         | Request body/params invalid       |
+| `NOT_FOUND`           | 404         | Resource doesn't exist            |
+| `UNAUTHORIZED`        | 401         | Missing or invalid auth           |
+| `FORBIDDEN`           | 403         | Authenticated but not allowed     |
+| `RATE_LIMIT_EXCEEDED` | 429         | Too many requests                 |
+| `EXPIRED`             | 400         | Registration expired              |
+| `ALREADY_CONFIRMED`   | 400         | Action not allowed (already done) |
+| `PAYMENT_FAILED`      | 400         | Payment gateway declined          |
+| `INTERNAL_ERROR`      | 500         | Unexpected server error           |
+| `SERVICE_UNAVAILABLE` | 503         | External dependency down          |
 
 ### 6.3 Error Handling Pattern (API Routes)
 
 ```typescript
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    
+    const body = await request.json();
+
     // Validation
     if (!body.registrationId || !body.email) {
       return Response.json(
         { ok: false, error: "Registration ID and email are required" },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
-    
+
     // Business logic
-    const result = await someServerAction(body)
-    
+    const result = await someServerAction(body);
+
     if (!result.success) {
-      return Response.json(
-        { ok: false, error: result.error },
-        { status: 400 }
-      )
+      return Response.json({ ok: false, error: result.error }, { status: 400 });
     }
-    
+
     // Success
-    return Response.json({ ok: true, data: result.data })
-    
+    return Response.json({ ok: true, data: result.data });
   } catch (error: any) {
-    console.error('API error:', error)
-    
+    console.error("API error:", error);
+
     return Response.json(
-      { 
-        ok: false, 
+      {
+        ok: false,
         error: "An unexpected error occurred",
-        ...(process.env.NODE_ENV === 'development' && { details: error.message })
+        ...(process.env.NODE_ENV === "development" && {
+          details: error.message,
+        }),
       },
-      { status: 500 }
-    )
+      { status: 500 },
+    );
   }
 }
 ```
@@ -633,14 +632,14 @@ async function callAPI() {
   try {
     const response = await fetch('/api/endpoint', { ... })
     const data = await response.json()
-    
+
     if (!response.ok || !data.ok) {
       // API-level error (even if HTTP 200)
       throw new Error(data.error || 'Request failed')
     }
-    
+
     return data
-    
+
   } catch (error) {
     // Network error or API error
     console.error('API call failed:', error)
@@ -713,38 +712,38 @@ async function callAPI() {
 3. Rate limit violation → 429 error
 4. Payment after expiry → blocked
 
-### 7.3 Example Test (Jest)**
+### 7.3 Example Test (Jest)\*\*
 
 ```typescript
-describe('POST /api/conference/start-payment', () => {
-  it('should initiate Stripe payment session', async () => {
+describe("POST /api/conference/start-payment", () => {
+  it("should initiate Stripe payment session", async () => {
     const response = await request(app)
-      .post('/api/conference/start-payment')
+      .post("/api/conference/start-payment")
       .send({
         registrationId: mockRegistrationId,
-        email: 'test@example.com',
-        provider: 'stripe'
-      })
-    
-    expect(response.status).toBe(200)
-    expect(response.body.ok).toBe(true)
-    expect(response.body.redirectUrl).toContain('stripe.com')
-  })
-  
-  it('should reject expired registration', async () => {
+        email: "test@example.com",
+        provider: "stripe",
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.ok).toBe(true);
+    expect(response.body.redirectUrl).toContain("stripe.com");
+  });
+
+  it("should reject expired registration", async () => {
     // Mock expired registration
     const response = await request(app)
-      .post('/api/conference/start-payment')
+      .post("/api/conference/start-payment")
       .send({
         registrationId: expiredRegistrationId,
-        email: 'test@example.com',
-        provider: 'stripe'
-      })
-    
-    expect(response.status).toBe(400)
-    expect(response.body.error).toContain('expired')
-  })
-})
+        email: "test@example.com",
+        provider: "stripe",
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toContain("expired");
+  });
+});
 ```
 
 ---
