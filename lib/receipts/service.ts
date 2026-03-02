@@ -5,11 +5,22 @@
 
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
+import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { generateReceiptNumber, generateReceiptHTML, getOrganizationDetails } from "./generator"
 import { sendReceiptEmail } from "@/lib/email/receipt-mailer"
-import { generateReceiptPDF } from "./pdf-generator"
-import { format } from "date-fns"
+
+/**
+ * Returns a Supabase service-role client.
+ * Used in receipt generation which runs as a fire-and-forget in API routes.
+ * In that context there is no user session cookie, so the anon client is
+ * blocked by RLS and silently fails on all DB writes.
+ */
+function getServiceSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) throw new Error("Missing Supabase service role env vars")
+  return createServiceClient(url, key)
+}
 
 export interface ReceiptGenerationResult {
   success: boolean
@@ -34,9 +45,12 @@ export async function generateAndStoreReceipt(
   isMonthly: boolean,
 ): Promise<ReceiptGenerationResult> {
   try {
-    const supabase = await createClient()
+    // IMPORTANT: use service-role client, NOT anon client.
+    // This function runs fire-and-forget inside API routes that have no auth session.
+    // Anon client is blocked by RLS and the receipt_number UPDATE silently fails.
+    const supabase = getServiceSupabase()
 
-    // Check if receipt already exists
+    // Check if receipt already exists (idempotency guard)
     const { data: existingDonation } = await supabase
       .from("donations")
       .select("receipt_number, receipt_url")
@@ -44,13 +58,27 @@ export async function generateAndStoreReceipt(
       .single()
 
     if (existingDonation?.receipt_number) {
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+      const canonicalUrl = `${baseUrl}/api/receipts/download?id=${existingDonation.receipt_number}`
+      const existingUrl = existingDonation.receipt_url || undefined
+
+      // If this donation was created before we switched to the download API as the
+      // canonical URL, repair it so email links never point at raw HTML storage.
+      if (!existingUrl || !existingUrl.includes("/api/receipts/download")) {
+        await supabase
+          .from("donations")
+          .update({ receipt_url: canonicalUrl })
+          .eq("id", donationId)
+      }
+
       return {
         success: true,
         receiptNumber: existingDonation.receipt_number,
-        receiptUrl: existingDonation.receipt_url || undefined,
+        receiptUrl: canonicalUrl,
         message: "Receipt already generated for this donation",
       }
     }
+
 
     // Generate receipt number
     const receiptNumber = await generateReceiptNumber()
@@ -73,51 +101,26 @@ export async function generateAndStoreReceipt(
       organizationDetails: orgDetails,
     })
 
-    // Generate PDF from HTML
-    let receiptPdfUrl: string | undefined
-    try {
-      const pdfBuffer = await generateReceiptPDF(receiptHTML)
-      
-      // Store PDF in Supabase Storage
-      const pdfFileName = `${donationId}-${receiptNumber}.pdf`
-      const { error: pdfUploadError } = await supabase.storage
-        .from("receipts")
-        .upload(pdfFileName, pdfBuffer, {
-          contentType: "application/pdf",
-          upsert: false,
-        })
-
-      if (pdfUploadError) {
-        console.error("PDF upload error:", pdfUploadError)
-        // Continue with HTML if PDF fails
-      } else {
-        // Get public URL for PDF
-        const { data: pdfUrlData } = supabase.storage.from("receipts").getPublicUrl(pdfFileName)
-        receiptPdfUrl = pdfUrlData?.publicUrl
-      }
-    } catch (pdfError) {
-      console.error("PDF generation error:", pdfError)
-      // Continue with HTML if PDF generation fails
-    }
-
-    // Store receipt HTML in Supabase Storage (as backup/preview)
+    // Store receipt HTML in Supabase Storage.
+    // PDFs are generated on-demand by the download route (/api/receipts/download?id=...)
+    // so we only need to persist the HTML source here.
     const htmlFileName = `${donationId}-${receiptNumber}.html`
     const { error: htmlUploadError } = await supabase.storage
       .from("receipts")
       .upload(htmlFileName, Buffer.from(receiptHTML), {
         contentType: "text/html",
-        upsert: false,
+        upsert: true, // overwrite if re-generated
       })
 
     if (htmlUploadError) {
       console.error("HTML upload error:", htmlUploadError)
     }
 
-    // Use PDF URL as primary receipt URL, fallback to HTML if PDF not available
-    const receiptUrl = receiptPdfUrl || (() => {
-      const { data: htmlUrlData } = supabase.storage.from("receipts").getPublicUrl(htmlFileName)
-      return htmlUrlData?.publicUrl
-    })()
+    // The canonical download URL points to our API route which generates the PDF
+    // live from the stored HTML. This works in all environments (dev + prod) and
+    // avoids the Puppeteer/Chromium setup issue at receipt-creation time.
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+    const receiptUrl = `${baseUrl}/api/receipts/download?id=${receiptNumber}`
 
     // Update donation with receipt info
     const { error: updateError } = await supabase
@@ -141,16 +144,15 @@ export async function generateAndStoreReceipt(
     await logReceiptAction(donationId, "generated", {
       receiptNumber,
       receiptUrl,
-      receiptPdfUrl,
     })
 
     return {
       success: true,
       receiptNumber,
       receiptUrl,
-      receiptPdfUrl,
       message: "Receipt generated successfully",
     }
+
   } catch (error) {
     console.error("Receipt generation error:", error)
     return {
@@ -173,7 +175,7 @@ export async function sendReceiptToDonor(
   currency: string,
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const supabase = await createClient()
+    const supabase = getServiceSupabase()
 
     // Send email
     const emailResult = await sendReceiptEmail({
@@ -229,7 +231,7 @@ export async function sendReceiptToDonor(
  */
 export async function trackReceiptDownload(donationId: string): Promise<void> {
   try {
-    const supabase = await createClient()
+    const supabase = getServiceSupabase()
 
     // Increment download count
     const { data: donation } = await supabase
@@ -264,7 +266,7 @@ export async function resendReceiptEmail(
   donationId: string,
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const supabase = await createClient()
+    const supabase = getServiceSupabase()
 
     // Get donation details
     const { data: donation, error } = await supabase
@@ -287,13 +289,27 @@ export async function resendReceiptEmail(
       }
     }
 
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+    const canonicalUrl = `${baseUrl}/api/receipts/download?id=${donation.receipt_number}`
+    const effectiveUrl =
+      typeof donation.receipt_url === "string" && donation.receipt_url.includes("/api/receipts/download")
+        ? donation.receipt_url
+        : canonicalUrl
+
+    if (effectiveUrl !== donation.receipt_url) {
+      await supabase
+        .from("donations")
+        .update({ receipt_url: effectiveUrl })
+        .eq("id", donationId)
+    }
+
     // Send email
     const emailResult = await sendReceiptToDonor(
       donationId,
       donation.donor_name,
       donation.donor_email,
       donation.receipt_number,
-      donation.receipt_url,
+      effectiveUrl,
       donation.amount,
       donation.currency,
     )
@@ -325,7 +341,7 @@ async function logReceiptAction(
   details: Record<string, unknown>,
 ): Promise<void> {
   try {
-    const supabase = await createClient()
+    const supabase = getServiceSupabase()
 
     await supabase.from("receipt_audit_log").insert({
       donation_id: donationId,
@@ -342,7 +358,7 @@ async function logReceiptAction(
  */
 export async function getReceiptDetails(donationId: string) {
   try {
-    const supabase = await createClient()
+    const supabase = getServiceSupabase()
 
     const { data: donation, error } = await supabase
       .from("donations")

@@ -57,11 +57,14 @@ export function ReceiptPreview({
         throw new Error("Download failed")
       }
 
+      const contentType = response.headers.get("content-type") || ""
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `${receiptNumber}.pdf`
+      a.download = contentType.includes("text/html")
+        ? `${receiptNumber}.html`
+        : `${receiptNumber}.pdf`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)

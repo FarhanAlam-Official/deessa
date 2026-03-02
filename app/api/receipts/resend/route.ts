@@ -3,9 +3,16 @@
  * Handles resending receipt emails
  */
 
-import { createClient } from "@/lib/supabase/server"
+import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { resendReceiptEmail } from "@/lib/receipts/service"
 import { NextRequest, NextResponse } from "next/server"
+
+function getServiceSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) throw new Error("Missing Supabase service role env vars")
+  return createServiceClient(url, key)
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +26,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = getServiceSupabase()
 
     // Get donation by receipt number
     const { data: donation, error } = await supabase

@@ -12,6 +12,7 @@ import {
   maskSensitiveData,
 } from "@/lib/payments/security"
 import { sendConferenceConfirmationEmail } from "@/lib/email/conference-mailer"
+import { generateReceiptForDonation } from "@/lib/actions/donation-receipt"
 
 /**
  * Verify HMAC-SHA256 signature for eSewa v2 API response.
@@ -338,6 +339,25 @@ export async function GET(request: Request) {
     transactionUuid: maskSensitiveData(transaction_uuid),
     amount: actualAmount,
   })
+
+  // Fire-and-forget receipt generation.
+  // Non-blocking: never delays the redirect.
+  // Idempotent: generateReceiptForDonation checks if receipt already exists.
+  generateReceiptForDonation({ donationId: donation.id })
+    .then((r) => {
+      if (!r.success) {
+        logPaymentEvent("eSewa success - receipt generation failed (non-fatal)", {
+          donationId: donation.id,
+          message: r.message,
+        }, "warn")
+      }
+    })
+    .catch((e) =>
+      logPaymentEvent("eSewa success - receipt generation error (non-fatal)", {
+        donationId: donation.id,
+        error: e instanceof Error ? e.message : String(e),
+      }, "error"),
+    )
 
   // Redirect to success page
   return NextResponse.redirect(

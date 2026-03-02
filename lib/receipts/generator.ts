@@ -3,8 +3,15 @@
  * Generates PDF receipts for donations with organization details
  */
 
-import { createClient } from "@/lib/supabase/server"
+import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { format } from "date-fns"
+
+function getServiceSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) throw new Error("Missing Supabase service role env vars")
+  return createServiceClient(url, key)
+}
 
 export interface ReceiptData {
   donationId: string
@@ -35,7 +42,7 @@ export interface OrganizationDetails {
  * Get organization details from site settings
  */
 export async function getOrganizationDetails(): Promise<OrganizationDetails> {
-  const supabase = await createClient()
+  const supabase = getServiceSupabase()
 
   const { data, error } = await supabase
     .from("site_settings")
@@ -63,28 +70,44 @@ export async function getOrganizationDetails(): Promise<OrganizationDetails> {
 
 /**
  * Generate next receipt number
+ *
+ * Uses a Postgres sequence via RPC for atomic, collision-free numbering.
+ * Falls back to the legacy SELECT-max approach if the RPC is unavailable
+ * (e.g., migration 012 not yet run), so existing environments stay working.
  */
 export async function generateReceiptNumber(): Promise<string> {
-  const supabase = await createClient()
+  const supabase = getServiceSupabase()
   const orgDetails = await getOrganizationDetails()
 
-  // Get the highest receipt number currently in use
-  const { data: donations, error } = await supabase
-    .from("donations")
-    .select("receipt_number")
-    .not("receipt_number", "is", null)
-    .order("created_at", { ascending: false })
-    .limit(1)
+  let nextNumber: number = orgDetails.receipt_number_start
 
-  let nextNumber = orgDetails.receipt_number_start
+  // Primary path: atomic DB sequence (requires migration 012-receipt-sequence.sql)
+  const { data: seqData, error: seqError } = await supabase.rpc(
+    "get_next_receipt_number",
+  )
 
-  if (!error && donations && donations.length > 0) {
-    const lastReceipt = donations[0].receipt_number
-    if (lastReceipt) {
-      // Extract number from receipt (e.g., "RCP-2024-001" -> 1)
-      const match = lastReceipt.match(/(\d+)$/)
-      if (match) {
-        nextNumber = parseInt(match[1], 10) + 1
+  if (!seqError && seqData !== null) {
+    nextNumber = Number(seqData)
+  } else {
+    // Fallback: non-atomic SELECT max (safe enough with the UNIQUE constraint as a guard)
+    console.warn(
+      "get_next_receipt_number RPC unavailable, using fallback. Run migration 012-receipt-sequence.sql.",
+      seqError?.message,
+    )
+    const { data: donations, error } = await supabase
+      .from("donations")
+      .select("receipt_number")
+      .not("receipt_number", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(1)
+
+    if (!error && donations && donations.length > 0) {
+      const lastReceipt = donations[0].receipt_number
+      if (lastReceipt) {
+        const match = lastReceipt.match(/(\d+)$/)
+        if (match) {
+          nextNumber = parseInt(match[1], 10) + 1
+        }
       }
     }
   }

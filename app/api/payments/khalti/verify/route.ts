@@ -10,6 +10,7 @@ import {
   maskSensitiveData,
 } from "@/lib/payments/security"
 import { sendConferenceConfirmationEmail } from "@/lib/email/conference-mailer"
+import { generateReceiptForDonation } from "@/lib/actions/donation-receipt"
 
 type KhaltiStatus =
   | "Completed"
@@ -578,6 +579,27 @@ export async function POST(request: Request) {
         } catch {
           // ignore if ledger table missing
         }
+      }
+
+      // Fire-and-forget receipt generation for completed donations.
+      // Non-blocking: never delays the payment confirmation response.
+      // Idempotent: generateReceiptForDonation checks if receipt already exists.
+      if (newStatus === "completed") {
+        generateReceiptForDonation({ donationId: donation.id })
+          .then((r) => {
+            if (!r.success) {
+              logPaymentEvent("Khalti verify - receipt generation failed (non-fatal)", {
+                donationId: donation.id,
+                message: r.message,
+              }, "warn")
+            }
+          })
+          .catch((e) =>
+            logPaymentEvent("Khalti verify - receipt generation error (non-fatal)", {
+              donationId: donation.id,
+              error: e instanceof Error ? e.message : String(e),
+            }, "error"),
+          )
       }
     }
 

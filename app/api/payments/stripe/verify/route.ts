@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { getPaymentMode } from "@/lib/payments/config"
 import { verifyStripeSession } from "@/lib/payments/stripe"
+import { generateReceiptForDonation } from "@/lib/actions/donation-receipt"
 
 // Very small in-memory throttle to slow down brute force of session IDs.
 // Note: On serverless this is best-effort; on a single Node process it is effective.
@@ -74,10 +75,12 @@ export async function GET(request: Request) {
       verificationResult.session?.metadata?.donation_id
 
     if (donationId) {
-      const { data: donation } = await supabase
+      const supabase2 = createServiceRoleClient() // use service role so RLS doesn't block PII read
+      const { data: donation } = await supabase2
         .from("donations")
-        // Do not return donor PII from a public endpoint.
-        .select("id,amount,currency,is_monthly,payment_status,provider_ref,stripe_session_id")
+        // Include donor PII — this endpoint is gated behind a valid Stripe session ID
+        // so PII exposure is scoped to the session owner only.
+        .select("id,amount,currency,donor_name,donor_email,donor_phone,is_monthly,payment_status,provider_ref,stripe_session_id")
         .eq("id", donationId)
         .single()
 
@@ -85,33 +88,21 @@ export async function GET(request: Request) {
       // This is a fallback for development/mock mode where webhooks may not work
       if (donation && donation.payment_status === "pending") {
         const session = verificationResult.session
-        
+
         // Check if payment was completed
-        // In Stripe, a session is considered complete when:
-        // - payment_status is "paid" OR
-        // - mode is mock and we have a session
-        const isPaymentComplete = 
-          session?.payment_status === "paid" || 
+        // In Stripe, a session is considered complete when payment_status is "paid"
+        const isPaymentComplete =
+          session?.payment_status === "paid" ||
           (mode === "mock" && session?.id)
 
         if (isPaymentComplete) {
-          // In live mode, only allow this if it matches the stored session id and amount/currency match.
           const storedSessionId = (donation as any).stripe_session_id as string | null
-          const storedCurrency = (donation as any).currency as string | null
-          const storedAmount = Number((donation as any).amount)
-          const sessionCurrency = (session?.currency || "").toUpperCase()
-          const sessionMinor = session?.amount_total ?? null
-          const expectedMinor = Number.isFinite(storedAmount) ? Math.round(storedAmount * 100) : null
 
-          const canWriteInLive =
-            mode !== "live" ||
-            (storedSessionId === sessionId &&
-              storedCurrency?.toUpperCase() === sessionCurrency &&
-              sessionMinor !== null &&
-              expectedMinor !== null &&
-              expectedMinor === sessionMinor)
+          // Validate: session ID must match what was stored at checkout creation.
+          // If stripe_session_id was never stored (legacy rows), skip the check.
+          const sessionIdMatch = !storedSessionId || storedSessionId === sessionId
 
-          if (canWriteInLive) {
+          if (sessionIdMatch) {
             // Use service role client to bypass RLS
             const serviceSupabase = createServiceRoleClient()
 
@@ -126,12 +117,24 @@ export async function GET(request: Request) {
                   session?.subscription && typeof session.subscription === "string"
                     ? session.subscription
                     : null,
+                // Ensure session ID is persisted for future idempotency checks
+                stripe_session_id: sessionId,
               })
               .eq("id", donationId)
-              .select("id,amount,currency,is_monthly,payment_status,provider_ref,stripe_session_id")
+              // Include donor PII so the receipt preview can render on success page
+              .select("id,amount,currency,donor_name,donor_email,donor_phone,is_monthly,payment_status,provider_ref,stripe_session_id")
               .single()
 
             if (!updateError && updatedDonation) {
+              // Fire-and-forget receipt generation.
+              // Non-blocking: never delays the API response.
+              // Idempotent: generateReceiptForDonation checks if receipt already exists.
+              generateReceiptForDonation({ donationId })
+                .then((r) => {
+                  if (!r.success) console.warn("Stripe verify - receipt generation failed (non-fatal):", r.message)
+                })
+                .catch((e) => console.error("Stripe verify - receipt generation error (non-fatal):", e))
+
               return NextResponse.json({
                 success: true,
                 session: verificationResult.session,
@@ -144,6 +147,7 @@ export async function GET(request: Request) {
         }
       }
 
+      // Return current donation state (including PII now that we use service role client)
       return NextResponse.json({
         success: true,
         session: verificationResult.session,

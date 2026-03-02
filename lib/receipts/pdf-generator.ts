@@ -5,6 +5,8 @@
 
 import puppeteer from "puppeteer-core"
 import chromium from "@sparticuz/chromium"
+import fs from "fs"
+import path from "path"
 
 // Configure Chromium for serverless environments
 // Only call setGraphicsMode if it exists (may not be available in all environments/versions)
@@ -26,6 +28,54 @@ export interface PDFGenerationOptions {
     bottom?: string
     left?: string
   }
+}
+
+function getLocalBrowserExecutablePath(): string | undefined {
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) return process.env.PUPPETEER_EXECUTABLE_PATH
+  if (process.env.CHROME_PATH) return process.env.CHROME_PATH
+
+  const platform = process.platform
+  const candidates: string[] = []
+
+  if (platform === "win32") {
+    const programFiles = process.env.PROGRAMFILES
+    const programFilesX86 = process.env["PROGRAMFILES(X86)"]
+    const localAppData = process.env.LOCALAPPDATA
+
+    if (programFiles) {
+      candidates.push(path.join(programFiles, "Google", "Chrome", "Application", "chrome.exe"))
+      candidates.push(path.join(programFiles, "Microsoft", "Edge", "Application", "msedge.exe"))
+    }
+    if (programFilesX86) {
+      candidates.push(path.join(programFilesX86, "Google", "Chrome", "Application", "chrome.exe"))
+      candidates.push(path.join(programFilesX86, "Microsoft", "Edge", "Application", "msedge.exe"))
+    }
+    if (localAppData) {
+      candidates.push(path.join(localAppData, "Google", "Chrome", "Application", "chrome.exe"))
+      candidates.push(path.join(localAppData, "Microsoft", "Edge", "Application", "msedge.exe"))
+    }
+  } else if (platform === "darwin") {
+    candidates.push("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
+    candidates.push("/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge")
+    candidates.push("/Applications/Chromium.app/Contents/MacOS/Chromium")
+  } else {
+    candidates.push("/usr/bin/google-chrome")
+    candidates.push("/usr/bin/google-chrome-stable")
+    candidates.push("/usr/bin/chromium")
+    candidates.push("/usr/bin/chromium-browser")
+    candidates.push("/snap/bin/chromium")
+    candidates.push("/opt/google/chrome/chrome")
+  }
+
+  for (const candidate of candidates) {
+    try {
+      if (candidate && fs.existsSync(candidate)) return candidate
+    } catch {
+      // ignore
+    }
+  }
+
+  return undefined
 }
 
 /**
@@ -51,10 +101,19 @@ export async function generatePDFFromHTML(
         headless: chromium.headless,
       })
     } else {
-      // Use local Chrome/Chromium for development
+      // Use local Chrome/Edge/Chromium for development.
+      // puppeteer-core does not bundle a browser, so we must provide an executablePath.
+      const executablePath = getLocalBrowserExecutablePath()
+      if (!executablePath) {
+        throw new Error(
+          "No local Chrome/Edge executable found. Set PUPPETEER_EXECUTABLE_PATH (or CHROME_PATH) to your browser executable.",
+        )
+      }
+
       browser = await puppeteer.launch({
         headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        executablePath,
       })
     }
 
