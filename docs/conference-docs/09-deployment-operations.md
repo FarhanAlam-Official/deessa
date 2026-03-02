@@ -74,25 +74,25 @@ SENTRY_DSN=https://...@sentry.io/...
 
 ### 1.2 Environment Variable Reference
 
-| Variable | Required | Visibility | Description |
-|---|---|---|---|
-| **NODE_ENV** | Yes | Server | `development` / `production` |
-| **NEXT_PUBLIC_SITE_URL** | Yes | Both | Base URL (used in emails, redirects) |
-| **NEXT_PUBLIC_SUPABASE_URL** | Yes | Both | Supabase project URL |
-| **NEXT_PUBLIC_SUPABASE_ANON_KEY** | Yes | Both | Public anon key (safe to expose) |
-| **SUPABASE_SERVICE_ROLE_KEY** | Yes | Server | Service role key (NEVER expose to client) |
-| **GOOGLE_EMAIL** | Yes | Server | Gmail account for sending emails |
-| **GOOGLE_EMAIL_APP_PASSWORD** | Yes | Server | Gmail app-specific password |
-| **STRIPE_SECRET_KEY** | Conditional | Server | Stripe secret key (live or test) |
-| **STRIPE_PUBLISHABLE_KEY** | Conditional | Both | Stripe publishable key |
-| **STRIPE_WEBHOOK_SECRET** | Conditional | Server | Stripe webhook signing secret |
-| **KHALTI_SECRET_KEY** | Conditional | Server | Khalti API secret key |
-| **KHALTI_PUBLIC_KEY** | Conditional | Both | Khalti public key |
-| **ESEWA_MERCHANT_CODE** | Conditional | Server | eSewa merchant/product code |
-| **ESEWA_SECRET_KEY** | Conditional | Server | eSewa signing secret |
-| **ESEWA_ENVIRONMENT** | Conditional | Server | `production` / `development` |
-| **CRON_SECRET** | Yes | Server | Random string for cron auth |
-| **SENTRY_DSN** | Optional | Server | Error tracking endpoint |
+| Variable                          | Required    | Visibility | Description                               |
+| --------------------------------- | ----------- | ---------- | ----------------------------------------- |
+| **NODE_ENV**                      | Yes         | Server     | `development` / `production`              |
+| **NEXT_PUBLIC_SITE_URL**          | Yes         | Both       | Base URL (used in emails, redirects)      |
+| **NEXT_PUBLIC_SUPABASE_URL**      | Yes         | Both       | Supabase project URL                      |
+| **NEXT_PUBLIC_SUPABASE_ANON_KEY** | Yes         | Both       | Public anon key (safe to expose)          |
+| **SUPABASE_SERVICE_ROLE_KEY**     | Yes         | Server     | Service role key (NEVER expose to client) |
+| **GOOGLE_EMAIL**                  | Yes         | Server     | Gmail account for sending emails          |
+| **GOOGLE_EMAIL_APP_PASSWORD**     | Yes         | Server     | Gmail app-specific password               |
+| **STRIPE_SECRET_KEY**             | Conditional | Server     | Stripe secret key (live or test)          |
+| **STRIPE_PUBLISHABLE_KEY**        | Conditional | Both       | Stripe publishable key                    |
+| **STRIPE_WEBHOOK_SECRET**         | Conditional | Server     | Stripe webhook signing secret             |
+| **KHALTI_SECRET_KEY**             | Conditional | Server     | Khalti API secret key                     |
+| **KHALTI_PUBLIC_KEY**             | Conditional | Both       | Khalti public key                         |
+| **ESEWA_MERCHANT_CODE**           | Conditional | Server     | eSewa merchant/product code               |
+| **ESEWA_SECRET_KEY**              | Conditional | Server     | eSewa signing secret                      |
+| **ESEWA_ENVIRONMENT**             | Conditional | Server     | `production` / `development`              |
+| **CRON_SECRET**                   | Yes         | Server     | Random string for cron auth               |
+| **SENTRY_DSN**                    | Optional    | Server     | Error tracking endpoint                   |
 
 **Conditional**: At least ONE payment provider must be configured (Stripe, Khalti, or eSewa).
 
@@ -134,12 +134,12 @@ SENTRY_DSN=https://...@sentry.io/...
 
 **Rotation Schedule**:
 
-| Key Type | Rotation Frequency | Procedure |
-|---|---|---|
-| Database keys | Annually | Rotate in Supabase dashboard → Update Vercel |
-| Payment gateway keys | Annually or after breach | Rotate in gateway dashboard → Update Vercel |
-| CRON_SECRET | Annually | Generate new random string → Update Vercel + cron config |
-| Email password | On security alert | Regenerate app password → Update Vercel |
+| Key Type             | Rotation Frequency       | Procedure                                                |
+| -------------------- | ------------------------ | -------------------------------------------------------- |
+| Database keys        | Annually                 | Rotate in Supabase dashboard → Update Vercel             |
+| Payment gateway keys | Annually or after breach | Rotate in gateway dashboard → Update Vercel              |
+| CRON_SECRET          | Annually                 | Generate new random string → Update Vercel + cron config |
+| Email password       | On security alert        | Regenerate app password → Update Vercel                  |
 
 **Access Control**:
 
@@ -269,7 +269,7 @@ git push origin main
   "crons": [
     {
       "path": "/api/cron/expire-conference-registrations",
-      "schedule": "0 * * * *"
+      "schedule": "0 2 * * *"
     }
   ]
 }
@@ -332,7 +332,7 @@ SELECT * FROM payment_events WHERE event_id = 'evt_...';
 
 # Option 3: Direct SQL (last resort)
 UPDATE conference_registrations
-SET 
+SET
   status = 'confirmed',
   payment_status = 'paid',
   payment_provider = 'stripe',
@@ -395,7 +395,7 @@ vercel logs --since 1h | grep "Email send failed"
 
 ```bash
 # Check registration record
-SELECT 
+SELECT
   id, status, payment_status, expires_at, created_at, updated_at
 FROM conference_registrations
 WHERE id = 'registration-uuid';
@@ -422,7 +422,7 @@ ORDER BY created_at DESC;
 
 # Option 3: Direct SQL (if payment verified in Stripe)
 UPDATE conference_registrations
-SET 
+SET
   status = 'confirmed',
   payment_status = 'paid',
   expires_at = NULL,
@@ -444,14 +444,13 @@ vercel logs --since 24h | grep "/api/cron/"
 
 # Check cron configuration
 # vercel.json should have:
+# vercel.json should have:
 {
   "crons": [{
     "path": "/api/cron/expire-conference-registrations",
-    "schedule": "0 * * * *"
+    "schedule": "0 2 * * *"
   }]
-}
-
-# Test cron endpoint manually
+}# Test cron endpoint manually
 curl https://deessa.org/api/cron/expire-conference-registrations \
   -H "Authorization: Bearer $CRON_SECRET"
 
@@ -492,7 +491,7 @@ WHERE status IN ('pending_payment', 'pending')
 
 ```bash
 # Check registration
-SELECT 
+SELECT
   payment_amount, payment_currency, payment_provider, payment_id, payment_status
 FROM conference_registrations
 WHERE id = 'registration-uuid';
@@ -533,15 +532,15 @@ WHERE id = 'registration-uuid' AND payment_amount = (verified_amount);
 
 ### 4.1 Key Metrics to Monitor
 
-| Metric | Tool | Alert Threshold | Action |
-|---|---|---|---|
-| **Error Rate** | Vercel / Sentry | >5% of requests | Check logs, investigate |
-| **Build Failures** | Vercel | Any failure | Fix build errors immediately |
-| **Database CPU** | Supabase | >80% sustained | Upgrade tier or optimize queries |
-| **Email Failures** | Application logs | >10% failure rate | Check SMTP status, daily limit |
-| **Payment Failures** | Gateway dashboards | >20% decline rate | Check gateway status, amounts |
-| **Cron Job Failures** | Vercel logs | Missed execution | Check CRON_SECRET, redeploy |
-| **Page Load Time** | Vercel Analytics | >3 seconds p95 | Optimize queries, add caching |
+| Metric                | Tool               | Alert Threshold   | Action                           |
+| --------------------- | ------------------ | ----------------- | -------------------------------- |
+| **Error Rate**        | Vercel / Sentry    | >5% of requests   | Check logs, investigate          |
+| **Build Failures**    | Vercel             | Any failure       | Fix build errors immediately     |
+| **Database CPU**      | Supabase           | >80% sustained    | Upgrade tier or optimize queries |
+| **Email Failures**    | Application logs   | >10% failure rate | Check SMTP status, daily limit   |
+| **Payment Failures**  | Gateway dashboards | >20% decline rate | Check gateway status, amounts    |
+| **Cron Job Failures** | Vercel logs        | Missed execution  | Check CRON_SECRET, redeploy      |
+| **Page Load Time**    | Vercel Analytics   | >3 seconds p95    | Optimize queries, add caching    |
 
 ### 4.2 Recommended Alerting Setup
 
@@ -603,13 +602,13 @@ vercel logs --since 1h | grep "ECONNREFUSED"
 
 ### 5.1 Backup Strategy
 
-| Data | Backup Method | Frequency | Retention | Owner |
-|---|---|---|---|---|
-| Database | Supabase auto-backup | Daily | 7 days | Supabase |
-| Database | Manual SQL export | Weekly | 30 days | DevOps team |
-| Registration CSV | Admin export | Before each event | Indefinite | Program staff |
-| Code | Git repository | On every commit | Indefinite | Git hosting |
-| Environment variables | Documented | On changes | Indefinite | DevOps team (secure storage) |
+| Data                  | Backup Method        | Frequency         | Retention  | Owner                        |
+| --------------------- | -------------------- | ----------------- | ---------- | ---------------------------- |
+| Database              | Supabase auto-backup | Daily             | 7 days     | Supabase                     |
+| Database              | Manual SQL export    | Weekly            | 30 days    | DevOps team                  |
+| Registration CSV      | Admin export         | Before each event | Indefinite | Program staff                |
+| Code                  | Git repository       | On every commit   | Indefinite | Git hosting                  |
+| Environment variables | Documented           | On changes        | Indefinite | DevOps team (secure storage) |
 
 ### 5.2 Database Backup Procedure
 
@@ -632,7 +631,7 @@ pg_dump $SUPABASE_DATABASE_URL \
   --file=backup-$(date +%Y%m%d).sql
 
 # Via SQL
-COPY (SELECT * FROM conference_registrations) 
+COPY (SELECT * FROM conference_registrations)
 TO '/tmp/registrations.csv' CSV HEADER;
 ```
 
@@ -701,16 +700,16 @@ psql $SUPABASE_DATABASE_URL -c "\\COPY conference_registrations FROM 'backup.csv
 
 ### 6.1 Common Issues
 
-| Issue | Symptoms | Solution |
-|---|---|---|
-| **Build fails** | Vercel shows "Build Failed" | Check logs for TypeScript/ESLint errors; fix and redeploy |
-| **500 errors** | Pages show "Internal Server Error" | Check Vercel logs; likely database connection or missing env var |
-| **Slow page loads** | Pages take >5 seconds | Check Supabase database CPU; add indexes; optimize queries |
-| **Payment not confirming** | Stuck in "Processing" | Check webhook logs; manually confirm via admin dashboard |
-| **Emails not sending** | No emails received | Check SMTP settings; verify Gmail app password; check spam |
-| **Cron not executing** | Registrations don't expire | Check CRON_SECRET; test endpoint manually; check Vercel logs |
-| **Rate limiting hit** | 429 errors | Wait for rate limit window to reset; upgrade rate limit logic |
-| **Database connection errors** | "ECONNREFUSED" in logs | Check Supabase status; verify connection pooling; restart functions |
+| Issue                          | Symptoms                           | Solution                                                            |
+| ------------------------------ | ---------------------------------- | ------------------------------------------------------------------- |
+| **Build fails**                | Vercel shows "Build Failed"        | Check logs for TypeScript/ESLint errors; fix and redeploy           |
+| **500 errors**                 | Pages show "Internal Server Error" | Check Vercel logs; likely database connection or missing env var    |
+| **Slow page loads**            | Pages take >5 seconds              | Check Supabase database CPU; add indexes; optimize queries          |
+| **Payment not confirming**     | Stuck in "Processing"              | Check webhook logs; manually confirm via admin dashboard            |
+| **Emails not sending**         | No emails received                 | Check SMTP settings; verify Gmail app password; check spam          |
+| **Cron not executing**         | Registrations don't expire         | Check CRON_SECRET; test endpoint manually; check Vercel logs        |
+| **Rate limiting hit**          | 429 errors                         | Wait for rate limit window to reset; upgrade rate limit logic       |
+| **Database connection errors** | "ECONNREFUSED" in logs             | Check Supabase status; verify connection pooling; restart functions |
 
 ### 6.2 Debug Commands
 
