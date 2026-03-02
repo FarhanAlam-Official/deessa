@@ -244,7 +244,7 @@ These limitations are **intentional design choices** that simplify the system fo
 
 ### Data Storage
 
-- All registration data stored in **Supabase (Frankfurt, EU)** or **US region** (configurable)
+- All registration data is stored in **Supabase (Frankfurt, EU)** by default for production. The region can be changed to the **US** or other available Supabase regions by updating the deployment configuration (see the `SUPABASE_REGION` environment variable in your hosting settings).
 - Database protected by Row-Level Security (RLS) policies
 - Admin access requires authentication
 - Public API endpoints validated with dual-key security (registration ID + email)
