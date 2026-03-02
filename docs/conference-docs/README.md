@@ -253,7 +253,7 @@ This comprehensive documentation suite covers the DEESSA Foundation Conference R
 4. Clone repository and set up local environment:
 
    ```bash
-   git clone [repository-url]
+   git clone https://github.com/farhanalam-official/deessa.git
    cd deessa-foundation
    pnpm install
    cp .env.example .env.local
@@ -292,18 +292,18 @@ This comprehensive documentation suite covers the DEESSA Foundation Conference R
 
 ## 📊 System Quick Facts
 
-| Category | Details |
-|---|---|
-| **Technology** | Next.js 14, TypeScript, Supabase (PostgreSQL), Stripe + Khalti + eSewa |
-| **Hosting** | Vercel (serverless) |
-| **Database** | 3 tables, 5 indexes, 30 columns in main table |
-| **APIs** | 8 endpoints (6 public, 1 admin, 1 cron) |
-| **Pages** | 11 pages (8 public, 3 admin) |
-| **Email** | Nodemailer + Gmail SMTP (2000/day limit) |
-| **Payments** | 3 gateways, dual-path verification, idempotency guaranteed |
-| **Security** | Dual-key auth, RLS policies, HMAC webhooks, PCI compliant (via gateways) |
-| **Deployment** | Auto-deploy on Git push, 2-5 min build time |
-| **Backup** | Daily auto-backup (7-day retention), manual CSV export recommended |
+| Category       | Details                                                                  |
+| -------------- | ------------------------------------------------------------------------ |
+| **Technology** | Next.js 14, TypeScript, Supabase (PostgreSQL), Stripe + Khalti + eSewa   |
+| **Hosting**    | Vercel (serverless)                                                      |
+| **Database**   | 3 tables, 5 indexes, 30 columns in main table                            |
+| **APIs**       | 8 endpoints (6 public, 1 admin, 1 cron)                                  |
+| **Pages**      | 11 pages (8 public, 3 admin)                                             |
+| **Email**      | Nodemailer + Gmail SMTP (2000/day limit)                                 |
+| **Payments**   | 3 gateways, dual-path verification, idempotency guaranteed               |
+| **Security**   | Dual-key auth, RLS policies, HMAC webhooks, PCI compliant (via gateways) |
+| **Deployment** | Auto-deploy on Git push, 2-5 min build time                              |
+| **Backup**     | Daily auto-backup (7-day retention), manual CSV export recommended       |
 
 ---
 
@@ -311,47 +311,47 @@ This comprehensive documentation suite covers the DEESSA Foundation Conference R
 
 ### Developers
 
-| Task | Documentation |
-|---|---|
+| Task                       | Documentation                                                                                     |
+| -------------------------- | ------------------------------------------------------------------------------------------------- |
 | Add new registration field | [04: Page Documentation](04-page-documentation.md) + [03: Database Schema](03-database-schema.md) |
-| Add new payment gateway | [06: Payment Flows](06-payment-flows.md) |
-| Optimize slow query | [03: Database Schema](03-database-schema.md) (query patterns section) |
-| Add new API endpoint | [05: API Documentation](05-api-documentation.md) (follow existing patterns) |
-| Fix email not sending | [09: Deployment & Operations](09-deployment-operations.md) (Runbook 3.2) |
-| Debug webhook failure | [09: Deployment & Operations](09-deployment-operations.md) (Runbook 3.1) |
+| Add new payment gateway    | [06: Payment Flows](06-payment-flows.md)                                                          |
+| Optimize slow query        | [03: Database Schema](03-database-schema.md) (query patterns section)                             |
+| Add new API endpoint       | [05: API Documentation](05-api-documentation.md) (follow existing patterns)                       |
+| Fix email not sending      | [09: Deployment & Operations](09-deployment-operations.md) (Runbook 3.2)                          |
+| Debug webhook failure      | [09: Deployment & Operations](09-deployment-operations.md) (Runbook 3.1)                          |
 
 ### Admins
 
-| Task | Documentation |
-|---|---|
-| Confirm payment manually | [07: Admin Documentation](07-admin-documentation.md) (Section 2.3) |
-| Export CSV for analysis | [07: Admin Documentation](07-admin-documentation.md) (Section 2.4) |
-| Cancel registration | [07: Admin Documentation](07-admin-documentation.md) (Section 2.3) |
-| Extend expiry time | [07: Admin Documentation](07-admin-documentation.md) (Section 2.3) |
-| Send custom email | [07: Admin Documentation](07-admin-documentation.md) (Section 2.3) |
+| Task                      | Documentation                                                              |
+| ------------------------- | -------------------------------------------------------------------------- |
+| Confirm payment manually  | [07: Admin Documentation](07-admin-documentation.md) (Section 2.3)         |
+| Export CSV for analysis   | [07: Admin Documentation](07-admin-documentation.md) (Section 2.4)         |
+| Cancel registration       | [07: Admin Documentation](07-admin-documentation.md) (Section 2.3)         |
+| Extend expiry time        | [07: Admin Documentation](07-admin-documentation.md) (Section 2.3)         |
+| Send custom email         | [07: Admin Documentation](07-admin-documentation.md) (Section 2.3)         |
 | Change conference pricing | [07: Admin Documentation](07-admin-documentation.md) (Section 3: Settings) |
 
 ### Operations
 
-| Task | Documentation |
-|---|---|
-| Deploy to production | [09: Deployment & Operations](09-deployment-operations.md) (Section 2.1) |
-| Run database migration | [09: Deployment & Operations](09-deployment-operations.md) (Section 2.2) |
-| Restore from backup | [09: Deployment & Operations](09-deployment-operations.md) (Section 5.3) |
+| Task                           | Documentation                                                            |
+| ------------------------------ | ------------------------------------------------------------------------ |
+| Deploy to production           | [09: Deployment & Operations](09-deployment-operations.md) (Section 2.1) |
+| Run database migration         | [09: Deployment & Operations](09-deployment-operations.md) (Section 2.2) |
+| Restore from backup            | [09: Deployment & Operations](09-deployment-operations.md) (Section 5.3) |
 | Handle payment webhook failure | [09: Deployment & Operations](09-deployment-operations.md) (Runbook 3.1) |
-| Fix cron not running | [09: Deployment & Operations](09-deployment-operations.md) (Runbook 3.4) |
-| Set up monitoring alerts | [09: Deployment & Operations](09-deployment-operations.md) (Section 4.2) |
+| Fix cron not running           | [09: Deployment & Operations](09-deployment-operations.md) (Runbook 3.4) |
+| Set up monitoring alerts       | [09: Deployment & Operations](09-deployment-operations.md) (Section 4.2) |
 
 ### Leadership
 
-| Task | Documentation |
-|---|---|
-| Evaluate system ROI | [00: Executive Summary](00-executive-summary.md) (Section 4: Financial Impact) |
+| Task                       | Documentation                                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Evaluate system ROI        | [00: Executive Summary](00-executive-summary.md) (Section 4: Financial Impact)                                    |
 | Understand ownership model | [00: Executive Summary](00-executive-summary.md) (Section 3) + [02: Architecture](02-architecture.md) (Section 2) |
-| Review security posture | [08: Security](08-security.md) |
-| Plan future enhancements | [10: Improvements & Risks](10-improvements-risks.md) (Section 6) |
-| Assess risks | [10: Improvements & Risks](10-improvements-risks.md) (Section 4) |
-| Review limitations | [10: Improvements & Risks](10-improvements-risks.md) (Section 1) |
+| Review security posture    | [08: Security](08-security.md)                                                                                    |
+| Plan future enhancements   | [10: Improvements & Risks](10-improvements-risks.md) (Section 6)                                                  |
+| Assess risks               | [10: Improvements & Risks](10-improvements-risks.md) (Section 4)                                                  |
+| Review limitations         | [10: Improvements & Risks](10-improvements-risks.md) (Section 1)                                                  |
 
 ---
 
@@ -359,18 +359,18 @@ This comprehensive documentation suite covers the DEESSA Foundation Conference R
 
 ### Search by Keyword
 
-| Looking for... | Check these files |
-|---|---|
+| Looking for...            | Check these files                                                      |
+| ------------------------- | ---------------------------------------------------------------------- |
 | **Environment variables** | [09: Deployment & Operations](09-deployment-operations.md) (Section 1) |
-| **Database indexes** | [03: Database Schema](03-database-schema.md) (Section 3) |
-| **Rate limiting rules** | [05: API Documentation](05-api-documentation.md) (Section 3) |
-| **Payment gateway fees** | [06: Payment Flows](06-payment-flows.md) (Section 1.1) |
-| **RLS policies** | [03: Database Schema](03-database-schema.md) (Section 5) |
-| **Error codes** | [05: API Documentation](05-api-documentation.md) (Section 4) |
-| **Operational runbooks** | [09: Deployment & Operations](09-deployment-operations.md) (Section 3) |
-| **Security threats** | [08: Security](08-security.md) (Section 7) |
-| **Technical debt** | [10: Improvements & Risks](10-improvements-risks.md) (Section 2) |
-| **Glossary terms** | [11: Appendix](11-appendix.md) (Section 1) |
+| **Database indexes**      | [03: Database Schema](03-database-schema.md) (Section 3)               |
+| **Rate limiting rules**   | [05: API Documentation](05-api-documentation.md) (Section 3)           |
+| **Payment gateway fees**  | [06: Payment Flows](06-payment-flows.md) (Section 1.1)                 |
+| **RLS policies**          | [03: Database Schema](03-database-schema.md) (Section 5)               |
+| **Error codes**           | [05: API Documentation](05-api-documentation.md) (Section 4)           |
+| **Operational runbooks**  | [09: Deployment & Operations](09-deployment-operations.md) (Section 3) |
+| **Security threats**      | [08: Security](08-security.md) (Section 7)                             |
+| **Technical debt**        | [10: Improvements & Risks](10-improvements-risks.md) (Section 2)       |
+| **Glossary terms**        | [11: Appendix](11-appendix.md) (Section 1)                             |
 
 ---
 
@@ -378,17 +378,17 @@ This comprehensive documentation suite covers the DEESSA Foundation Conference R
 
 ### When to Update This Documentation
 
-| Trigger | Files to Update | Priority |
-|---|---|---|
-| **New feature added** | 01-overview, 04-page-docs (if UI), 05-api-docs (if API), 11-appendix (changelog) | High |
-| **Database schema changed** | 03-database-schema, 11-appendix (changelog), bump version | Critical |
-| **Payment gateway added** | 06-payment-flows, 01-overview, 11-appendix | High |
-| **Security vulnerability fixed** | 08-security, 10-improvements-risks, 11-appendix (changelog) | Critical |
-| **Deployment procedure changed** | 09-deployment-operations | High |
-| **Environment variable added** | 09-deployment-operations (Section 1) | Critical |
-| **Known limitation fixed** | 10-improvements-risks (Section 1) | Medium |
-| **Admin feature changed** | 07-admin-documentation | High |
-| **After major incident** | 09-deployment-operations (add new runbook), 10-improvements-risks (update risks) | High |
+| Trigger                          | Files to Update                                                                  | Priority |
+| -------------------------------- | -------------------------------------------------------------------------------- | -------- |
+| **New feature added**            | 01-overview, 04-page-docs (if UI), 05-api-docs (if API), 11-appendix (changelog) | High     |
+| **Database schema changed**      | 03-database-schema, 11-appendix (changelog), bump version                        | Critical |
+| **Payment gateway added**        | 06-payment-flows, 01-overview, 11-appendix                                       | High     |
+| **Security vulnerability fixed** | 08-security, 10-improvements-risks, 11-appendix (changelog)                      | Critical |
+| **Deployment procedure changed** | 09-deployment-operations                                                         | High     |
+| **Environment variable added**   | 09-deployment-operations (Section 1)                                             | Critical |
+| **Known limitation fixed**       | 10-improvements-risks (Section 1)                                                | Medium   |
+| **Admin feature changed**        | 07-admin-documentation                                                           | High     |
+| **After major incident**         | 09-deployment-operations (add new runbook), 10-improvements-risks (update risks) | High     |
 
 ### Documentation Review Schedule
 
