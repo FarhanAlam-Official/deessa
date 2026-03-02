@@ -22,22 +22,22 @@
 
 ### 1.1 Provider Feature Matrix
 
-| Feature | Stripe | Khalti | eSewa |
-|---|---|---|---|
-| **Region** | Global | Nepal only | Nepal only |
-| **Currency** | 135+ currencies | NPR only | NPR only |
-| **Payment Methods** | Credit/Debit cards, Wallets, Bank transfers | Mobile banking, Cards, Wallets | Digital wallet only |
-| **Redirect Pattern** | Checkout Session (hosted page) | ePay redirect | Form POST redirect |
-| **Webhook Support** | Yes (HMAC-verified) | Yes (HMAC-verified) | Limited (callback only) |
-| **Test Mode** | Yes (test API keys) | Yes (sandbox) | Yes (staging environment) |
-| **SDK** | Official Node.js SDK | HTTP API (no official SDK) | Form-based (no API) |
-| **Session Expiry** | 24 hours | Configurable | 15 minutes (typical) |
-| **Minimum Amount** | 0.50 USD | 10 NPR | 1 NPR |
-| **Maximum Amount** | No limit | 100,000 NPR per txn | 100,000 NPR per txn |
-| **Fee Structure** | 2.9% + $0.30 (intl cards) | 3-4% + gateway fees | 0.75% + gateway fees |
-| **Settlement Time** | T+2 days | T+1 to T+3 days | T+1 day |
-| **Refund Support** | Full/Partial via API | Via dashboard (manual) | Via dashboard (manual) |
-| **Metadata Support** | Yes (up to 50 keys) | purchase_order_id only | transaction_uuid only |
+| Feature              | Stripe                                      | Khalti                         | eSewa                     |
+| -------------------- | ------------------------------------------- | ------------------------------ | ------------------------- |
+| **Region**           | Global                                      | Nepal only                     | Nepal only                |
+| **Currency**         | 135+ currencies                             | NPR only                       | NPR only                  |
+| **Payment Methods**  | Credit/Debit cards, Wallets, Bank transfers | Mobile banking, Cards, Wallets | Digital wallet only       |
+| **Redirect Pattern** | Checkout Session (hosted page)              | ePay redirect                  | Form POST redirect        |
+| **Webhook Support**  | Yes (HMAC-verified)                         | Yes (HMAC-verified)            | Limited (callback only)   |
+| **Test Mode**        | Yes (test API keys)                         | Yes (sandbox)                  | Yes (staging environment) |
+| **SDK**              | Official Node.js SDK                        | HTTP API (no official SDK)     | Form-based (no API)       |
+| **Session Expiry**   | 24 hours                                    | Configurable                   | 15 minutes (typical)      |
+| **Minimum Amount**   | 0.50 USD                                    | 10 NPR                         | 1 NPR                     |
+| **Maximum Amount**   | No limit                                    | 100,000 NPR per txn            | 100,000 NPR per txn       |
+| **Fee Structure**    | 2.9% + $0.30 (intl cards)                   | 3-4% + gateway fees            | 0.75% + gateway fees      |
+| **Settlement Time**  | T+2 days                                    | T+1 to T+3 days                | T+1 day                   |
+| **Refund Support**   | Full/Partial via API                        | Via dashboard (manual)         | Via dashboard (manual)    |
+| **Metadata Support** | Yes (up to 50 keys)                         | purchase_order_id only         | transaction_uuid only     |
 
 ### 1.2 Provider Selection Logic
 
@@ -57,7 +57,7 @@ if (currency === 'NPR') {
 }
 
 // Filter by configured providers (env variables)
-availableProviders = availableProviders.filter(p => 
+availableProviders = availableProviders.filter(p =>
   p === 'stripe' ? !!process.env.STRIPE_SECRET_KEY :
   p === 'khalti' ? !!process.env.KHALTI_SECRET_KEY :
   p === 'esewa'  ? !!process.env.ESEWA_SECRET_KEY
@@ -66,11 +66,11 @@ availableProviders = availableProviders.filter(p =>
 
 ### 1.3 Fee Comparison (Example: 2500 NPR)
 
-| Provider | Transaction Fee | Net to Organization | User Pays |
-|---|---|---|---|
-| **Stripe** (NPR) | ~70 NPR (2.9%) | 2430 NPR | 2500 NPR |
-| **Khalti** | ~88 NPR (3.5%) | 2412 NPR | 2500 NPR |
-| **eSewa** | ~19 NPR (0.75%) | 2481 NPR | 2500 NPR |
+| Provider         | Transaction Fee | Net to Organization | User Pays |
+| ---------------- | --------------- | ------------------- | --------- |
+| **Stripe** (NPR) | ~70 NPR (2.9%)  | 2430 NPR            | 2500 NPR  |
+| **Khalti**       | ~88 NPR (3.5%)  | 2412 NPR            | 2500 NPR  |
+| **eSewa**        | ~19 NPR (0.75%) | 2481 NPR            | 2500 NPR  |
 
 **Note**: Fees shown are approximate; actual rates depend on contract and payment method.
 
@@ -96,38 +96,38 @@ availableProviders = availableProviders.filter(p =>
 stateDiagram-v2
     [*] --> pending: Free event (fee = 0)
     [*] --> pending_payment: Paid event (fee > 0)
-    
+
     pending --> confirmed: Admin confirms
     pending --> cancelled: Admin cancels
     pending --> expired: Cron job (if expires_at set)
-    
+
     pending_payment --> confirmed: Payment verified
     pending_payment --> cancelled: Admin cancels
     pending_payment --> expired: Deadline passed (cron)
-    
+
     expired --> pending_payment: Admin extends +24h
-    
+
     confirmed --> cancelled: Admin cancels (post-payment)
-    
+
     cancelled --> [*]
     confirmed --> [*]
 ```
 
 ### 2.2 State Transition Table
 
-| From State | Trigger | To State | Side Effects |
-|---|---|---|---|
-| *(initial)* | Form submit (free) | `pending` | Email: registration received |
-| *(initial)* | Form submit (paid) | `pending_payment` | Email: registration + payment link |
-| `pending` | Admin confirm | `confirmed` | Email: confirmation |
-| `pending` | Admin cancel | `cancelled` | Email: cancellation |
-| `pending` | Expiry cron | `expired` | None |
-| `pending_payment` | Payment verified | `confirmed` | Email: confirmation |
-| `pending_payment` | Admin cancel | `cancelled` | Email: cancellation |
-| `pending_payment` | Deadline passed | `expired` | None (cron job) |
-| `pending_payment` | Admin force confirm | `confirmed` | Email: confirmation |
-| `expired` | Admin extend +24h | `pending_payment` | `expires_at` = now + 24h |
-| `confirmed` | Admin cancel | `cancelled` | Email: cancellation |
+| From State        | Trigger             | To State          | Side Effects                       |
+| ----------------- | ------------------- | ----------------- | ---------------------------------- |
+| _(initial)_       | Form submit (free)  | `pending`         | Email: registration received       |
+| _(initial)_       | Form submit (paid)  | `pending_payment` | Email: registration + payment link |
+| `pending`         | Admin confirm       | `confirmed`       | Email: confirmation                |
+| `pending`         | Admin cancel        | `cancelled`       | Email: cancellation                |
+| `pending`         | Expiry cron         | `expired`         | None                               |
+| `pending_payment` | Payment verified    | `confirmed`       | Email: confirmation                |
+| `pending_payment` | Admin cancel        | `cancelled`       | Email: cancellation                |
+| `pending_payment` | Deadline passed     | `expired`         | None (cron job)                    |
+| `pending_payment` | Admin force confirm | `confirmed`       | Email: confirmation                |
+| `expired`         | Admin extend +24h   | `pending_payment` | `expires_at` = now + 24h           |
+| `confirmed`       | Admin cancel        | `cancelled`       | Email: cancellation                |
 
 ### 2.3 State Business Rules
 
@@ -170,14 +170,14 @@ stateDiagram-v2
 ```mermaid
 stateDiagram-v2
     [*] --> unpaid: Default on creation
-    
+
     unpaid --> paid: Webhook OR direct verify (success)
     unpaid --> failed: Gateway declined payment
     unpaid --> review: Amount/currency mismatch
-    
+
     failed --> paid: Retry successful
     failed --> unpaid: (reset state for retry)
-    
+
     review --> paid: Admin approves after investigation
     review --> failed: Admin rejects, issues refund
 ```
@@ -186,27 +186,27 @@ stateDiagram-v2
 
 **Important**: These are **independent** fields with different purposes.
 
-| payment_status | status | Meaning |
-|---|---|---|
-| `unpaid` | `pending_payment` | Normal: awaiting payment |
-| `paid` | `confirmed` | Normal: payment received + registration confirmed |
-| `paid` | `pending_payment` | Edge case: payment received but not yet confirmed (webhook lag) |
-| `unpaid` | `confirmed` | Admin override: confirmed without payment (manual payment received offline) |
-| `review` | `pending_payment` | Problem: payment received but amount is wrong |
-| `failed` | `pending_payment` | User tried to pay, gateway declined |
+| payment_status | status            | Meaning                                                                     |
+| -------------- | ----------------- | --------------------------------------------------------------------------- |
+| `unpaid`       | `pending_payment` | Normal: awaiting payment                                                    |
+| `paid`         | `confirmed`       | Normal: payment received + registration confirmed                           |
+| `paid`         | `pending_payment` | Edge case: payment received but not yet confirmed (webhook lag)             |
+| `unpaid`       | `confirmed`       | Admin override: confirmed without payment (manual payment received offline) |
+| `review`       | `pending_payment` | Problem: payment received but amount is wrong                               |
+| `failed`       | `pending_payment` | User tried to pay, gateway declined                                         |
 
 ### 3.3 Payment Status Transition Table
 
-| From | Trigger | To | Action Taken |
-|---|---|---|---|
-| `unpaid` | Webhook: payment succeeded | `paid` | Update `payment_provider`, `payment_id`, send confirmation email |
-| `unpaid` | Direct verify: payment succeeded | `paid` | Same as above |
-| `unpaid` | Gateway declined | `failed` | Set `status` to `cancelled` or leave as `pending_payment` (retry allowed) |
-| `unpaid` | Amount mismatch detected | `review` | Flag for admin investigation |
-| `unpaid` | Admin "Mark as Paid" | `paid` | Set `payment_override_by` = admin email, send confirmation |
-| `failed` | User retries → success | `paid` | Normal flow |
-| `review` | Admin approves | `paid` | Admin manually confirms after validating with gateway dashboard |
-| `review` | Admin rejects | `failed` | Initiate refund via gateway dashboard |
+| From     | Trigger                          | To       | Action Taken                                                              |
+| -------- | -------------------------------- | -------- | ------------------------------------------------------------------------- |
+| `unpaid` | Webhook: payment succeeded       | `paid`   | Update `payment_provider`, `payment_id`, send confirmation email          |
+| `unpaid` | Direct verify: payment succeeded | `paid`   | Same as above                                                             |
+| `unpaid` | Gateway declined                 | `failed` | Set `status` to `cancelled` or leave as `pending_payment` (retry allowed) |
+| `unpaid` | Amount mismatch detected         | `review` | Flag for admin investigation                                              |
+| `unpaid` | Admin "Mark as Paid"             | `paid`   | Set `payment_override_by` = admin email, send confirmation                |
+| `failed` | User retries → success           | `paid`   | Normal flow                                                               |
+| `review` | Admin approves                   | `paid`   | Admin manually confirms after validating with gateway dashboard           |
+| `review` | Admin rejects                    | `failed` | Initiate refund via gateway dashboard                                     |
 
 ---
 
@@ -226,12 +226,12 @@ sequenceDiagram
     User->>Browser: Click "Pay with Stripe"
     Browser->>API: POST { rid, email, provider: "stripe" }
     API->>Action: Call server action
-    
+
     Action->>DB: SELECT registration WHERE id=rid AND email=email
     DB-->>Action: { registration }
-    
+
     Action->>Action: Validate status, expiry, amount
-    
+
     alt Registration Expired
         Action->>DB: UPDATE status='expired'
         Action-->>API: { error: "Registration expired" }
@@ -240,13 +240,13 @@ sequenceDiagram
     else Valid
         Action->>Gateway: Create session (amount, currency, metadata)
         Gateway-->>Action: { sessionId, redirectUrl }
-        
+
         Action->>DB: UPDATE SET stripe_session_id=sessionId, payment_provider='stripe'
         DB-->>Action: OK
-        
+
         Action-->>API: { ok: true, redirectUrl }
         API-->>Browser: 200 response
-        
+
         Browser->>Gateway: window.location = redirectUrl
         Gateway->>User: Show checkout page
     end
@@ -258,31 +258,44 @@ sequenceDiagram
 
 ```typescript
 // 1. Registration exists and email matches
-const reg = await db.query('SELECT * FROM conference_registrations WHERE id = $1 AND email = $2')
-if (!reg) throw new Error('Registration not found')
+const reg = await db.query(
+  "SELECT * FROM conference_registrations WHERE id = $1 AND email = $2",
+);
+if (!reg) throw new Error("Registration not found");
 
 // 2. Not already paid
-if (reg.payment_status === 'paid') throw new Error('Payment already completed')
+if (reg.payment_status === "paid") throw new Error("Payment already completed");
 
 // 3. Not confirmed (prevents double-payment)
-if (reg.status === 'confirmed') throw new Error('Registration already confirmed')
+if (reg.status === "confirmed")
+  throw new Error("Registration already confirmed");
 
 // 4. Not cancelled
-if (reg.status === 'cancelled') throw new Error('Registration has been cancelled')
+if (reg.status === "cancelled")
+  throw new Error("Registration has been cancelled");
 
 // 5. Not expired (inline expiry check)
-if (reg.expires_at && new Date(reg.expires_at) < new Date() && reg.payment_status !== 'paid') {
-  await db.query('UPDATE conference_registrations SET status = $1 WHERE id = $2', ['expired', reg.id])
-  throw new Error('Registration has expired')
+if (
+  reg.expires_at &&
+  new Date(reg.expires_at) < new Date() &&
+  reg.payment_status !== "paid"
+) {
+  await db.query(
+    "UPDATE conference_registrations SET status = $1 WHERE id = $2",
+    ["expired", reg.id],
+  );
+  throw new Error("Registration has expired");
 }
 
 // 6. Fee is configured
-const fee = resolveRegistrationFee(settings, reg.attendance_mode)
-if (!fee.enabled || fee.amount <= 0) throw new Error('Registration fee not configured')
+const fee = resolveRegistrationFee(settings, reg.attendance_mode);
+if (!fee.enabled || fee.amount <= 0)
+  throw new Error("Registration fee not configured");
 
 // 7. Provider is supported
-const supportedProviders = getSupportedProviders(settings, fee.currency)
-if (!supportedProviders.includes(provider)) throw new Error('Payment provider not available')
+const supportedProviders = getSupportedProviders(settings, fee.currency);
+if (!supportedProviders.includes(provider))
+  throw new Error("Payment provider not available");
 ```
 
 ### 4.3 Amount Resolution Logic
@@ -296,31 +309,30 @@ if (!supportedProviders.includes(provider)) throw new Error('Payment provider no
 ```typescript
 function resolveRegistrationFee(
   settings: ConferenceSettings,
-  mode: 'in-person' | 'online'
+  mode: "in-person" | "online",
 ): { enabled: boolean; amount: number; currency: string } {
-  
   if (!settings.registrationFeeEnabled) {
-    return { enabled: false, amount: 0, currency: 'NPR' }
+    return { enabled: false, amount: 0, currency: "NPR" };
   }
-  
+
   // Check per-mode override
-  const modeKey = normaliseModeKey(mode)  // "in-person" or "online"
-  const modeAmount = settings.registrationFeeByMode?.[modeKey]
-  
+  const modeKey = normaliseModeKey(mode); // "in-person" or "online"
+  const modeAmount = settings.registrationFeeByMode?.[modeKey];
+
   if (modeAmount !== undefined && modeAmount !== null) {
     return {
       enabled: true,
       amount: modeAmount,
-      currency: settings.registrationFeeCurrency || 'NPR'
-    }
+      currency: settings.registrationFeeCurrency || "NPR",
+    };
   }
-  
+
   // Fallback to global fee
   return {
     enabled: true,
     amount: settings.registrationFee || 0,
-    currency: settings.registrationFeeCurrency || 'NPR'
-  }
+    currency: settings.registrationFeeCurrency || "NPR",
+  };
 }
 ```
 
@@ -372,7 +384,7 @@ sequenceDiagram
     Note over Gateway,Email: Payment completed at gateway
 
     Gateway->>Browser: Redirect to /payment-success?rid=X&session_id=Y
-    
+
     par Direct Verify Path
         Browser->>DirectAPI: POST { rid, sessionId }
         DirectAPI->>Gateway: Verify session with Stripe API
@@ -400,7 +412,7 @@ sequenceDiagram
         end
         WebhookAPI-->>Gateway: 200 OK
     end
-    
+
     Browser->>DirectAPI: Poll GET /api/conference/status?rid=X
     DirectAPI->>DB: SELECT status, payment_status
     DB-->>DirectAPI: { status: 'confirmed', paymentStatus: 'paid' }
@@ -426,22 +438,25 @@ CREATE TABLE payment_events (
 
 ```typescript
 // Attempt insert
-const result = await db.query(`
+const result = await db.query(
+  `
   INSERT INTO payment_events (event_id, conference_registration_id, status, amount)
   VALUES ($1, $2, $3, $4)
   ON CONFLICT (event_id) DO NOTHING
   RETURNING id
-`, [eventId, registrationId, 'paid', amount])
+`,
+  [eventId, registrationId, "paid", amount],
+);
 
 if (result.rows.length === 0) {
   // Duplicate detected - skip processing
-  console.log('Duplicate payment event ignored:', eventId)
-  return
+  console.log("Duplicate payment event ignored:", eventId);
+  return;
 }
 
 // First time seeing this event - process it
-await updateRegistrationStatus(registrationId, 'confirmed', 'paid')
-await sendConfirmationEmail(registrationId)
+await updateRegistrationStatus(registrationId, "confirmed", "paid");
+await sendConfirmationEmail(registrationId);
 ```
 
 ### 5.4 Amount Verification
@@ -450,27 +465,33 @@ await sendConfirmationEmail(registrationId)
 
 ```typescript
 // Direct verify (Stripe)
-const session = await stripe.checkout.sessions.retrieve(sessionId)
+const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-const expectedMinor = Math.round(Number(registration.payment_amount) * 100)  // Convert to cents
-const actualMinor = session.amount_total
+const expectedMinor = Math.round(Number(registration.payment_amount) * 100); // Convert to cents
+const actualMinor = session.amount_total;
 
 if (expectedMinor !== actualMinor) {
   // FAIL: Amount mismatch detected
-  await db.query(`
+  await db.query(
+    `
     UPDATE conference_registrations
     SET payment_status = 'review'
     WHERE id = $1
-  `, [registrationId])
-  
+  `,
+    [registrationId],
+  );
+
   // Alert admin
-  console.error('Payment amount mismatch:', {
+  console.error("Payment amount mismatch:", {
     registrationId,
     expected: expectedMinor,
-    actual: actualMinor
-  })
-  
-  return { status: 'review', message: 'Amount mismatch - admin review required' }
+    actual: actualMinor,
+  });
+
+  return {
+    status: "review",
+    message: "Amount mismatch - admin review required",
+  };
 }
 
 // Amount verified - proceed with confirmation
@@ -492,33 +513,35 @@ if (expectedMinor !== actualMinor) {
 
 ```typescript
 const session = await stripe.checkout.sessions.create({
-  payment_method_types: ['card'],
-  line_items: [{
-    price_data: {
-      currency: currency.toLowerCase(),
-      unit_amount: Math.round(amount * 100),  // Convert to minor units
-      product_data: {
-        name: 'Conference Registration',
-        description: `${settings.conferenceName} - ${attendanceMode}`
-      }
+  payment_method_types: ["card"],
+  line_items: [
+    {
+      price_data: {
+        currency: currency.toLowerCase(),
+        unit_amount: Math.round(amount * 100), // Convert to minor units
+        product_data: {
+          name: "Conference Registration",
+          description: `${settings.conferenceName} - ${attendanceMode}`,
+        },
+      },
+      quantity: 1,
     },
-    quantity: 1
-  }],
-  mode: 'payment',
+  ],
+  mode: "payment",
   success_url: `${baseUrl}/conference/register/payment-success?rid=${registrationId}&session_id={CHECKOUT_SESSION_ID}`,
   cancel_url: `${baseUrl}/conference/register/pending-payment?rid=${registrationId}&email=${email}`,
   metadata: {
     conference_registration_id: registrationId,
-    payment_type: 'conference_registration'
-  }
-})
+    payment_type: "conference_registration",
+  },
+});
 ```
 
 **Step 2: Store Session Reference**
 
 ```sql
 UPDATE conference_registrations
-SET 
+SET
   stripe_session_id = $1,
   payment_provider = 'stripe',
   payment_id = 'stripe:' || $1,
@@ -529,7 +552,7 @@ WHERE id = $2;
 **Step 3: Redirect User**
 
 ```typescript
-return { redirectUrl: session.url, requiresFormSubmit: false }
+return { redirectUrl: session.url, requiresFormSubmit: false };
 ```
 
 **Step 4: User Completes Payment at Stripe**
@@ -543,9 +566,9 @@ https://deessa.org/conference/register/payment-success?rid=abc&session_id=cs_liv
 **Step 6: Direct Verification**
 
 ```typescript
-const session = await stripe.checkout.sessions.retrieve(sessionId)
+const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-if (session.payment_status === 'paid') {
+if (session.payment_status === "paid") {
   // Confirm registration
 }
 ```
@@ -554,12 +577,12 @@ if (session.payment_status === 'paid') {
 
 ```typescript
 // POST /api/webhooks/stripe
-const event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+const event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
 
-if (event.type === 'checkout.session.completed') {
-  const session = event.data.object
-  const registrationId = session.metadata.conference_registration_id
-  
+if (event.type === "checkout.session.completed") {
+  const session = event.data.object;
+  const registrationId = session.metadata.conference_registration_id;
+
   // Confirm registration (idempotent)
 }
 ```
@@ -571,27 +594,27 @@ if (event.type === 'checkout.session.completed') {
 **Step 1: Initiate Payment**
 
 ```typescript
-const response = await fetch('https://khalti.com/api/v2/epayment/initiate/', {
-  method: 'POST',
+const response = await fetch("https://khalti.com/api/v2/epayment/initiate/", {
+  method: "POST",
   headers: {
-    'Authorization': `Key ${KHALTI_SECRET_KEY}`,
-    'Content-Type': 'application/json'
+    Authorization: `Key ${KHALTI_SECRET_KEY}`,
+    "Content-Type": "application/json",
   },
   body: JSON.stringify({
     return_url: `${baseUrl}/conference/register/payment-success?rid=${registrationId}`,
     website_url: baseUrl,
-    amount: Math.round(amount * 100),  // Paisa (1 NPR = 100 paisa)
+    amount: Math.round(amount * 100), // Paisa (1 NPR = 100 paisa)
     purchase_order_id: registrationId,
-    purchase_order_name: 'Conference Registration',
+    purchase_order_name: "Conference Registration",
     customer_info: {
       name: fullName,
       email: email,
-      phone: phone
-    }
-  })
-})
+      phone: phone,
+    },
+  }),
+});
 
-const data = await response.json()
+const data = await response.json();
 // Returns: { pidx, payment_url, expires_at, expires_in }
 ```
 
@@ -599,7 +622,7 @@ const data = await response.json()
 
 ```sql
 UPDATE conference_registrations
-SET 
+SET
   khalti_pidx = $1,
   payment_provider = 'khalti',
   payment_id = 'khalti:' || $1,
@@ -610,7 +633,7 @@ WHERE id = $2;
 **Step 3: Redirect User**
 
 ```typescript
-return { redirectUrl: data.payment_url, requiresFormSubmit: false }
+return { redirectUrl: data.payment_url, requiresFormSubmit: false };
 ```
 
 **Step 4: Khalti Redirects Back**
@@ -622,15 +645,15 @@ https://deessa.org/conference/register/payment-success?rid=abc&pidx=kdZJqDr...
 **Step 5: Direct Verification (Lookup)**
 
 ```typescript
-const response = await fetch('https://khalti.com/api/v2/epayment/lookup/', {
-  method: 'POST',
-  headers: { 'Authorization': `Key ${KHALTI_SECRET_KEY}` },
-  body: JSON.stringify({ pidx })
-})
+const response = await fetch("https://khalti.com/api/v2/epayment/lookup/", {
+  method: "POST",
+  headers: { Authorization: `Key ${KHALTI_SECRET_KEY}` },
+  body: JSON.stringify({ pidx }),
+});
 
-const data = await response.json()
+const data = await response.json();
 
-if (data.status === 'Completed') {
+if (data.status === "Completed") {
   // Confirm registration
 }
 ```
@@ -648,53 +671,53 @@ if (data.status === 'Completed') {
 **Step 1: Generate Signature**
 
 ```typescript
-const message = `total_amount=${amount},transaction_uuid=${uuid},product_code=${ESEWA_PRODUCT_CODE}`
+const message = `total_amount=${amount},transaction_uuid=${uuid},product_code=${ESEWA_PRODUCT_CODE}`;
 const signature = crypto
-  .createHmac('sha256', ESEWA_SECRET_KEY)
+  .createHmac("sha256", ESEWA_SECRET_KEY)
   .update(message)
-  .digest('base64')
+  .digest("base64");
 ```
 
 **Step 2: Return Form Data**
 
 ```typescript
 return {
-  redirectUrl: 'https://esewa.com.np/epay/main',
+  redirectUrl: "https://esewa.com.np/epay/main",
   formData: {
     amount: amount.toString(),
-    tax_amount: '0',
+    tax_amount: "0",
     total_amount: amount.toString(),
     transaction_uuid: uuid,
     product_code: ESEWA_PRODUCT_CODE,
-    product_service_charge: '0',
-    product_delivery_charge: '0',
+    product_service_charge: "0",
+    product_delivery_charge: "0",
     success_url: `${baseUrl}/conference/register/payment-success?rid=${registrationId}`,
     failure_url: `${baseUrl}/conference/register/failure?rid=${registrationId}`,
-    signed_field_names: 'total_amount,transaction_uuid,product_code',
-    signature
+    signed_field_names: "total_amount,transaction_uuid,product_code",
+    signature,
   },
-  requiresFormSubmit: true
-}
+  requiresFormSubmit: true,
+};
 ```
 
 **Step 3: Client Submits Form**
 
 ```typescript
 // Client-side (in pending-payment page)
-const form = document.createElement('form')
-form.method = 'POST'
-form.action = data.redirectUrl
+const form = document.createElement("form");
+form.method = "POST";
+form.action = data.redirectUrl;
 
 Object.entries(data.formData).forEach(([key, value]) => {
-  const input = document.createElement('input')
-  input.type = 'hidden'
-  input.name = key
-  input.value = value
-  form.appendChild(input)
-})
+  const input = document.createElement("input");
+  input.type = "hidden";
+  input.name = key;
+  input.value = value;
+  form.appendChild(input);
+});
 
-document.body.appendChild(form)
-form.submit()
+document.body.appendChild(form);
+form.submit();
 ```
 
 **Step 4: eSewa Processes Payment**
@@ -714,17 +737,17 @@ form.submit()
 
 ### 7.1 Failure Mode Matrix
 
-| Failure | Detection | User Impact | Recovery |
-|---|---|---|---|
-| **User abandons payment** | Timeout (no return redirect) | Payment incomplete | Status stays `pending_payment`; can retry |
-| **Gateway declines card** | Gateway returns failure status | Payment failed | User sees error; can try different card/method |
-| **Amount mismatch** | Direct verify compares amounts | Payment held for review | Admin investigates; refunds if wrong |
-| **Session expired** | Gateway returns expired status | Cannot pay | Must register again (new expiry window) |
-| **Webhook missed** | No webhook received within 5 min | Possible delay | Direct verify catches it; polling confirms |
-| **Both webhook and direct fail** | Both return errors | Processing timeout | Admin manually verifies in gateway dashboard |
-| **Registration expired before payment** | Pre-flight check detects | Payment blocked | Must register again |
-| **Double payment attempt** | Pre-flight check (`payment_status === 'paid'`) | Payment blocked | User informed already paid |
-| **Email delivery failure** | SMTP error logged | No email received | Admin can resend via dashboard |
+| Failure                                 | Detection                                      | User Impact             | Recovery                                       |
+| --------------------------------------- | ---------------------------------------------- | ----------------------- | ---------------------------------------------- |
+| **User abandons payment**               | Timeout (no return redirect)                   | Payment incomplete      | Status stays `pending_payment`; can retry      |
+| **Gateway declines card**               | Gateway returns failure status                 | Payment failed          | User sees error; can try different card/method |
+| **Amount mismatch**                     | Direct verify compares amounts                 | Payment held for review | Admin investigates; refunds if wrong           |
+| **Session expired**                     | Gateway returns expired status                 | Cannot pay              | Must register again (new expiry window)        |
+| **Webhook missed**                      | No webhook received within 5 min               | Possible delay          | Direct verify catches it; polling confirms     |
+| **Both webhook and direct fail**        | Both return errors                             | Processing timeout      | Admin manually verifies in gateway dashboard   |
+| **Registration expired before payment** | Pre-flight check detects                       | Payment blocked         | Must register again                            |
+| **Double payment attempt**              | Pre-flight check (`payment_status === 'paid'`) | Payment blocked         | User informed already paid                     |
+| **Email delivery failure**              | SMTP error logged                              | No email received       | Admin can resend via dashboard                 |
 
 ### 7.2 Timeout Handling
 
