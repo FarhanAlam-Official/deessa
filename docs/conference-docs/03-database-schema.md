@@ -106,54 +106,54 @@
 CREATE TABLE conference_registrations (
   -- Primary Key
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  
+
   -- Personal Information
   email text NOT NULL,
   full_name text NOT NULL,
   phone text NOT NULL,
   organization text,
   role text NOT NULL,
-  
+
   -- Conference Details
   attendance_mode text NOT NULL, -- 'In-person' or 'Virtual'
   workshops text[], -- Array of selected workshop names
   dietary_preference text,
   tshirt_size text,
   heard_via text[], -- How user heard about conference
-  
+
   -- Emergency Contact
   emergency_contact_name text,
   emergency_contact_phone text,
-  
+
   -- Consent & Preferences
   consent boolean NOT NULL DEFAULT false,
   newsletter_opt_in boolean NOT NULL DEFAULT false,
-  
+
   -- Status Tracking
   status text NOT NULL DEFAULT 'pending',
   payment_status text NOT NULL DEFAULT 'unpaid',
-  
+
   -- Payment Information
   payment_amount numeric(10, 2),
   payment_currency text, -- 'USD' or 'NPR'
   payment_provider text, -- 'stripe', 'khalti', 'esewa'
   payment_id text, -- Gateway transaction ID
   provider_ref text, -- Additional provider reference
-  
+
   -- Gateway-Specific IDs
   stripe_session_id text,
   khalti_pidx text, -- Khalti payment index
   esewa_transaction_uuid text,
-  
+
   -- Admin Overrides
   payment_override_by text, -- Admin email who manually confirmed
   admin_notes text,
-  
+
   -- Timestamps
   expires_at timestamptz, -- Payment deadline (24h from creation)
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
-  
+
   -- Constraints
   CONSTRAINT valid_status CHECK (status IN (
     'pending',
@@ -178,9 +178,9 @@ CREATE TABLE conference_registrations (
 CREATE INDEX idx_registrations_status ON conference_registrations(status);
 CREATE INDEX idx_registrations_email ON conference_registrations(email);
 CREATE INDEX idx_registrations_created ON conference_registrations(created_at DESC);
-CREATE INDEX idx_registrations_expires ON conference_registrations(expires_at) 
+CREATE INDEX idx_registrations_expires ON conference_registrations(expires_at)
   WHERE expires_at IS NOT NULL;
-CREATE INDEX idx_registrations_payment_id ON conference_registrations(payment_id) 
+CREATE INDEX idx_registrations_payment_id ON conference_registrations(payment_id)
   WHERE payment_id IS NOT NULL;
 
 -- Updated_at trigger
@@ -194,45 +194,45 @@ CREATE TRIGGER update_conference_registrations_updated_at
 
 #### Personal Information Fields
 
-| Column | Type | Nullable | Description | Example |
-|---|---|---|---|---|
-| **id** | uuid | No | Primary key, auto-generated UUID v4 | `550e8400-e29b-41d4-a716-...` |
-| **email** | text | No | User's email (used for dual-key auth) | `john@example.com` |
-| **full_name** | text | No | Full name as appears on ID | `John Michael Doe` |
-| **phone** | text | No | International phone format | `+1 234-567-8900` |
-| **organization** | text | Yes | Company/institution name | `Example Corporation` |
-| **role** | text | No | Job title or role | `Software Engineer` |
+| Column           | Type | Nullable | Description                           | Example                       |
+| ---------------- | ---- | -------- | ------------------------------------- | ----------------------------- |
+| **id**           | uuid | No       | Primary key, auto-generated UUID v4   | `550e8400-e29b-41d4-a716-...` |
+| **email**        | text | No       | User's email (used for dual-key auth) | `john@example.com`            |
+| **full_name**    | text | No       | Full name as appears on ID            | `John Michael Doe`            |
+| **phone**        | text | No       | International phone format            | `+1 234-567-8900`             |
+| **organization** | text | Yes      | Company/institution name              | `Example Corporation`         |
+| **role**         | text | No       | Job title or role                     | `Software Engineer`           |
 
 #### Conference Details Fields
 
-| Column | Type | Nullable | Description | Example |
-|---|---|---|---|---|
-| **attendance_mode** | text | No | In-person or Virtual attendance | `In-person` |
-| **workshops** | text[] | Yes | Selected workshop sessions | `{Workshop A, Workshop B}` |
-| **dietary_preference** | text | Yes | Dietary restrictions (for catering) | `Vegetarian, No nuts` |
-| **tshirt_size** | text | Yes | T-shirt size (for in-person) | `M`, `L`, `XL` |
-| **heard_via** | text[] | Yes | Marketing channel attribution | `{Social Media, Email}` |
+| Column                 | Type   | Nullable | Description                         | Example                    |
+| ---------------------- | ------ | -------- | ----------------------------------- | -------------------------- |
+| **attendance_mode**    | text   | No       | In-person or Virtual attendance     | `In-person`                |
+| **workshops**          | text[] | Yes      | Selected workshop sessions          | `{Workshop A, Workshop B}` |
+| **dietary_preference** | text   | Yes      | Dietary restrictions (for catering) | `Vegetarian, No nuts`      |
+| **tshirt_size**        | text   | Yes      | T-shirt size (for in-person)        | `M`, `L`, `XL`             |
+| **heard_via**          | text[] | Yes      | Marketing channel attribution       | `{Social Media, Email}`    |
 
 #### Emergency Contact Fields
 
-| Column | Type | Nullable | Description | Example |
-|---|---|---|---|---|
-| **emergency_contact_name** | text | Yes | Emergency contact full name | `Jane Doe` |
-| **emergency_contact_phone** | text | Yes | Emergency contact phone | `+1 987-654-3210` |
+| Column                      | Type | Nullable | Description                 | Example           |
+| --------------------------- | ---- | -------- | --------------------------- | ----------------- |
+| **emergency_contact_name**  | text | Yes      | Emergency contact full name | `Jane Doe`        |
+| **emergency_contact_phone** | text | Yes      | Emergency contact phone     | `+1 987-654-3210` |
 
 #### Consent Fields
 
-| Column | Type | Nullable | Description | Default |
-|---|---|---|---|---|
-| **consent** | boolean | No | Privacy policy consent | `false` |
-| **newsletter_opt_in** | boolean | No | Newsletter subscription opt-in | `false` |
+| Column                | Type    | Nullable | Description                    | Default |
+| --------------------- | ------- | -------- | ------------------------------ | ------- |
+| **consent**           | boolean | No       | Privacy policy consent         | `false` |
+| **newsletter_opt_in** | boolean | No       | Newsletter subscription opt-in | `false` |
 
 #### Status Fields
 
-| Column | Type | Nullable | Description | Possible Values |
-|---|---|---|---|---|
-| **status** | text | No | Registration lifecycle state | `pending`, `pending_payment`, `confirmed`, `cancelled`, `expired` |
-| **payment_status** | text | No | Payment verification state | `unpaid`, `paid`, `failed`, `review` |
+| Column             | Type | Nullable | Description                  | Possible Values                                                   |
+| ------------------ | ---- | -------- | ---------------------------- | ----------------------------------------------------------------- |
+| **status**         | text | No       | Registration lifecycle state | `pending`, `pending_payment`, `confirmed`, `cancelled`, `expired` |
+| **payment_status** | text | No       | Payment verification state   | `unpaid`, `paid`, `failed`, `review`                              |
 
 **Status State Machine**:
 
@@ -251,36 +251,36 @@ cancelled    expired      (final state)
 
 #### Payment Fields
 
-| Column | Type | Nullable | Description | Example |
-|---|---|---|---|---|
-| **payment_amount** | numeric(10,2) | Yes | Amount charged (2 decimal places) | `20.00`, `800.00` |
-| **payment_currency** | text | Yes | Currency code (ISO 4217) | `USD`, `NPR` |
-| **payment_provider** | text | Yes | Gateway used for payment | `stripe`, `khalti`, `esewa` |
-| **payment_id** | text | Yes | Gateway transaction ID | `stripe:cs_live_abc123...` |
-| **provider_ref** | text | Yes | Additional provider reference | Secondary transaction ID |
+| Column               | Type          | Nullable | Description                       | Example                     |
+| -------------------- | ------------- | -------- | --------------------------------- | --------------------------- |
+| **payment_amount**   | numeric(10,2) | Yes      | Amount charged (2 decimal places) | `20.00`, `800.00`           |
+| **payment_currency** | text          | Yes      | Currency code (ISO 4217)          | `USD`, `NPR`                |
+| **payment_provider** | text          | Yes      | Gateway used for payment          | `stripe`, `khalti`, `esewa` |
+| **payment_id**       | text          | Yes      | Gateway transaction ID            | `stripe:cs_live_abc123...`  |
+| **provider_ref**     | text          | Yes      | Additional provider reference     | Secondary transaction ID    |
 
 #### Gateway-Specific Fields
 
-| Column | Type | Nullable | Description | Example |
-|---|---|---|---|---|
-| **stripe_session_id** | text | Yes | Stripe Checkout Session ID | `cs_live_abc123...` |
-| **khalti_pidx** | text | Yes | Khalti payment index | `khalti_pidx_xyz...` |
-| **esewa_transaction_uuid** | text | Yes | eSewa transaction UUID | `0000AA-AB12` |
+| Column                     | Type | Nullable | Description                | Example              |
+| -------------------------- | ---- | -------- | -------------------------- | -------------------- |
+| **stripe_session_id**      | text | Yes      | Stripe Checkout Session ID | `cs_live_abc123...`  |
+| **khalti_pidx**            | text | Yes      | Khalti payment index       | `khalti_pidx_xyz...` |
+| **esewa_transaction_uuid** | text | Yes      | eSewa transaction UUID     | `0000AA-AB12`        |
 
 #### Admin Fields
 
-| Column | Type | Nullable | Description | Example |
-|---|---|---|---|---|
-| **payment_override_by** | text | Yes | Admin email who manually confirmed | `admin@deessa.org` |
-| **admin_notes** | text | Yes | Private admin notes | `User called, card declined, asked to retry` |
+| Column                  | Type | Nullable | Description                        | Example                                      |
+| ----------------------- | ---- | -------- | ---------------------------------- | -------------------------------------------- |
+| **payment_override_by** | text | Yes      | Admin email who manually confirmed | `admin@deessa.org`                           |
+| **admin_notes**         | text | Yes      | Private admin notes                | `User called, card declined, asked to retry` |
 
 #### Timestamp Fields
 
-| Column | Type | Nullable | Description | Default |
-|---|---|---|---|---|
-| **expires_at** | timestamptz | Yes | Payment deadline (24h window) | `created_at + interval '24 hours'` |
-| **created_at** | timestamptz | No | Registration creation timestamp | `now()` |
-| **updated_at** | timestamptz | No | Last update timestamp (auto-updated) | `now()` |
+| Column         | Type        | Nullable | Description                          | Default                            |
+| -------------- | ----------- | -------- | ------------------------------------ | ---------------------------------- |
+| **expires_at** | timestamptz | Yes      | Payment deadline (24h window)        | `created_at + interval '24 hours'` |
+| **created_at** | timestamptz | No       | Registration creation timestamp      | `now()`                            |
+| **updated_at** | timestamptz | No       | Last update timestamp (auto-updated) | `now()`                            |
 
 ### 2.3 Business Rules
 
@@ -302,12 +302,12 @@ WHERE status IN ('pending_payment', 'pending')
 
 ```typescript
 // Amount based on attendance mode
-if (attendance_mode === 'In-person') {
+if (attendance_mode === "In-person") {
   amount = settings.inPersonPriceUSD; // e.g., 20.00
-  currency = 'USD';
+  currency = "USD";
 } else {
   amount = settings.virtualPriceNPR; // e.g., 800
-  currency = 'NPR';
+  currency = "NPR";
 }
 ```
 
@@ -355,15 +355,15 @@ INSERT INTO site_settings (key, value) VALUES (
 
 ```typescript
 interface ConferenceSettings {
-  conferenceName: string;        // Display name
-  conferenceDate: string;        // ISO date (YYYY-MM-DD)
-  conferenceEndDate?: string;    // Optional end date (multi-day events)
-  location: string;              // Physical address
-  virtualLink: string;           // Zoom/Teams URL
-  deadline: string;              // ISO datetime (last registration date)
-  inPersonPriceUSD: number;      // Amount in USD (e.g., 20.00)
-  virtualPriceNPR: number;       // Amount in NPR (e.g., 800)
-  registrationEnabled: boolean;  // Master toggle for registration form
+  conferenceName: string; // Display name
+  conferenceDate: string; // ISO date (YYYY-MM-DD)
+  conferenceEndDate?: string; // Optional end date (multi-day events)
+  location: string; // Physical address
+  virtualLink: string; // Zoom/Teams URL
+  deadline: string; // ISO datetime (last registration date)
+  inPersonPriceUSD: number; // Amount in USD (e.g., 20.00)
+  virtualPriceNPR: number; // Amount in NPR (e.g., 800)
+  registrationEnabled: boolean; // Master toggle for registration form
 }
 ```
 
@@ -372,16 +372,16 @@ interface ConferenceSettings {
 **Fetching Settings** (server-side):
 
 ```typescript
-import { createServerClient } from '@/lib/supabase/server';
+import { createServerClient } from "@/lib/supabase/server";
 
 async function getSettings(): Promise<ConferenceSettings> {
   const supabase = createServerClient();
   const { data } = await supabase
-    .from('site_settings')
-    .select('value')
-    .eq('key', 'conference_settings')
+    .from("site_settings")
+    .select("value")
+    .eq("key", "conference_settings")
     .single();
-  
+
   return data.value as ConferenceSettings;
 }
 ```
@@ -392,12 +392,12 @@ async function getSettings(): Promise<ConferenceSettings> {
 async function updateSettings(newSettings: ConferenceSettings) {
   const supabase = createServerClient();
   await supabase
-    .from('site_settings')
+    .from("site_settings")
     .update({
       value: newSettings,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     })
-    .eq('key', 'conference_settings');
+    .eq("key", "conference_settings");
 }
 ```
 
@@ -419,16 +419,16 @@ CREATE TABLE payment_events (
   event_id text UNIQUE NOT NULL, -- Gateway event ID (e.g., evt_1ABC...)
   event_type text NOT NULL,      -- Event type (e.g., checkout.session.completed)
   provider text NOT NULL,        -- 'stripe', 'khalti', 'esewa'
-  
+
   -- Foreign Keys (one will be set, others null)
   conference_registration_id uuid REFERENCES conference_registrations(id),
   donation_id uuid REFERENCES donations(id), -- For donation module
-  
+
   status text NOT NULL,          -- 'success', 'failed', 'pending'
   amount numeric(10, 2),         -- Amount processed
   currency text,                 -- Currency code
   metadata jsonb,                -- Additional gateway data
-  
+
   processed_at timestamptz NOT NULL, -- When system processed event
   created_at timestamptz NOT NULL DEFAULT now()
 );
@@ -446,23 +446,23 @@ CREATE INDEX idx_payment_events_created ON payment_events(created_at DESC);
 export async function POST(req: Request) {
   const event = stripe.webhooks.constructEvent(...);
   const eventId = event.id; // e.g., evt_1ABC...
-  
+
   // Check if already processed
   const { data: existing } = await supabase
     .from('payment_events')
     .select('id')
     .eq('event_id', eventId)
     .single();
-  
+
   if (existing) {
     console.log('Event already processed, skipping');
     return new Response('OK', { status: 200 }); // Return 200 to acknowledge
   }
-  
+
   // Process payment
   const registrationId = event.data.object.metadata.registrationId;
   await confirmRegistration(registrationId);
-  
+
   // Record event (prevents future duplicate processing)
   await supabase.from('payment_events').insert({
     event_id: eventId,
@@ -475,7 +475,7 @@ export async function POST(req: Request) {
     metadata: event.data.object,
     processed_at: new Date().toISOString()
   });
-  
+
   return new Response('OK', { status: 200 });
 }
 ```
@@ -485,7 +485,7 @@ export async function POST(req: Request) {
 **Find all events for a registration**:
 
 ```sql
-SELECT 
+SELECT
   event_id,
   event_type,
   provider,
@@ -501,7 +501,7 @@ ORDER BY processed_at DESC;
 **Daily payment reconciliation**:
 
 ```sql
-SELECT 
+SELECT
   provider,
   COUNT(*) as event_count,
   SUM(amount) as total_amount,
@@ -528,13 +528,13 @@ HAVING COUNT(*) > 1;
 
 ### 5.1 Index Analysis
 
-| Index Name | Columns | Type | Purpose | Cardinality | Selectivity |
-|---|---|---|---|---|---|
-| **idx_registrations_status** | status | B-Tree | Filter by status in admin list | 5-6 distinct values | Medium |
-| **idx_registrations_email** | email | B-Tree | Dual-key lookup, resend email | High (unique per user) | High |
-| **idx_registrations_created** | created_at DESC | B-Tree | Sort registrations by date | High | High |
-| **idx_registrations_expires** | expires_at (partial) | B-Tree | Cron job expiry query | Only rows with expiry set | High |
-| **idx_registrations_payment_id** | payment_id (partial) | B-Tree | Webhook lookup by transaction | High | High |
+| Index Name                       | Columns              | Type   | Purpose                        | Cardinality               | Selectivity |
+| -------------------------------- | -------------------- | ------ | ------------------------------ | ------------------------- | ----------- |
+| **idx_registrations_status**     | status               | B-Tree | Filter by status in admin list | 5-6 distinct values       | Medium      |
+| **idx_registrations_email**      | email                | B-Tree | Dual-key lookup, resend email  | High (unique per user)    | High        |
+| **idx_registrations_created**    | created_at DESC      | B-Tree | Sort registrations by date     | High                      | High        |
+| **idx_registrations_expires**    | expires_at (partial) | B-Tree | Cron job expiry query          | Only rows with expiry set | High        |
+| **idx_registrations_payment_id** | payment_id (partial) | B-Tree | Webhook lookup by transaction  | High                      | High        |
 
 **Partial Index Explanation**:
 
@@ -609,11 +609,11 @@ WHERE email ILIKE '%john@example.com%';
 
 ### 5.3 Missing Indexes (Future Optimization)
 
-| Index | Use Case | Expected Improvement | Priority |
-|---|---|---|---|
-| `(payment_provider, created_at)` | Provider-specific reporting | 30% faster | Low |
-| `(attendance_mode, status)` | Filter in-person confirmed registrations | 40% faster | Medium |
-| Full-text search on `full_name` | Admin search by name | 10x faster for large datasets | Medium |
+| Index                            | Use Case                                 | Expected Improvement          | Priority |
+| -------------------------------- | ---------------------------------------- | ----------------------------- | -------- |
+| `(payment_provider, created_at)` | Provider-specific reporting              | 30% faster                    | Low      |
+| `(attendance_mode, status)`      | Filter in-person confirmed registrations | 40% faster                    | Medium   |
+| Full-text search on `full_name`  | Admin search by name                     | 10x faster for large datasets | Medium   |
 
 ---
 
@@ -650,7 +650,7 @@ ALTER TABLE conference_registrations
 ADD COLUMN payment_override_by text,
 ADD COLUMN admin_notes text;
 
-COMMENT ON COLUMN conference_registrations.payment_override_by IS 
+COMMENT ON COLUMN conference_registrations.payment_override_by IS
   'Admin email who manually confirmed payment (for audit trail)';
 ```
 
@@ -752,7 +752,7 @@ WITH CHECK (true);
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!, // Bypasses RLS
-  { auth: { persistSession: false } }
+  { auth: { persistSession: false } },
 );
 ```
 
@@ -770,20 +770,20 @@ If not using service-role client:
 
 ```typescript
 // Set session variables before query
-await supabase.rpc('set_claim', { 
-  claim: 'app.registration_id', 
-  value: registrationId 
+await supabase.rpc("set_claim", {
+  claim: "app.registration_id",
+  value: registrationId,
 });
-await supabase.rpc('set_claim', { 
-  claim: 'app.email', 
-  value: email 
+await supabase.rpc("set_claim", {
+  claim: "app.email",
+  value: email,
 });
 
 // Then query (RLS policy checks session vars)
 const { data } = await supabase
-  .from('conference_registrations')
-  .select('*')
-  .eq('id', registrationId); // RLS automatically filters by session vars
+  .from("conference_registrations")
+  .select("*")
+  .eq("id", registrationId); // RLS automatically filters by session vars
 ```
 
 ---
@@ -796,7 +796,7 @@ const { data } = await supabase
 
 ```typescript
 const { data, error } = await supabase
-  .from('conference_registrations')
+  .from("conference_registrations")
   .insert({
     email: formData.email,
     full_name: formData.fullName,
@@ -806,9 +806,9 @@ const { data, error } = await supabase
     attendance_mode: formData.attendanceMode,
     consent: formData.consent,
     newsletter_opt_in: formData.newsletterOptIn,
-    status: 'pending',
-    payment_status: 'unpaid',
-    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24h from now
+    status: "pending",
+    payment_status: "unpaid",
+    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h from now
   })
   .select()
   .single();
@@ -818,14 +818,14 @@ const { data, error } = await supabase
 
 ```typescript
 const { data } = await supabase
-  .from('conference_registrations')
-  .select('*')
-  .eq('id', registrationId)
-  .eq('email', email)
+  .from("conference_registrations")
+  .select("*")
+  .eq("id", registrationId)
+  .eq("email", email)
   .single();
 
 if (!data) {
-  throw new Error('Registration not found or email mismatch');
+  throw new Error("Registration not found or email mismatch");
 }
 ```
 
@@ -833,40 +833,40 @@ if (!data) {
 
 ```typescript
 await supabase
-  .from('conference_registrations')
+  .from("conference_registrations")
   .update({
-    status: 'confirmed',
-    payment_status: 'paid',
-    payment_provider: 'stripe',
+    status: "confirmed",
+    payment_status: "paid",
+    payment_provider: "stripe",
     payment_id: `stripe:${session.id}`,
     payment_amount: session.amount_total / 100,
     payment_currency: session.currency.toUpperCase(),
     stripe_session_id: session.id,
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
   })
-  .eq('id', registrationId);
+  .eq("id", registrationId);
 ```
 
 #### Pattern 4: Admin List with Filters
 
 ```typescript
 let query = supabase
-  .from('conference_registrations')
-  .select('*', { count: 'exact' });
+  .from("conference_registrations")
+  .select("*", { count: "exact" });
 
 // Apply filters
-if (statusFilter !== 'all') {
-  query = query.eq('status', statusFilter);
+if (statusFilter !== "all") {
+  query = query.eq("status", statusFilter);
 }
 
 if (searchTerm) {
-  query = query.or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+  query = query.or(
+    `full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`,
+  );
 }
 
 // Sort and paginate
-query = query
-  .order('created_at', { ascending: false })
-  .range(0, 49); // First 50 rows
+query = query.order("created_at", { ascending: false }).range(0, 49); // First 50 rows
 
 const { data, count } = await query;
 ```
@@ -875,14 +875,14 @@ const { data, count } = await query;
 
 ```typescript
 const { data } = await supabase
-  .from('conference_registrations')
-  .update({ 
-    status: 'expired',
-    updated_at: new Date().toISOString()
+  .from("conference_registrations")
+  .update({
+    status: "expired",
+    updated_at: new Date().toISOString(),
   })
-  .in('status', ['pending', 'pending_payment'])
-  .eq('payment_status', 'unpaid')
-  .lt('expires_at', new Date().toISOString())
+  .in("status", ["pending", "pending_payment"])
+  .eq("payment_status", "unpaid")
+  .lt("expires_at", new Date().toISOString())
   .select();
 
 console.log(`Expired ${data?.length || 0} registrations`);
@@ -892,23 +892,23 @@ console.log(`Expired ${data?.length || 0} registrations`);
 
 ```typescript
 const { data } = await supabase
-  .from('conference_registrations')
-  .select('status, payment_status, attendance_mode');
+  .from("conference_registrations")
+  .select("status, payment_status, attendance_mode");
 
 // Client-side aggregation (no GROUP BY in Supabase client)
 const stats = {
   total: data.length,
-  confirmed: data.filter(r => r.status === 'confirmed').length,
-  pending: data.filter(r => r.status === 'pending_payment').length,
-  inPerson: data.filter(r => r.attendance_mode === 'In-person').length,
-  virtual: data.filter(r => r.attendance_mode === 'Virtual').length
+  confirmed: data.filter((r) => r.status === "confirmed").length,
+  pending: data.filter((r) => r.status === "pending_payment").length,
+  inPerson: data.filter((r) => r.attendance_mode === "In-person").length,
+  virtual: data.filter((r) => r.attendance_mode === "Virtual").length,
 };
 ```
 
 **Alternative (Direct SQL for better performance)**:
 
 ```sql
-SELECT 
+SELECT
   COUNT(*) as total,
   COUNT(*) FILTER (WHERE status = 'confirmed') as confirmed,
   COUNT(*) FILTER (WHERE status = 'pending_payment') as pending,
@@ -950,14 +950,12 @@ WHERE email = 'user@example.com'; -- Uses idx_registrations_email
 
 ```typescript
 // BAD: Fetches all columns when only need few
-const { data } = await supabase
-  .from('conference_registrations')
-  .select('*');
+const { data } = await supabase.from("conference_registrations").select("*");
 
 // GOOD: Select only needed columns
 const { data } = await supabase
-  .from('conference_registrations')
-  .select('id, full_name, email, status');
+  .from("conference_registrations")
+  .select("id, full_name, email, status");
 ```
 
 ---
@@ -980,25 +978,25 @@ const { data } = await supabase
 
 ### Current Production Stats (as of Feb 28, 2026)
 
-| Metric | Value |
-|---|---|
-| Total Registrations | 347 |
-| Confirmed | 298 |
-| Pending Payment | 23 |
-| Expired | 18 |
-| Cancelled | 8 |
-| Average Registration Time | 3.2 minutes |
-| Database Size | 12 MB |
-| Largest Table | `conference_registrations` (11.5 MB) |
-| Index Size | 2.1 MB |
-| Backup Size | 8.4 MB (compressed) |
+| Metric                    | Value                                |
+| ------------------------- | ------------------------------------ |
+| Total Registrations       | 347                                  |
+| Confirmed                 | 298                                  |
+| Pending Payment           | 23                                   |
+| Expired                   | 18                                   |
+| Cancelled                 | 8                                    |
+| Average Registration Time | 3.2 minutes                          |
+| Database Size             | 12 MB                                |
+| Largest Table             | `conference_registrations` (11.5 MB) |
+| Index Size                | 2.1 MB                               |
+| Backup Size               | 8.4 MB (compressed)                  |
 
 ### Performance Over Time
 
-| Month | Registrations | Avg Query Time | P95 Query Time |
-|---|---|---|---|
-| Dec 2025 | 45 | 5ms | 12ms |
-| Jan 2026 | 128 | 7ms | 18ms |
-| Feb 2026 | 174 | 8ms | 22ms |
+| Month    | Registrations | Avg Query Time | P95 Query Time |
+| -------- | ------------- | -------------- | -------------- |
+| Dec 2025 | 45            | 5ms            | 12ms           |
+| Jan 2026 | 128           | 7ms            | 18ms           |
+| Feb 2026 | 174           | 8ms            | 22ms           |
 
 **Projection**: At 1000 registrations, expect ~15ms avg query time (still acceptable).
