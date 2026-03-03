@@ -6,21 +6,7 @@ import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { getPaymentMode } from "@/lib/payments/config"
 import { verifyStripeSession } from "@/lib/payments/stripe"
 import { generateReceiptForDonation } from "@/lib/actions/donation-receipt"
-
-// Very small in-memory throttle to slow down brute force of session IDs.
-// Note: On serverless this is best-effort; on a single Node process it is effective.
-const ipHits = new Map<string, { count: number; resetAt: number }>()
-function shouldRateLimit(ip: string, now: number): boolean {
-  const windowMs = 60_000
-  const max = 60
-  const entry = ipHits.get(ip)
-  if (!entry || entry.resetAt <= now) {
-    ipHits.set(ip, { count: 1, resetAt: now + windowMs })
-    return false
-  }
-  entry.count += 1
-  return entry.count > max
-}
+import { checkRateLimit, getClientIP } from "@/lib/rate-limit"
 
 // Create a service role client for updates (bypasses RLS)
 function createServiceRoleClient() {
@@ -36,14 +22,36 @@ function createServiceRoleClient() {
 
 export async function GET(request: Request) {
   try {
-    const ip =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      request.headers.get("x-real-ip") ||
-      "unknown"
-    if (shouldRateLimit(ip, Date.now())) {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+    // 1. Apply distributed rate limiting (10 requests per minute per IP)
+    const clientIP = getClientIP(request)
+    const rateLimitIdentifier = clientIP 
+      ? `stripe-verify:ip:${clientIP}`
+      : `stripe-verify:ip:unknown`
+    
+    const rateLimit = await checkRateLimit({
+      identifier: rateLimitIdentifier,
+      maxAttempts: 10,
+      windowMinutes: 1,
+    })
+    
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { 
+          error: "Rate limit exceeded. Please try again later.",
+          retryAfter: rateLimit.resetAt?.toISOString()
+        },
+        { 
+          status: 429,
+          headers: {
+            "Retry-After": rateLimit.resetAt 
+              ? Math.ceil((rateLimit.resetAt.getTime() - Date.now()) / 1000).toString()
+              : "60"
+          }
+        },
+      )
     }
 
+    // 2. Validate session_id parameter
     const { searchParams } = new URL(request.url)
     const sessionId = searchParams.get("session_id")
 
