@@ -36,6 +36,14 @@ export interface OrganizationDetails {
   logo_url: string
   receipt_prefix: string
   receipt_number_start: number
+  // Extended fields for tax compliance and receipt quality — all optional
+  // so existing DB records with the old schema continue to work unchanged.
+  website?: string
+  ird_exemption_number?: string
+  authorized_signatory_name?: string
+  authorized_signatory_designation?: string
+  stamp_url?: string
+  signature_url?: string
 }
 
 /**
@@ -77,43 +85,50 @@ export async function getOrganizationDetails(): Promise<OrganizationDetails> {
  */
 export async function generateReceiptNumber(): Promise<string> {
   const supabase = getServiceSupabase()
-  const orgDetails = await getOrganizationDetails()
 
-  let nextNumber: number = orgDetails.receipt_number_start
-
-  // Primary path: atomic DB sequence (requires migration 012-receipt-sequence.sql)
+  // Primary path: migration 025 — RPC returns the fully-formatted TEXT string
+  // e.g. "RCP-2026-00001". Atomic, race-condition-free, yearly auto-reset.
   const { data: seqData, error: seqError } = await supabase.rpc(
     "get_next_receipt_number",
   )
 
   if (!seqError && seqData !== null) {
-    nextNumber = Number(seqData)
-  } else {
-    // Fallback: non-atomic SELECT max (safe enough with the UNIQUE constraint as a guard)
+    const receiptNumber = String(seqData).trim()
+    if (/^[A-Z]+-\d{4}-\d+$/.test(receiptNumber)) {
+      return receiptNumber
+    }
     console.warn(
-      "get_next_receipt_number RPC unavailable, using fallback. Run migration 012-receipt-sequence.sql.",
-      seqError?.message,
+      "[generateReceiptNumber] RPC returned unexpected value — falling back.",
+      seqData,
     )
-    const { data: donations, error } = await supabase
-      .from("donations")
-      .select("receipt_number")
-      .not("receipt_number", "is", null)
-      .order("created_at", { ascending: false })
-      .limit(1)
+  }
 
-    if (!error && donations && donations.length > 0) {
-      const lastReceipt = donations[0].receipt_number
-      if (lastReceipt) {
-        const match = lastReceipt.match(/(\d+)$/)
-        if (match) {
-          nextNumber = parseInt(match[1], 10) + 1
-        }
-      }
+  // Fallback: non-atomic SELECT max (safe with the UNIQUE constraint as a guard).
+  // Matches migration 025 format: RCP-YYYY-NNNNN (5-digit zero-padded).
+  console.warn(
+    "[generateReceiptNumber] RPC unavailable, using fallback. Run migration 025-atomic-receipt-number.sql.",
+    seqError?.message,
+  )
+
+  const year = new Date().getFullYear()
+  const { data: donations } = await supabase
+    .from("donations")
+    .select("receipt_number")
+    .not("receipt_number", "is", null)
+    .not("receipt_number", "like", "%NaN%")
+    .order("created_at", { ascending: false })
+    .limit(1)
+
+  let nextNumber = 1
+  if (donations && donations.length > 0) {
+    const lastReceipt = donations[0].receipt_number
+    if (lastReceipt) {
+      const match = lastReceipt.match(/(\d+)$/)
+      if (match) nextNumber = parseInt(match[1], 10) + 1
     }
   }
 
-  const year = new Date().getFullYear()
-  return `${orgDetails.receipt_prefix}-${year}-${String(nextNumber).padStart(3, "0")}`
+  return `RCP-${year}-${String(nextNumber).padStart(5, "0")}`
 }
 
 /**
