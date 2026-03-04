@@ -7,7 +7,11 @@
 
 import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { generateReceiptNumber, generateReceiptHTML, getOrganizationDetails } from "./generator"
+import { renderReceiptToPDF } from "./pdf-renderer"
+import type { ReceiptPDFData } from "./receipt-document"
 import { sendReceiptEmail } from "@/lib/email/receipt-mailer"
+import { generateReceiptDownloadUrl } from "./token"
+import { verificationQRBase64 } from "./qr"
 
 /**
  * Returns a Supabase service-role client.
@@ -43,6 +47,7 @@ export async function generateAndStoreReceipt(
   paymentMethod: string,
   paymentDate: Date,
   isMonthly: boolean,
+  providerRef?: string,
 ): Promise<ReceiptGenerationResult> {
   try {
     // IMPORTANT: use service-role client, NOT anon client.
@@ -58,23 +63,25 @@ export async function generateAndStoreReceipt(
       .single()
 
     if (existingDonation?.receipt_number) {
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-      const canonicalUrl = `${baseUrl}/api/receipts/download?id=${existingDonation.receipt_number}`
-      const existingUrl = existingDonation.receipt_url || undefined
+      // Generate token-based URL for existing receipt
+      const tokenUrl = await generateReceiptDownloadUrl(
+        donationId,
+        existingDonation.receipt_number
+      )
 
-      // If this donation was created before we switched to the download API as the
-      // canonical URL, repair it so email links never point at raw HTML storage.
-      if (!existingUrl || !existingUrl.includes("/api/receipts/download")) {
+      // If this donation was created before we switched to token-based URLs,
+      // update it to use the new secure URL format
+      if (!existingDonation.receipt_url || !existingDonation.receipt_url.includes("token=")) {
         await supabase
           .from("donations")
-          .update({ receipt_url: canonicalUrl })
+          .update({ receipt_url: tokenUrl })
           .eq("id", donationId)
       }
 
       return {
         success: true,
         receiptNumber: existingDonation.receipt_number,
-        receiptUrl: canonicalUrl,
+        receiptUrl: tokenUrl,
         message: "Receipt already generated for this donation",
       }
     }
@@ -101,26 +108,78 @@ export async function generateAndStoreReceipt(
       organizationDetails: orgDetails,
     })
 
-    // Store receipt HTML in Supabase Storage.
-    // PDFs are generated on-demand by the download route (/api/receipts/download?id=...)
-    // so we only need to persist the HTML source here.
+    // Store receipt HTML in Supabase Storage (source for email).
     const htmlFileName = `${donationId}-${receiptNumber}.html`
     const { error: htmlUploadError } = await supabase.storage
       .from("receipts")
       .upload(htmlFileName, Buffer.from(receiptHTML), {
         contentType: "text/html",
-        upsert: true, // overwrite if re-generated
+        upsert: true,
       })
 
     if (htmlUploadError) {
       console.error("HTML upload error:", htmlUploadError)
     }
 
-    // The canonical download URL points to our API route which generates the PDF
-    // live from the stored HTML. This works in all environments (dev + prod) and
-    // avoids the Puppeteer/Chromium setup issue at receipt-creation time.
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-    const receiptUrl = `${baseUrl}/api/receipts/download?id=${receiptNumber}`
+    // Generate PDF using @react-pdf/renderer and upload alongside HTML.
+    const pdfFileName = `${donationId}-${receiptNumber}.pdf`
+    try {
+      // Fetch verification_id from database (may be null for old donations)
+      const { data: donationData } = await supabase
+        .from("donations")
+        .select("verification_id")
+        .eq("id", donationId)
+        .single()
+
+      const verificationId = donationData?.verification_id
+      let verificationQR: string | undefined
+
+      // Generate QR code if verification_id exists
+      if (verificationId) {
+        try {
+          verificationQR = await verificationQRBase64(verificationId)
+        } catch (qrError) {
+          console.warn("[ReceiptService] QR code generation failed (non-fatal):", qrError)
+        }
+      }
+
+      const pdfData: ReceiptPDFData = {
+        receiptNumber,
+        donationId,
+        paymentDate,
+        donorName,
+        donorEmail,
+        donorPhone,
+        amount,
+        currency,
+        paymentMethod,
+        isMonthly,
+        providerRef,
+        organization: orgDetails,
+        verificationId,
+        verificationQR,
+      }
+      const pdfBuffer = await renderReceiptToPDF(pdfData)
+      const { error: pdfUploadError } = await supabase.storage
+        .from("receipts")
+        .upload(pdfFileName, pdfBuffer, {
+          contentType: "application/pdf",
+          upsert: true,
+        })
+      if (pdfUploadError) {
+        console.warn("[ReceiptService] PDF upload failed (non-fatal):", pdfUploadError.message)
+      }
+    } catch (pdfErr) {
+      console.error(
+        "[ReceiptService] PDF generation failed (non-fatal) — download will regenerate on-the-fly.",
+        "\nError:", pdfErr instanceof Error ? pdfErr.message : pdfErr,
+        "\nStack:", pdfErr instanceof Error ? pdfErr.stack : "(no stack)",
+      )
+    }
+
+    // The canonical download URL now uses token-based authentication
+    // for secure, time-limited access to receipts
+    const receiptUrl = await generateReceiptDownloadUrl(donationId, receiptNumber)
 
     // Update donation with receipt info
     const { error: updateError } = await supabase
@@ -133,6 +192,26 @@ export async function generateAndStoreReceipt(
       .eq("id", donationId)
 
     if (updateError) {
+      // 23505 = unique_violation: receipt_number already exists on another row.
+      // This happens when a previous run generated a malformed number (e.g. NaN)
+      // and a retry generates the same broken value.
+      // Treat as a soft error: the PDF was generated and uploaded; log and continue.
+      if ((updateError as { code?: string }).code === "23505") {
+        console.warn(
+          "[ReceiptService] Duplicate receipt_number — likely a NaN collision from a previous run.",
+          "receipt_number:", receiptNumber,
+          "donation:", donationId,
+          updateError,
+        )
+        // Return success so the webhook handler doesn't retry; the fix to
+        // generateReceiptNumber() will produce unique numbers from now on.
+        return {
+          success: true,
+          receiptNumber,
+          receiptUrl,
+          message: "Receipt PDF generated (duplicate number warning — see logs)",
+        }
+      }
       console.error("Failed to update donation with receipt:", updateError)
       return {
         success: false,
@@ -173,6 +252,7 @@ export async function sendReceiptToDonor(
   receiptUrl: string,
   amount: number,
   currency: string,
+  verificationId?: string,
 ): Promise<{ success: boolean; message: string }> {
   try {
     const supabase = getServiceSupabase()
@@ -185,6 +265,7 @@ export async function sendReceiptToDonor(
       receiptUrl,
       amount,
       currency,
+      verificationId,
     })
 
     if (!emailResult.success) {
@@ -289,17 +370,17 @@ export async function resendReceiptEmail(
       }
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-    const canonicalUrl = `${baseUrl}/api/receipts/download?id=${donation.receipt_number}`
-    const effectiveUrl =
-      typeof donation.receipt_url === "string" && donation.receipt_url.includes("/api/receipts/download")
-        ? donation.receipt_url
-        : canonicalUrl
+    // Generate fresh token-based URL for resend
+    const tokenUrl = await generateReceiptDownloadUrl(
+      donationId,
+      donation.receipt_number
+    )
 
-    if (effectiveUrl !== donation.receipt_url) {
+    // Update to token-based URL if needed
+    if (!donation.receipt_url.includes("token=")) {
       await supabase
         .from("donations")
-        .update({ receipt_url: effectiveUrl })
+        .update({ receipt_url: tokenUrl })
         .eq("id", donationId)
     }
 
@@ -309,9 +390,10 @@ export async function resendReceiptEmail(
       donation.donor_name,
       donation.donor_email,
       donation.receipt_number,
-      effectiveUrl,
+      tokenUrl,
       donation.amount,
       donation.currency,
+      donation.verification_id,
     )
 
     if (emailResult.success) {
