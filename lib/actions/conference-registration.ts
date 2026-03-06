@@ -271,6 +271,17 @@ export async function registerForConference(
     if (error) {
       console.error("Conference registration error:", error);
 
+      // Postgres unique constraint violation — duplicate active email
+      if (error.code === "23505") {
+        return {
+          success: false,
+          message:
+            "This email address is already registered for the conference. " +
+            "Please check your inbox for a confirmation email, or contact support if you need help.",
+          error: error.message,
+        };
+      }
+
       return {
         success: false,
 
@@ -294,9 +305,16 @@ export async function registerForConference(
       role: registration.role || undefined,
 
       workshops: registration.workshops || undefined,
-    }).catch((err) =>
-      console.error("Non-fatal: registration email failed:", err),
-    );
+    })
+      .then((r) => {
+        if (r.success)
+          supabase
+            .from("conference_registrations")
+            .update({ last_registration_email_sent_at: new Date().toISOString() })
+            .eq("id", registration.id)
+            .then(() => {})
+      })
+      .catch((err) => console.error("Non-fatal: registration email failed:", err))
 
     return {
       success: true,
@@ -617,6 +635,8 @@ export async function startConferencePayment(
 
         payment_currency: fee.currency,
 
+        payment_initiated_at: new Date().toISOString(),
+
         ...providerUpdate,
       })
 
@@ -741,7 +761,7 @@ export async function confirmConferenceRegistration(
 
     .from("conference_registrations")
 
-    .update({ status: "confirmed" })
+    .update({ status: "confirmed", confirmed_at: new Date().toISOString() })
 
     .eq("id", id);
 
@@ -763,9 +783,16 @@ export async function confirmConferenceRegistration(
     role: reg.role || undefined,
 
     workshops: reg.workshops || undefined,
-  }).catch((err) =>
-    console.error("Non-fatal: confirmation email failed:", err),
-  );
+  })
+    .then((r) => {
+      if (r.success)
+        supabase
+          .from("conference_registrations")
+          .update({ last_confirmation_email_sent_at: new Date().toISOString() })
+          .eq("id", reg.id)
+          .then(() => {})
+    })
+    .catch((err) => console.error("Non-fatal: confirmation email failed:", err))
 
   return { success: true };
 }
@@ -791,7 +818,7 @@ export async function cancelConferenceRegistration(
 
     .from("conference_registrations")
 
-    .update({ status: "cancelled" })
+    .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
 
     .eq("id", id);
 
@@ -806,9 +833,16 @@ export async function cancelConferenceRegistration(
       email: reg.email,
 
       registrationId: id,
-    }).catch((err) =>
-      console.error("Non-fatal: cancellation email failed:", err),
-    );
+    })
+      .then((r) => {
+        if (r.success)
+          supabase
+            .from("conference_registrations")
+            .update({ last_cancellation_email_sent_at: new Date().toISOString() })
+            .eq("id", id)
+            .then(() => {})
+      })
+      .catch((err) => console.error("Non-fatal: cancellation email failed:", err))
   }
 
   return { success: true };
@@ -849,6 +883,10 @@ export async function markConferencePaymentManual(
       payment_id: "manual:admin-override",
 
       payment_override_by: adminEmail || "admin",
+
+      payment_paid_at: new Date().toISOString(),
+
+      confirmed_at: new Date().toISOString(),
     })
 
     .eq("id", id);
@@ -871,9 +909,16 @@ export async function markConferencePaymentManual(
     role: reg.role || undefined,
 
     workshops: reg.workshops || undefined,
-  }).catch((err) =>
-    console.error("Non-fatal: admin-override confirmation email failed:", err),
-  );
+  })
+    .then((r) => {
+      if (r.success)
+        supabase
+          .from("conference_registrations")
+          .update({ last_confirmation_email_sent_at: new Date().toISOString() })
+          .eq("id", reg.id)
+          .then(() => {})
+    })
+    .catch((err) => console.error("Non-fatal: admin-override confirmation email failed:", err))
 
   return { success: true };
 }
@@ -1056,6 +1101,13 @@ export async function resendConferenceRegistrationEmail(
     workshops: reg.workshops || undefined,
   });
 
+  if (result.success) {
+    await supabase
+      .from("conference_registrations")
+      .update({ last_registration_email_sent_at: new Date().toISOString() })
+      .eq("id", id)
+  }
+
   return result.success
     ? { success: true }
     : { success: false, error: result.message };
@@ -1093,6 +1145,13 @@ export async function resendConferenceConfirmationEmail(
 
     workshops: reg.workshops || undefined,
   });
+
+  if (result.success) {
+    await supabase
+      .from("conference_registrations")
+      .update({ last_confirmation_email_sent_at: new Date().toISOString() })
+      .eq("id", id)
+  }
 
   return result.success
     ? { success: true }
@@ -1153,6 +1212,13 @@ export async function sendCustomConferenceEmail(
 
     body,
   });
+
+  if (result.success) {
+    await supabase
+      .from("conference_registrations")
+      .update({ last_custom_email_sent_at: new Date().toISOString() })
+      .eq("id", id)
+  }
 
   return result.success
     ? { success: true }
@@ -1225,6 +1291,13 @@ export async function sendTemplateConferenceEmail(
     subject,
     body,
   });
+
+  if (result.success) {
+    await supabase
+      .from("conference_registrations")
+      .update({ last_custom_email_sent_at: new Date().toISOString() })
+      .eq("id", id)
+  }
 
   return result.success
     ? { success: true }

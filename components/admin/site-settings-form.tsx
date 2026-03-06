@@ -40,6 +40,7 @@ import {
   X,
   Save,
   Settings,
+  Building2,
 } from "lucide-react"
 import { updateSiteSetting } from "@/lib/actions/admin-settings"
 import { FileUpload } from "./file-upload"
@@ -151,6 +152,14 @@ export function SiteSettingsForm({ settings }: SiteSettingsFormProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="default"
+            onClick={() => router.push("/admin/settings/organization")}
+            className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
+          >
+            <Building2 className="h-4 w-4 mr-2" />
+            Organization
+          </Button>
           <Button
             variant="default"
             onClick={() => router.push("/admin/homepage")}

@@ -111,7 +111,7 @@ export async function POST(request: Request) {
         // Amount mismatch — flag for admin review
         const { error: reviewErr } = await supabase
           .from("conference_registrations")
-          .update({ payment_status: "review", stripe_session_id: sessionId })
+          .update({ payment_status: "review", payment_review_at: new Date().toISOString(), stripe_session_id: sessionId })
           .eq("id", rid)
 
         if (reviewErr) {
@@ -161,6 +161,8 @@ export async function POST(request: Request) {
         payment_id: `stripe:${sessionId}`,
         provider_ref: sessionId,
         stripe_session_id: sessionId,
+        payment_paid_at: new Date().toISOString(),
+        confirmed_at: new Date().toISOString(),
       })
       .eq("id", rid)
 
@@ -177,7 +179,14 @@ export async function POST(request: Request) {
       attendanceMode: reg.attendance_mode || "",
       role: reg.role || undefined,
       workshops: reg.workshops || undefined,
-    }).catch((err) => console.error("Non-fatal: confirmation email failed:", err))
+    })
+      .then((r) => {
+        if (r.success)
+          supabase.from("conference_registrations")
+            .update({ last_confirmation_email_sent_at: new Date().toISOString() })
+            .eq("id", rid).then(() => {})
+      })
+      .catch((err) => console.error("Non-fatal: confirmation email failed:", err))
 
     console.log("confirm-stripe-session: confirmed registration", rid)
     return NextResponse.json({ ok: true, status: "confirmed" })

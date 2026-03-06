@@ -1,7 +1,25 @@
 /**
  * Receipt Email Template
  * HTML email template for donation receipts
+ *
+ * Design system matched to conference email template:
+ * - Inline styles only (email-client safe, no <style> block)
+ * - Ocean Blue brand colors (#3FABDE / #0B5F8A)
+ * - DEESSA brand badge with Foundation name
+ * - Ticket-style receipt with dashed dividers
+ * - Consistent CTA button hierarchy
+ * - Proper currency formatting with spacing
  */
+
+// ── Shared HTML escaping (same pattern as conference-registration.ts) ─────────
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
 
 export interface ReceiptEmailTemplateProps {
   donorName: string
@@ -9,6 +27,7 @@ export interface ReceiptEmailTemplateProps {
   receiptUrl: string
   amount: number
   currency: string
+  verificationId?: string
 }
 
 export function ReceiptEmailTemplate({
@@ -17,291 +36,312 @@ export function ReceiptEmailTemplate({
   receiptUrl,
   amount,
   currency,
+  verificationId,
 }: ReceiptEmailTemplateProps): string {
-  const currencySymbol = currency === "USD" ? "$" : "₨"
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dessafoundation.org"
+  const currencyLabels: Record<string, { symbol: string; name: string }> = {
+    NPR: { symbol: "Rs.", name: "Nepalese Rupee" },
+    USD: { symbol: "$", name: "US Dollar" },
+    EUR: { symbol: "€", name: "Euro" },
+    GBP: { symbol: "£", name: "British Pound" },
+    INR: { symbol: "₹", name: "Indian Rupee" },
+  }
+  const currencyInfo = currencyLabels[currency] || { symbol: currency, name: currency }
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deessafoundation.org.np"
 
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Your Donation Receipt</title>
-      <style>
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        
-        body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-          color: #1f2937;
-          line-height: 1.6;
-          background: #f9fafb;
-        }
-        
-        .container {
-          max-width: 600px;
-          margin: 0 auto;
-          background: white;
-          border-radius: 8px;
-          overflow: hidden;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        
-        .header {
-          background: linear-gradient(135deg, #059669 0%, #047857 100%);
-          color: white;
-          padding: 40px 20px;
-          text-align: center;
-        }
-        
-        .header-title {
-          font-size: 28px;
-          font-weight: 700;
-          margin-bottom: 10px;
-        }
-        
-        .header-subtitle {
-          font-size: 14px;
-          opacity: 0.9;
-        }
-        
-        .content {
-          padding: 40px 20px;
-        }
-        
-        .greeting {
-          font-size: 16px;
-          margin-bottom: 20px;
-          color: #111827;
-        }
-        
-        .greeting strong {
-          color: #059669;
-        }
-        
-        .receipt-box {
-          background: #f0fdf4;
-          border: 2px solid #86efac;
-          border-radius: 8px;
-          padding: 20px;
-          margin: 20px 0;
-        }
-        
-        .receipt-row {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 12px;
-          font-size: 14px;
-        }
-        
-        .receipt-label {
-          color: #6b7280;
-          font-weight: 500;
-        }
-        
-        .receipt-value {
-          color: #111827;
-          font-weight: 600;
-        }
-        
-        .amount-display {
-          font-size: 32px;
-          font-weight: 700;
-          color: #059669;
-          text-align: center;
-          margin: 20px 0;
-          padding: 20px 0;
-          border-top: 1px solid #d1fae5;
-          border-bottom: 1px solid #d1fae5;
-        }
-        
-        .message {
-          background: #eff6ff;
-          border-left: 4px solid #3b82f6;
-          padding: 15px;
-          margin: 20px 0;
-          font-size: 13px;
-          color: #1e40af;
-          line-height: 1.6;
-        }
-        
-        .cta-button {
-          display: inline-block;
-          background: #059669;
-          color: white;
-          padding: 12px 30px;
-          border-radius: 6px;
-          text-decoration: none;
-          font-weight: 600;
-          font-size: 14px;
-          margin: 20px 0;
-        }
-        
-        .cta-button:hover {
-          background: #047857;
-        }
-        
-        .button-container {
-          text-align: center;
-          margin: 30px 0;
-        }
-        
-        .next-steps {
-          background: #f3f4f6;
-          border-radius: 8px;
-          padding: 20px;
-          margin: 20px 0;
-        }
-        
-        .next-steps-title {
-          font-weight: 600;
-          color: #111827;
-          margin-bottom: 12px;
-          font-size: 14px;
-        }
-        
-        .next-steps-list {
-          list-style: none;
-          font-size: 13px;
-          color: #6b7280;
-        }
-        
-        .next-steps-list li {
-          margin-bottom: 8px;
-          padding-left: 20px;
-          position: relative;
-        }
-        
-        .next-steps-list li:before {
-          content: "✓";
-          position: absolute;
-          left: 0;
-          color: #059669;
-          font-weight: bold;
-        }
-        
-        .footer {
-          background: #f9fafb;
-          padding: 20px;
-          text-align: center;
-          font-size: 12px;
-          color: #6b7280;
-          border-top: 1px solid #e5e7eb;
-        }
-        
-        .footer-links {
-          margin: 10px 0;
-        }
-        
-        .footer-links a {
-          color: #059669;
-          text-decoration: none;
-          margin: 0 10px;
-        }
-        
-        .footer-links a:hover {
-          text-decoration: underline;
-        }
-        
-        @media (max-width: 600px) {
-          .content {
-            padding: 20px;
-          }
-          
-          .header {
-            padding: 30px 20px;
-          }
-          
-          .amount-display {
-            font-size: 24px;
-          }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <!-- Header -->
-        <div class="header">
-          <div class="header-title">Thank You! 🙏</div>
-          <div class="header-subtitle">Your donation has been received</div>
-        </div>
+  // Escape all user-supplied values before interpolating into HTML
+  const safeDonorName = escapeHtml(donorName)
+  const firstName = escapeHtml(donorName.split(" ")[0])
+  const safeReceiptNumber = escapeHtml(receiptNumber)
+  const safeVerificationId = verificationId ? escapeHtml(verificationId) : ""
+  // Use Indian grouping (lakhs/crores) for NPR & INR, international (thousands/millions) for others
+  const amountLocale = ["NPR", "INR"].includes(currency.toUpperCase()) ? "en-IN" : "en-US"
+  const formattedAmount = amount.toLocaleString(amountLocale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+  const dateStr = new Date().toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  })
+  const timeStr = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  })
 
-        <!-- Content -->
-        <div class="content">
-          <div class="greeting">
-            Dear <strong>${donorName}</strong>,
-          </div>
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Donation Receipt — DEESSA Foundation</title>
+</head>
+<body style="margin:0;padding:0;background:#f0f4f8;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4f8;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
 
-          <p style="margin-bottom: 20px; font-size: 14px; color: #6b7280;">
-            We are deeply grateful for your generous donation to Dessa Foundation. Your support enables us to continue our mission of creating positive change in communities across Nepal.
-          </p>
+          <!-- Brand Badge -->
+          <tr>
+            <td align="center" style="padding-bottom:24px;">
+              <table cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background:#3FABDE;border-radius:12px;padding:10px 16px;">
+                    <span style="color:#fff;font-size:20px;font-weight:800;letter-spacing:-0.5px;">DEESSA</span>
+                    <span style="color:rgba(255,255,255,0.8);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-left:8px;">Foundation</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-          <!-- Receipt Details -->
-          <div class="receipt-box">
-            <div class="receipt-row">
-              <span class="receipt-label">Receipt Number:</span>
-              <span class="receipt-value">${receiptNumber}</span>
-            </div>
-            <div class="receipt-row">
-              <span class="receipt-label">Date:</span>
-              <span class="receipt-value">${new Date().toLocaleDateString()}</span>
-            </div>
-            <div class="amount-display">
-              ${currencySymbol}${amount.toFixed(2)}
-            </div>
-          </div>
+          <!-- Main Card -->
+          <tr>
+            <td style="background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.07);">
+              <table width="100%" cellpadding="0" cellspacing="0">
 
-          <!-- Tax Information -->
-          <div class="message">
-            <strong>Tax Deductibility:</strong> Dessa Foundation is a registered nonprofit organization. Your donation is tax-deductible to the extent permitted by law. Please keep this receipt for your tax records.
-          </div>
+              <!-- Gradient Header -->
+              <tr>
+                <td style="background:linear-gradient(135deg,#0B5F8A 0%,#3FABDE 50%,#0B5F8A 100%);padding:48px 40px;text-align:center;">
+                  <div style="font-size:48px;margin-bottom:16px;">🙏</div>
+                  <h1 style="margin:0 0 8px;color:#fff;font-size:28px;font-weight:800;line-height:1.2;">
+                    Thank You, ${firstName}!
+                  </h1>
+                  <p style="margin:0;color:rgba(255,255,255,0.9);font-size:16px;line-height:1.5;">
+                    Your generous donation to <strong>DEESSA Foundation</strong><br />has been successfully received and recorded.
+                  </p>
+                </td>
+              </tr>
 
-          <!-- Download Receipt -->
-          <div class="button-container">
-            <a href="${receiptUrl}" class="cta-button">Download Full Receipt</a>
-          </div>
+              <!-- Donation Confirmed badge -->
+              <tr>
+                <td align="center" style="padding:20px 40px 0;background:#fff;">
+                  <span style="display:inline-block;background:#DCFCE7;color:#15803D;font-size:13px;font-weight:700;padding:6px 18px;border-radius:100px;border:1.5px solid #BBF7D0;letter-spacing:0.3px;">
+                    ✓ &nbsp;Donation Confirmed
+                  </span>
+                </td>
+              </tr>
 
-          <!-- Next Steps -->
-          <div class="next-steps">
-            <div class="next-steps-title">What Happens Next?</div>
-            <ul class="next-steps-list">
-              <li>Your donation is being processed and allocated to our programs</li>
-              <li>You'll receive regular updates about the impact of your contribution</li>
-              <li>Your receipt is available for download anytime</li>
-              <li>We'll keep you informed about our initiatives and progress</li>
-            </ul>
-          </div>
+              <!-- Body -->
+              <tr>
+                <td style="padding:32px 40px 40px;">
 
-          <p style="margin: 20px 0; font-size: 13px; color: #6b7280; line-height: 1.6;">
-            If you have any questions about your donation or would like to learn more about our work, please don't hesitate to reach out to us.
-          </p>
+                  <!-- Personal message -->
+                  <p style="margin:0 0 24px;font-size:15px;color:#334155;line-height:1.7;">
+                    Dear <strong>${safeDonorName}</strong>,<br /><br />
+                    On behalf of everyone at <strong>DEESSA Foundation</strong>, we sincerely appreciate your contribution
+                    of <strong>${currencyInfo.symbol}&nbsp;${formattedAmount}</strong>. Every donation, no matter the size,
+                    directly fuels our mission to empower communities through education, healthcare, and sustainable development
+                    across Nepal.<br /><br />
+                    Your official donation receipt is attached below for your records.
+                  </p>
 
-          <p style="margin: 20px 0; font-size: 13px; color: #111827; font-weight: 600;">
-            With heartfelt gratitude,<br>
-            The Dessa Foundation Team
-          </p>
-        </div>
+                  <!-- Receipt Ticket Box -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="border:1.5px solid #E2E8F0;border-radius:16px;overflow:hidden;margin-bottom:28px;">
+                    <!-- Ticket Header -->
+                    <tr style="background:linear-gradient(90deg,#EFF8FF,#F8FAFC);">
+                      <td style="padding:16px 20px;">
+                        <p style="margin:0;font-size:11px;font-weight:700;color:#3FABDE;text-transform:uppercase;letter-spacing:1px;">DONATION RECEIPT</p>
+                        <p style="margin:4px 0 0;font-size:18px;font-weight:800;color:#0F172A;">${dateStr}</p>
+                        <p style="margin:2px 0 0;font-size:12px;color:#64748B;">at ${timeStr}</p>
+                      </td>
+                      <td style="padding:16px 20px;text-align:right;vertical-align:top;">
+                        <p style="margin:0;font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;">Receipt No.</p>
+                        <p style="margin:4px 0 0;font-size:13px;font-weight:700;color:#0F172A;font-family:monospace;">${safeReceiptNumber}</p>
+                      </td>
+                    </tr>
+                    ${verificationId ? `
+                    <!-- Verification ID row -->
+                    <tr>
+                      <td colspan="2" style="padding:0 12px;">
+                        <div style="border-top:1px solid #F1F5F9;"></div>
+                      </td>
+                    </tr>
+                    <tr style="background:linear-gradient(90deg,#F8FAFC,#EFF8FF);">
+                      <td colspan="2" style="padding:10px 20px;">
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                          <tr>
+                            <td style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.5px;">🔐 Verification ID</td>
+                            <td style="text-align:right;font-size:13px;font-weight:700;color:#0B5F8A;font-family:monospace;letter-spacing:0.5px;">${safeVerificationId}</td>
+                          </tr>
+                        </table>
+                        <p style="margin:4px 0 0;font-size:11px;color:#94A3B8;">Use this ID to verify your receipt at <a href="${siteUrl}/verify/${encodeURIComponent(verificationId)}" style="color:#3FABDE;">${siteUrl}/verify</a></p>
+                      </td>
+                    </tr>
+                    ` : ''}
+                    <!-- Dashed divider -->
+                    <tr>
+                      <td colspan="2" style="padding:0 12px;">
+                        <div style="border-top:2px dashed #E2E8F0;"></div>
+                      </td>
+                    </tr>
+                    <!-- Ticket Details -->
+                    <tr>
+                      <td colspan="2" style="padding:16px 20px;">
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                          <tr>
+                            <td style="font-size:11px;color:#64748B;font-weight:600;text-transform:uppercase;padding-bottom:4px;width:50%;">Donor Name</td>
+                            <td style="font-size:11px;color:#64748B;font-weight:600;text-transform:uppercase;padding-bottom:4px;width:50%;">Currency</td>
+                          </tr>
+                          <tr>
+                            <td style="font-size:14px;font-weight:600;color:#0F172A;padding-bottom:14px;">${safeDonorName}</td>
+                            <td style="font-size:14px;font-weight:600;color:#0F172A;padding-bottom:14px;">${currency} (${currencyInfo.name})</td>
+                          </tr>
+                          <tr>
+                            <td style="font-size:11px;color:#64748B;font-weight:600;text-transform:uppercase;padding-bottom:4px;">Date</td>
+                            <td style="font-size:11px;color:#64748B;font-weight:600;text-transform:uppercase;padding-bottom:4px;">Status</td>
+                          </tr>
+                          <tr>
+                            <td style="font-size:14px;font-weight:600;color:#0F172A;">${dateStr}</td>
+                            <td style="font-size:14px;font-weight:600;color:#15803D;">✓ Completed</td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    <!-- Dashed divider -->
+                    <tr>
+                      <td colspan="2" style="padding:0 12px;">
+                        <div style="border-top:2px dashed #E2E8F0;"></div>
+                      </td>
+                    </tr>
+                    <!-- Amount display -->
+                    <tr>
+                      <td colspan="2" style="padding:24px 20px;text-align:center;background:linear-gradient(180deg,#FAFBFC,#F0F8FF);">
+                        <p style="margin:0;font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:1px;">Total Amount Donated</p>
+                        <p style="margin:10px 0 0;font-size:38px;font-weight:800;color:#0B5F8A;letter-spacing:-0.5px;">${currencyInfo.symbol}&nbsp;${formattedAmount}</p>
+                        <p style="margin:4px 0 0;font-size:12px;color:#94A3B8;">${currency} &middot; ${currencyInfo.name}</p>
+                      </td>
+                    </tr>
+                  </table>
 
-        <!-- Footer -->
-        <div class="footer">
-          <p style="margin-bottom: 10px;">
-            Dessa Foundation | Making a Difference in Nepal
-          </p>
-          <div class="footer-links">
-            <a href="${siteUrl}">Visit Website</a>
-            <a href="${siteUrl}/contact">Contact Us</a>
-            <a href="${siteUrl}/privacy">Privacy Policy</a>
-          </div>
-          <p style="margin-top: 15px; font-size: 11px; color: #9ca3af;">
-            This is an automated email. Please do not reply to this message.
-          </p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `
+                  <!-- CTA: Download Receipt -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                    <tr>
+                      <td align="center">
+                        <a href="${receiptUrl}"
+                           style="display:inline-block;background:linear-gradient(135deg,#0B5F8A,#3FABDE);color:#fff;font-size:16px;font-weight:700;text-decoration:none;border-radius:12px;padding:16px 44px;letter-spacing:0.3px;">
+                          📄 &nbsp;Download Full Receipt
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Tax Info Box -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background:#EFF8FF;border:1.5px solid #BAE0FF;border-radius:12px;margin-bottom:24px;">
+                    <tr>
+                      <td style="padding:20px 24px;">
+                        <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#0B5F8A;">📋 Tax Information</p>
+                        <p style="margin:0;font-size:13px;color:#1E6FA8;line-height:1.7;">
+                          DEESSA Foundation is a registered nonprofit organization in Nepal.
+                          Your donation of <strong>${currencyInfo.symbol}&nbsp;${formattedAmount}</strong> is tax-deductible
+                          under Section 12 of the Income Tax Act, 2058 (Nepal). Please download and retain
+                          your receipt above for your tax filing records.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Your Impact Box -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:12px;margin-bottom:24px;">
+                    <tr>
+                      <td style="padding:20px 24px;">
+                        <p style="margin:0 0 10px;font-size:14px;font-weight:700;color:#15803D;">💚 Your Impact Matters</p>
+                        <p style="margin:0 0 6px;font-size:13px;color:#166534;line-height:1.7;">
+                          Your donation to DEESSA Foundation helps us:
+                        </p>
+                        <table cellpadding="0" cellspacing="0" style="margin-top:4px;">
+                          <tr>
+                            <td style="padding:4px 8px 4px 0;font-size:13px;color:#166534;vertical-align:top;">🎓</td>
+                            <td style="padding:4px 0;font-size:13px;color:#166534;line-height:1.5;">Provide quality education &amp; scholarships to underserved communities</td>
+                          </tr>
+                          <tr>
+                            <td style="padding:4px 8px 4px 0;font-size:13px;color:#166534;vertical-align:top;">🏥</td>
+                            <td style="padding:4px 0;font-size:13px;color:#166534;line-height:1.5;">Deliver healthcare access &amp; wellness programs in rural Nepal</td>
+                          </tr>
+                          <tr>
+                            <td style="padding:4px 8px 4px 0;font-size:13px;color:#166534;vertical-align:top;">🌱</td>
+                            <td style="padding:4px 0;font-size:13px;color:#166534;line-height:1.5;">Support sustainable livelihoods &amp; community development</td>
+                          </tr>
+                          <tr>
+                            <td style="padding:4px 8px 4px 0;font-size:13px;color:#166534;vertical-align:top;">🤝</td>
+                            <td style="padding:4px 0;font-size:13px;color:#166534;line-height:1.5;">Empower women, youth &amp; marginalized groups</td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- What Happens Next -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;margin-bottom:24px;">
+                    <tr>
+                      <td style="padding:20px 24px;">
+                        <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:#0F172A;">📬 What Happens Next?</p>
+                        <table cellpadding="0" cellspacing="0" width="100%">
+                          <tr>
+                            <td style="padding:6px 0;font-size:13px;color:#475569;line-height:1.6;">
+                              <span style="color:#3FABDE;font-weight:700;">1.</span>&nbsp; Your donation is being allocated to active programs
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding:6px 0;font-size:13px;color:#475569;line-height:1.6;">
+                              <span style="color:#3FABDE;font-weight:700;">2.</span>&nbsp; We'll share impact updates via email &amp; our website
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding:6px 0;font-size:13px;color:#475569;line-height:1.6;">
+                              <span style="color:#3FABDE;font-weight:700;">3.</span>&nbsp; Your receipt is available for download anytime from the link above
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding:6px 0;font-size:13px;color:#475569;line-height:1.6;">
+                              <span style="color:#3FABDE;font-weight:700;">4.</span>&nbsp; You'll be added to our donor community for exclusive updates
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Secondary CTA -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                    <tr>
+                      <td align="center">
+                        <a href="${siteUrl}/donate"
+                           style="display:inline-block;background:#F0F4F8;color:#0B5F8A;font-size:14px;font-weight:600;text-decoration:none;border-radius:12px;padding:12px 32px;border:1.5px solid #E2E8F0;">
+                          ❤️ &nbsp;Make Another Donation
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Contact line -->
+                  <p style="margin:0;font-size:13px;color:#94A3B8;line-height:1.6;text-align:center;">
+                    Have questions about your donation?<br />
+                    <a href="mailto:thedeessafoundation@gmail.com" style="color:#3FABDE;font-weight:600;">thedeessafoundation@gmail.com</a>
+                  </p>
+                </td>
+              </tr>
+
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding:28px 0;">
+              <p style="margin:0 0 4px;font-size:12px;color:#94A3B8;">DEESSA Foundation — Empowering Communities Across Nepal</p>
+              <p style="margin:0;font-size:11px;color:#CBD5E1;">
+                <a href="${siteUrl}" style="color:#3FABDE;">deessafoundation.org.np</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
 }

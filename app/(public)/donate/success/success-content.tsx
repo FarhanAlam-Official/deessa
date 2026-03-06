@@ -3,30 +3,32 @@
 import Link from "next/link"
 import { CheckCircle, Heart, Download, ArrowRight, Loader2, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import { formatCurrency } from "@/lib/utils/currency"
 import { ReceiptPreview } from "@/components/receipt-preview"
-import { getReceiptForDisplay, getOrganizationDetailsForReceipt } from "@/lib/actions/donation-receipt"
-import { notifications } from "@/lib/notifications"
+import {
+  getReceiptForDisplay,
+  getOrganizationDetailsForReceipt,
+  getDonationByPaymentRef,
+  ensureReceiptSent,
+} from "@/lib/actions/donation-receipt"
+
+interface DonationData {
+  id: string
+  amount: number
+  currency: string
+  donor_name: string
+  donor_email: string
+  donor_phone?: string | null
+  is_monthly: boolean
+  payment_status: string
+  created_at?: string
+}
 
 interface VerificationResult {
   success: boolean
-  session?: {
-    id: string
-    payment_status?: string
-    amount_total?: number
-    currency?: string
-  }
-  donation?: {
-    id: string
-    amount: number
-    currency: string
-    donor_name: string
-    donor_email: string
-    is_monthly: boolean
-    payment_status: string
-  } | null
+  donation?: DonationData | null
   error?: string
 }
 
@@ -37,6 +39,9 @@ export function SuccessContent() {
   const [provider, setProvider] = useState<"stripe" | "khalti" | "esewa">("stripe")
   const [receipt, setReceipt] = useState<any>(null)
   const [isFetchingReceipt, setIsFetchingReceipt] = useState(false)
+  const [receiptTimedOut, setReceiptTimedOut] = useState(false)
+  const [ensureEmailSent, setEnsureEmailSent] = useState(false)
+  const [ensureEmailStatus, setEnsureEmailStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [organizationDetails, setOrganizationDetails] = useState<{
     name: string
     vatNumber: string
@@ -44,209 +49,268 @@ export function SuccessContent() {
     swcNumber: string
   } | null>(null)
 
+  // Guard: ensures receipt-fetch only runs once per confirmed donation,
+  // even if verification state updates multiple times (e.g. during status polling).
+  const receiptFetchStarted = useRef(false)
+
   useEffect(() => {
     const providerParam = searchParams.get("provider") as "stripe" | "khalti" | "esewa" | null
     const sessionId = searchParams.get("session_id")
     const pidx = searchParams.get("pidx")
+    const transactionCode = searchParams.get("transaction_code")
     const refId = searchParams.get("refId")
-    const isMock = searchParams.get("mock") === "1"
 
-    // Determine provider
     if (providerParam && ["stripe", "khalti", "esewa"].includes(providerParam)) {
       setProvider(providerParam)
     } else if (pidx) {
       setProvider("khalti")
-    } else if (refId) {
+    } else if (transactionCode || refId) {
       setProvider("esewa")
     } else if (sessionId) {
       setProvider("stripe")
     }
 
-    // For Khalti and eSewa, if we have the identifiers, we can show success
-    // (verification was already done in the return/callback handlers)
+    // ── Khalti ──────────────────────────────────────────────────────────────
     if (providerParam === "khalti" && pidx) {
-      // Khalti verification was done in return page, just show success
-      setVerification({
-        success: true,
-        donation: null, // We'll fetch it if needed
-      })
-      setIsLoading(false)
+      // Use read-only status endpoint (no mutation)
+      fetch(`/api/payments/khalti/status?pidx=${encodeURIComponent(pidx)}`)
+        .then(async (response) => {
+          const data = await response.json()
+          if (response.ok && data.success && data.donation) {
+            setVerification({
+              success: true,
+              donation: {
+                id: data.donation.id,
+                amount: data.donation.amount,
+                currency: data.donation.currency,
+                donor_name: data.donation.donor_name,
+                donor_email: data.donation.donor_email,
+                donor_phone: data.donation.donor_phone ?? undefined,
+                is_monthly: data.donation.is_monthly,
+                payment_status: data.donation.payment_status,
+                created_at: data.donation.created_at,
+              },
+            })
+          } else {
+            setVerification({ success: false, error: data.error || "Donation not found" })
+          }
+          setIsLoading(false)
+        })
+        .catch((error) => {
+          console.error("Error fetching Khalti status:", error)
+          setVerification({ success: false, error: "Failed to fetch payment status" })
+          setIsLoading(false)
+        })
       return
     }
 
-    if (providerParam === "esewa" && refId) {
-      // eSewa verification was done in callback, just show success
-      setVerification({
-        success: true,
-        donation: null, // We'll fetch it if needed
-      })
-      setIsLoading(false)
+    // ── eSewa ────────────────────────────────────────────────────────────────
+    // Prefer the full UUID (esewa_uuid param) over the short transaction_code for status lookup
+    const esewaUuid = searchParams.get("esewa_uuid")
+    const esewaRef = esewaUuid || transactionCode || refId
+    if ((providerParam === "esewa" || esewaRef) && esewaRef) {
+      // Use read-only status endpoint (no mutation)
+      fetch(`/api/payments/esewa/status?transaction_uuid=${encodeURIComponent(esewaRef)}`)
+        .then(async (response) => {
+          const data = await response.json()
+          if (response.ok && data.success && data.donation) {
+            setVerification({
+              success: true,
+              donation: {
+                id: data.donation.id,
+                amount: data.donation.amount,
+                currency: data.donation.currency,
+                donor_name: data.donation.donor_name,
+                donor_email: data.donation.donor_email,
+                donor_phone: data.donation.donor_phone ?? undefined,
+                is_monthly: data.donation.is_monthly,
+                payment_status: data.donation.payment_status,
+                created_at: data.donation.created_at,
+              },
+            })
+          } else {
+            setVerification({ success: false, error: data.error || "Donation not found" })
+          }
+          setIsLoading(false)
+        })
+        .catch((error) => {
+          console.error("Error fetching eSewa status:", error)
+          setVerification({ success: false, error: "Failed to fetch payment status" })
+          setIsLoading(false)
+        })
       return
     }
 
-    // For Stripe, verify session
+    // ── Stripe ───────────────────────────────────────────────────────────────
     if (providerParam === "stripe" || sessionId) {
       if (!sessionId) {
-        setVerification({
-          success: false,
-          error: "No session ID provided",
-        })
+        setVerification({ success: false, error: "No session ID provided" })
         setIsLoading(false)
         return
       }
 
-      // Verify session with API and poll for webhook updates
-      const verifySession = async () => {
+      const checkStatus = async () => {
         try {
-          const response = await fetch(`/api/payments/stripe/verify?session_id=${sessionId}`)
+          const response = await fetch(`/api/payments/stripe/status?session_id=${sessionId}`)
           const data = await response.json()
 
           if (response.ok && data.success) {
-            // If donation status is pending, poll for webhook updates
             if (data.donation?.payment_status === "pending") {
-              // Poll every 2 seconds for up to 30 seconds (15 attempts)
+              // Set initial state, then poll for the DB update
+              setVerification({ success: true, donation: data.donation })
+              setIsLoading(false)
+
               let attempts = 0
               const maxAttempts = 15
-              const pollInterval = 2000
 
               const pollForUpdate = setInterval(async () => {
                 attempts++
                 try {
-                  const pollResponse = await fetch(`/api/payments/stripe/verify?session_id=${sessionId}`)
+                  const pollResponse = await fetch(`/api/payments/stripe/status?session_id=${sessionId}`)
                   const pollData = await pollResponse.json()
 
                   if (pollResponse.ok && pollData.success && pollData.donation) {
-                    // If status is no longer pending, update and stop polling
+                    // Merge: always preserve donor PII whichever poll first delivers it
+                    setVerification((prev) => ({
+                      success: true,
+                      donation: {
+                        ...prev?.donation,
+                        ...pollData.donation,
+                        donor_name: pollData.donation.donor_name || prev?.donation?.donor_name || "",
+                        donor_email: pollData.donation.donor_email || prev?.donation?.donor_email || "",
+                        donor_phone: pollData.donation.donor_phone ?? prev?.donation?.donor_phone,
+                      } as DonationData,
+                    }))
+
                     if (pollData.donation.payment_status !== "pending") {
                       clearInterval(pollForUpdate)
-                      setVerification({
-                        success: true,
-                        session: pollData.session,
-                        donation: pollData.donation,
-                      })
-                      setIsLoading(false)
                     } else if (attempts >= maxAttempts) {
-                      // Timeout: stop polling and show current status
                       clearInterval(pollForUpdate)
-                      setVerification({
-                        success: true,
-                        session: pollData.session,
-                        donation: pollData.donation,
-                      })
-                      setIsLoading(false)
                     }
+                  } else if (attempts >= maxAttempts) {
+                    clearInterval(pollForUpdate)
                   }
                 } catch (pollError) {
                   console.error("Error polling for status update:", pollError)
-                  if (attempts >= maxAttempts) {
-                    clearInterval(pollForUpdate)
-                    setIsLoading(false)
-                  }
+                  if (attempts >= maxAttempts) clearInterval(pollForUpdate)
                 }
-              }, pollInterval)
-
-              // Set initial verification while polling
-              setVerification({
-                success: true,
-                session: data.session,
-                donation: data.donation,
-              })
-              setIsLoading(false)
+              }, 2000)
             } else {
-              // Status is already completed/failed, no need to poll
-              setVerification({
-                success: true,
-                session: data.session,
-                donation: data.donation,
-              })
+              // Already completed/failed
+              setVerification({ success: true, donation: data.donation })
               setIsLoading(false)
             }
           } else {
-            setVerification({
-              success: false,
-              error: data.error || "Verification failed",
-            })
+            setVerification({ success: false, error: data.error || "Status check failed" })
             setIsLoading(false)
           }
         } catch (error) {
-          console.error("Error verifying session:", error)
-          setVerification({
-            success: false,
-            error: "Failed to verify payment session",
-          })
+          console.error("Error checking status:", error)
+          setVerification({ success: false, error: "Failed to check payment status" })
           setIsLoading(false)
         }
       }
 
-      verifySession()
+      checkStatus()
       return
     }
 
-    // If no provider-specific params, show success (might be direct navigation)
-    setVerification({
-      success: true,
-    })
+    setVerification({ success: true })
     setIsLoading(false)
   }, [searchParams])
 
-  // Auto-fetch receipt and organization details when donation is completed
-  useEffect(() => {
-    const fetchReceiptAndOrgDetails = async () => {
-      const donation = verification?.donation
-      if (!donation || donation.payment_status !== "completed") {
-        return
-      }
+  // Stable scalar deps — NOT the full donation object — so these effects don't
+  // re-fire on every poll update that creates a new object reference.
+  const donationId = verification?.donation?.id
+  const paymentStatus = verification?.donation?.payment_status
 
-      // Fetch organization details
+  // When poll times out, trigger email fallback once
+  useEffect(() => {
+    if (!receiptTimedOut || !donationId || ensureEmailSent) return
+    setEnsureEmailSent(true)
+    setEnsureEmailStatus('sending')
+
+    ensureReceiptSent(donationId)
+      .then((result) => {
+        // If receipt was found and returned, surface it on the page
+        if (result.receiptNumber) {
+          setReceipt((prev: typeof receipt) => prev ?? {
+            receipt_number: result.receiptNumber,
+            receipt_url: result.receiptUrl,
+          })
+        }
+        setEnsureEmailStatus(result.success ? 'sent' : 'error')
+      })
+      .catch(() => setEnsureEmailStatus('error'))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [receiptTimedOut, donationId])
+
+  // Fetch receipt once when payment is confirmed.
+  useEffect(() => {
+    if (!donationId || paymentStatus !== "completed") return
+    // Guard: only run once even if donationId/paymentStatus re-evaluate to same values
+    if (receiptFetchStarted.current) return
+    receiptFetchStarted.current = true
+
+    let cancelled = false
+    let pollTimer: ReturnType<typeof setInterval> | null = null
+
+    const run = async () => {
+      // Org details (non-blocking)
       try {
         const orgDetails = await getOrganizationDetailsForReceipt()
-        setOrganizationDetails(orgDetails)
-      } catch (error) {
-        console.error("Error fetching organization details:", error)
+        if (!cancelled) setOrganizationDetails(orgDetails)
+      } catch (e) {
+        console.error("Org details fetch error:", e)
       }
 
-      // Fetch receipt if it exists
+      // Immediate receipt check
       setIsFetchingReceipt(true)
       try {
-        const receiptData = await getReceiptForDisplay(donation.id)
-        if (receiptData?.receipt_number) {
-          setReceipt(receiptData)
-        } else {
-          // If receipt doesn't exist yet, poll for it (webhook might still be processing)
-          let attempts = 0
-          const maxAttempts = 10
-          const pollInterval = 2000
-
-          const pollForReceipt = setInterval(async () => {
-            attempts++
-            try {
-              const pollReceiptData = await getReceiptForDisplay(donation.id)
-              if (pollReceiptData?.receipt_number) {
-                clearInterval(pollForReceipt)
-                setReceipt(pollReceiptData)
-                setIsFetchingReceipt(false)
-              } else if (attempts >= maxAttempts) {
-                clearInterval(pollForReceipt)
-                setIsFetchingReceipt(false)
-              }
-            } catch (pollError) {
-              console.error("Error polling for receipt:", pollError)
-              if (attempts >= maxAttempts) {
-                clearInterval(pollForReceipt)
-                setIsFetchingReceipt(false)
-              }
-            }
-          }, pollInterval)
+        const initial = await getReceiptForDisplay(donationId)
+        if (initial?.receipt_number) {
+          if (!cancelled) { setReceipt(initial); setIsFetchingReceipt(false) }
+          return
         }
-      } catch (error) {
-        console.error("Error fetching receipt:", error)
-      } finally {
-        setIsFetchingReceipt(false)
+      } catch (e) {
+        console.error("Initial receipt fetch error:", e)
       }
+
+      // Not ready yet — poll every 2s for up to 30s
+      let attempts = 0
+      pollTimer = setInterval(async () => {
+        if (cancelled) { clearInterval(pollTimer!); return }
+        attempts++
+        try {
+          const data = await getReceiptForDisplay(donationId)
+          if (data?.receipt_number) {
+            clearInterval(pollTimer!)
+            if (!cancelled) { setReceipt(data); setIsFetchingReceipt(false) }
+          } else if (attempts >= 15) {
+            clearInterval(pollTimer!)
+            if (!cancelled) {
+              setIsFetchingReceipt(false)
+              setReceiptTimedOut(true)
+            }
+          }
+        } catch (e) {
+          console.error("Receipt poll error:", e)
+          if (attempts >= 15) {
+            clearInterval(pollTimer!)
+            if (!cancelled) { setIsFetchingReceipt(false); setReceiptTimedOut(true) }
+          }
+        }
+      }, 2000)
     }
 
-    fetchReceiptAndOrgDetails()
-  }, [verification?.donation])
+    run()
+
+    return () => {
+      cancelled = true
+      if (pollTimer) clearInterval(pollTimer)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [donationId, paymentStatus])
 
   if (isLoading) {
     return (
@@ -277,20 +341,16 @@ export function SuccessContent() {
           {verification?.error || "We couldn't verify your payment session. Please contact support if you have any questions."}
         </p>
         <div className="space-y-3">
-          <Button asChild size="lg">
-            <Link href="/donate">Try Again</Link>
-          </Button>
-          <Button asChild variant="outline" size="lg">
-            <Link href="/contact">Contact Support</Link>
-          </Button>
+          <Button asChild size="lg"><Link href="/donate">Try Again</Link></Button>
+          <Button asChild variant="outline" size="lg"><Link href="/contact">Contact Support</Link></Button>
         </div>
       </div>
     )
   }
 
   const donation = verification.donation
-  const amount = donation?.amount || (verification.session?.amount_total ? verification.session.amount_total / 100 : 0)
-  const currency = donation?.currency || verification.session?.currency?.toUpperCase() || "USD"
+  const amount = donation?.amount || 0
+  const currency = donation?.currency || "USD"
 
   return (
     <div className="max-w-3xl mx-auto text-center">
@@ -303,8 +363,9 @@ export function SuccessContent() {
       </h1>
 
       <p className="text-xl text-foreground-muted mb-8 leading-relaxed">
-        Your donation has been successfully processed via {provider === "stripe" ? "Stripe" : provider === "khalti" ? "Khalti" : "eSewa"}. You&apos;re making a real difference in the lives of
-        communities across Nepal.
+        Your donation has been successfully processed via{" "}
+        {provider === "stripe" ? "Stripe" : provider === "khalti" ? "Khalti" : "eSewa"}.
+        You&apos;re making a real difference in the lives of communities across Nepal.
       </p>
 
       {donation && (
@@ -312,10 +373,12 @@ export function SuccessContent() {
           <div className="bg-surface border border-border rounded-2xl p-6 mb-8 text-left">
             <h2 className="text-xl font-bold text-foreground mb-4 text-center">Donation Details</h2>
             <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-foreground-muted">Donor Name:</span>
-                <span className="font-semibold text-foreground">{donation.donor_name}</span>
-              </div>
+              {donation.donor_name && (
+                <div className="flex justify-between">
+                  <span className="text-foreground-muted">Donor Name:</span>
+                  <span className="font-semibold text-foreground">{donation.donor_name}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-foreground-muted">Amount:</span>
                 <span className="font-semibold text-foreground">
@@ -330,7 +393,9 @@ export function SuccessContent() {
               )}
               <div className="flex justify-between">
                 <span className="text-foreground-muted">Status:</span>
-                <span className="font-semibold text-green-600 capitalize">{donation.payment_status}</span>
+                <span className={`font-semibold capitalize ${donation.payment_status === "completed" ? "text-green-600" : "text-amber-500"}`}>
+                  {donation.payment_status === "completed" ? "Confirmed" : donation.payment_status}
+                </span>
               </div>
             </div>
           </div>
@@ -339,7 +404,34 @@ export function SuccessContent() {
             <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <div className="flex items-center gap-3">
                 <Loader2 className="size-5 text-blue-600 animate-spin" />
-                <p className="text-sm text-blue-800">Generating your receipt...</p>
+                <p className="text-sm text-blue-800">Generating your receipt — this takes a few seconds...</p>
+              </div>
+            </div>
+          )}
+
+          {donation.payment_status === "completed" && receiptTimedOut && !receipt && (
+            <div className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-left">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="size-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-amber-800 mb-1">Receipt is taking longer than expected</p>
+                  <p className="text-sm text-amber-700 mb-2">
+                    Your payment was confirmed. We&apos;re sending your receipt to{" "}
+                    <span className="font-medium">{donation.donor_email}</span>.
+                  </p>
+                  {ensureEmailStatus === 'sending' && (
+                    <div className="flex items-center gap-2 text-amber-700 text-sm">
+                      <Loader2 className="size-3.5 animate-spin" />
+                      Sending receipt email...
+                    </div>
+                  )}
+                  {ensureEmailStatus === 'sent' && (
+                    <p className="text-sm text-green-700 font-medium">✓ Receipt email sent. Please check your inbox.</p>
+                  )}
+                  {ensureEmailStatus === 'error' && (
+                    <p className="text-sm text-red-700">Could not send automatically — please contact support if you don&apos;t receive your receipt within an hour.</p>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -350,10 +442,10 @@ export function SuccessContent() {
               receiptUrl={receipt.receipt_url}
               donorName={donation.donor_name}
               donorEmail={donation.donor_email}
-              donorPhone={donation.donor_phone}
+              donorPhone={donation.donor_phone ?? undefined}
               amount={donation.amount}
               currency={donation.currency}
-              paymentDate={new Date(donation.created_at)}
+              paymentDate={new Date(donation.created_at ?? receipt.receipt_generated_at ?? new Date())}
               isMonthly={donation.is_monthly}
               organizationName={organizationDetails.name}
               vatNumber={organizationDetails.vatNumber}
@@ -374,7 +466,7 @@ export function SuccessContent() {
             <div>
               <h3 className="font-bold text-foreground mb-1">Receipt Sent</h3>
               <p className="text-foreground-muted text-sm">
-                A tax-deductible receipt has been sent to your email address within 24 hours.
+                A tax-deductible receipt has been sent to your email address.
               </p>
             </div>
           </div>
@@ -442,4 +534,3 @@ export function SuccessContent() {
     </div>
   )
 }
-

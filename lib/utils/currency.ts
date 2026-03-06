@@ -82,8 +82,8 @@ export function formatCurrency(
   })
 
   let result = symbolPosition === "before" 
-    ? `${symbol}${formattedAmount}`
-    : `${formattedAmount}${symbol}`
+    ? `${symbol} ${formattedAmount}`
+    : `${formattedAmount} ${symbol}`
 
   if (showCode) {
     result += ` ${code}`

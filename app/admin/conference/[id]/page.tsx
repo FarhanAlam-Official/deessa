@@ -119,15 +119,73 @@ export default async function ConferenceRegistrantDetailPage({ params }: Props) 
   // Timeline events
   const timeline: { icon: string; label: string; ts: string; color: string }[] = [
     { icon: "📝", label: "Registration submitted", ts: formatTs(reg.created_at), color: "text-primary" },
-    { icon: "📧", label: "Registration email sent", ts: formatTs(reg.created_at), color: "text-primary" },
+    { icon: "📧", label: "Registration received email sent to attendee", ts: reg.last_registration_email_sent_at ? formatTs(reg.last_registration_email_sent_at) : formatTs(reg.created_at), color: "text-primary" },
   ]
-  if (reg.status === "confirmed") {
-    timeline.push({ icon: "✅", label: "Registration confirmed by admin", ts: "—", color: "text-green-600" })
-    timeline.push({ icon: "📩", label: "Confirmation email sent to attendee", ts: "—", color: "text-green-600" })
+
+  // Payment initiated via a real gateway
+  if (reg.payment_provider && reg.payment_id && reg.payment_id !== "manual:admin-override") {
+    const provider = reg.payment_provider.charAt(0).toUpperCase() + reg.payment_provider.slice(1)
+    timeline.push({ icon: "💳", label: `Payment initiated via ${provider}`, ts: reg.payment_initiated_at ? formatTs(reg.payment_initiated_at) : "—", color: "text-amber-600" })
   }
-  if (reg.status === "cancelled") {
-    timeline.push({ icon: "❌", label: "Registration cancelled by admin", ts: "—", color: "text-red-600" })
-    timeline.push({ icon: "📩", label: "Cancellation email sent to attendee", ts: "—", color: "text-red-600" })
+
+  // Awaiting payment — show expiry deadline as timestamp
+  if (
+    (reg.status === "pending_payment" || reg.status === "pending") &&
+    reg.payment_status !== "paid" &&
+    reg.expires_at
+  ) {
+    timeline.push({
+      icon: "⌛",
+      label: "Awaiting payment",
+      ts: `Expires ${new Date(reg.expires_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}`,
+      color: "text-amber-500",
+    })
+  }
+
+  // Payment failed
+  if (reg.payment_status === "failed") {
+    timeline.push({ icon: "❌", label: "Payment attempt failed", ts: reg.payment_failed_at ? formatTs(reg.payment_failed_at) : "—", color: "text-red-600" })
+  }
+
+  // Payment under review (amount / currency mismatch)
+  if (reg.payment_status === "review") {
+    timeline.push({ icon: "⚠️", label: "Payment flagged for review — amount or currency mismatch", ts: reg.payment_review_at ? formatTs(reg.payment_review_at) : "—", color: "text-purple-600" })
+  }
+
+  // Manual payment override by admin
+  if (reg.payment_id === "manual:admin-override") {
+    const by = reg.payment_override_by ? ` by ${reg.payment_override_by}` : ""
+    timeline.push({ icon: "💰", label: `Payment manually marked as paid${by}`, ts: reg.payment_paid_at ? formatTs(reg.payment_paid_at) : "—", color: "text-green-600" })
+  }
+
+  // Payment verified via gateway webhook
+  if (reg.payment_status === "paid" && reg.payment_id && reg.payment_id !== "manual:admin-override") {
+    const provider = reg.payment_provider
+      ? reg.payment_provider.charAt(0).toUpperCase() + reg.payment_provider.slice(1)
+      : "Gateway"
+    timeline.push({ icon: "✅", label: `Payment verified via ${provider}`, ts: reg.payment_paid_at ? formatTs(reg.payment_paid_at) : "—", color: "text-green-600" })
+  }
+
+  // Confirmed — use timestamp column so this persists even if later cancelled/re-confirmed
+  if (reg.confirmed_at || reg.status === "confirmed") {
+    timeline.push({ icon: "✅", label: "Registration confirmed by admin", ts: reg.confirmed_at ? formatTs(reg.confirmed_at) : "—", color: "text-green-600" })
+    timeline.push({ icon: "📩", label: "Confirmation email sent to attendee", ts: reg.last_confirmation_email_sent_at ? formatTs(reg.last_confirmation_email_sent_at) : "—", color: "text-green-600" })
+  }
+
+  // Cancelled — use timestamp column so this persists even if later re-confirmed
+  if (reg.cancelled_at || reg.status === "cancelled") {
+    timeline.push({ icon: "❌", label: "Registration cancelled by admin", ts: reg.cancelled_at ? formatTs(reg.cancelled_at) : "—", color: "text-red-600" })
+    timeline.push({ icon: "📩", label: "Cancellation email sent to attendee", ts: reg.last_cancellation_email_sent_at ? formatTs(reg.last_cancellation_email_sent_at) : "—", color: "text-red-600" })
+  }
+
+  // Expired (unpaid after deadline)
+  if (reg.status === "expired") {
+    timeline.push({
+      icon: "⌛",
+      label: "Registration expired — payment not received in time",
+      ts: reg.expires_at ? formatTs(reg.expires_at) : "—",
+      color: "text-slate-500",
+    })
   }
 
   return (

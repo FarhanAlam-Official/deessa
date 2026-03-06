@@ -4,6 +4,7 @@ import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { logPaymentEvent, maskSensitiveData } from "@/lib/payments/security"
+import { checkRateLimit, getClientIP } from "@/lib/rate-limit"
 
 function createServiceRoleClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -17,6 +18,40 @@ function createServiceRoleClient() {
 export async function GET(request: Request) {
   const url = new URL(request.url)
 
+  // 1. Apply distributed rate limiting (20 requests per minute per IP for callbacks)
+  const clientIP = getClientIP(request)
+  const rateLimitIdentifier = clientIP 
+    ? `esewa-failure:ip:${clientIP}`
+    : `esewa-failure:ip:unknown`
+  
+  const rateLimit = await checkRateLimit({
+    identifier: rateLimitIdentifier,
+    maxAttempts: 20, // Higher limit for legitimate callbacks
+    windowMinutes: 1,
+  })
+  
+  if (!rateLimit.allowed) {
+    logPaymentEvent("eSewa failure - rate limit exceeded", {
+      ip: clientIP,
+      resetAt: rateLimit.resetAt?.toISOString()
+    }, "warn")
+    return NextResponse.json(
+      { 
+        error: "Rate limit exceeded. Please try again later.",
+        retryAfter: rateLimit.resetAt?.toISOString()
+      },
+      { 
+        status: 429,
+        headers: {
+          "Retry-After": rateLimit.resetAt 
+            ? Math.ceil((rateLimit.resetAt.getTime() - Date.now()) / 1000).toString()
+            : "60"
+        }
+      },
+    )
+  }
+
+  // 2. Parse eSewa callback data
   // eSewa v2 sends data as base64 encoded query parameter (even on failure)
   const encodedData = url.searchParams.get("data")
   const isMock = url.searchParams.get("mock") === "1"
@@ -92,7 +127,7 @@ export async function GET(request: Request) {
       // Mark as failed — awaited to guarantee completion in serverless environments
       const { error: regUpdateError } = await supabase
         .from("conference_registrations")
-        .update({ payment_status: "failed" })
+        .update({ payment_status: "failed", payment_failed_at: new Date().toISOString() })
         .eq("id", reg.id)
       if (regUpdateError) {
         logPaymentEvent("eSewa failure - conference registration update failed", {

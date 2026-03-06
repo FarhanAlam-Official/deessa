@@ -6,8 +6,16 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
-import { generateAndStoreReceipt, sendReceiptToDonor } from "@/lib/receipts/service"
+import { createClient as createServiceClient } from "@supabase/supabase-js"
+import { generateAndStoreReceipt, sendReceiptToDonor, resendReceiptEmail } from "@/lib/receipts/service"
 import { getOrganizationDetails } from "@/lib/receipts/generator"
+
+function getServiceSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) throw new Error("Missing Supabase service role env vars")
+  return createServiceClient(url, key)
+}
 
 export type GenerateReceiptInput = {
   donationId: string
@@ -28,7 +36,9 @@ export async function generateReceiptForDonation(
   input: GenerateReceiptInput,
 ): Promise<GenerateReceiptResult> {
   try {
-    const supabase = await createClient()
+    // Must use service role client — this runs inside webhook API routes where there
+    // is no user session, so the anon client is RLS-blocked on the donations table.
+    const supabase = getServiceSupabase()
 
     // Get donation details
     const { data: donation, error } = await supabase
@@ -63,6 +73,7 @@ export async function generateReceiptForDonation(
       donation.provider || "unknown",
       new Date(donation.created_at),
       donation.is_monthly,
+      donation.provider_ref ?? undefined,
     )
 
     if (!receiptResult.success) {
@@ -82,6 +93,7 @@ export async function generateReceiptForDonation(
         receiptResult.receiptUrl,
         donation.amount,
         donation.currency,
+        donation.verification_id ?? undefined,
       )
 
       if (!emailResult.success) {
@@ -106,11 +118,80 @@ export async function generateReceiptForDonation(
 }
 
 /**
+ * Ensure the receipt email has been sent for a confirmed donation.
+ * Called as a fallback when the success-page receipt poll times out.
+ *
+ * Logic:
+ *  - If receipt already exists + email already sent → no-op, return existing data
+ *  - If receipt exists but email not sent → resend email
+ *  - If no receipt yet → kick off full generation (idempotent)
+ */
+export async function ensureReceiptSent(
+  donationId: string,
+): Promise<{ success: boolean; message: string; receiptNumber?: string; receiptUrl?: string }> {
+  try {
+    const supabase = getServiceSupabase()
+
+    const { data: donation, error } = await supabase
+      .from("donations")
+      .select("id, receipt_number, receipt_url, receipt_sent_at, donor_name, donor_email, amount, currency, payment_status, verification_id")
+      .eq("id", donationId)
+      .single()
+
+    if (error || !donation) {
+      return { success: false, message: "Donation not found" }
+    }
+
+    if (donation.payment_status !== "completed") {
+      return { success: false, message: "Payment not yet confirmed" }
+    }
+
+    // Receipt already generated
+    if (donation.receipt_number && donation.receipt_url) {
+      // Email already sent — nothing to do
+      if (donation.receipt_sent_at) {
+        return {
+          success: true,
+          message: "Receipt already sent",
+          receiptNumber: donation.receipt_number,
+          receiptUrl: donation.receipt_url,
+        }
+      }
+
+      // Email not yet sent — send it now
+      const emailResult = await sendReceiptToDonor(
+        donationId,
+        donation.donor_name,
+        donation.donor_email,
+        donation.receipt_number,
+        donation.receipt_url,
+        donation.amount,
+        donation.currency,
+        donation.verification_id ?? undefined,
+      )
+      return {
+        success: emailResult.success,
+        message: emailResult.success ? "Receipt email sent" : emailResult.message,
+        receiptNumber: donation.receipt_number,
+        receiptUrl: donation.receipt_url,
+      }
+    }
+
+    // Receipt not generated yet — run full generation (idempotent)
+    return generateReceiptForDonation({ donationId })
+  } catch (error) {
+    console.error("ensureReceiptSent error:", error)
+    return { success: false, message: "An error occurred while sending the receipt" }
+  }
+}
+
+/**
  * Get receipt details for display
+ * Uses service role client so receipt_number is readable regardless of RLS.
  */
 export async function getReceiptForDisplay(donationId: string) {
   try {
-    const supabase = await createClient()
+    const supabase = getServiceSupabase()
 
     const { data: donation, error } = await supabase
       .from("donations")
@@ -153,3 +234,96 @@ export async function getOrganizationDetailsForReceipt() {
     }
   }
 }
+
+/**
+ * Look up a donation by a payment-provider identifier.
+ * Used by the success page to hydrate donation data for Khalti and eSewa
+ * where the payment handler only redirects with a reference code (no donationId).
+ *
+ * Tries columns in order:
+ *   1. khalti_pidx
+ *   2. esewa_transaction_uuid
+ *   3. stripe_session_id
+ *   4. payment_id (composite string like "khalti:PIDX123")
+ */
+export async function getDonationByPaymentRef(ref: string): Promise<{
+  id: string
+  amount: number
+  currency: string
+  donor_name: string
+  donor_email: string
+  donor_phone: string | null
+  is_monthly: boolean
+  payment_status: string
+  provider: string | null
+  receipt_number: string | null
+  receipt_url: string | null
+  receipt_generated_at: string | null
+  created_at: string
+} | null> {
+  if (!ref || ref.trim().length === 0) return null
+
+  try {
+    const supabase = await createClient()
+
+    const selectFields =
+      "id, amount, currency, donor_name, donor_email, donor_phone, is_monthly, payment_status, provider, receipt_number, receipt_url, receipt_generated_at, created_at"
+
+    // Try khalti_pidx
+    const { data: byPidx } = await supabase
+      .from("donations")
+      .select(selectFields)
+      .eq("khalti_pidx", ref)
+      .maybeSingle()
+    if (byPidx) return byPidx
+
+    // Try esewa_transaction_uuid
+    const { data: byEsewaUuid } = await supabase
+      .from("donations")
+      .select(selectFields)
+      .eq("esewa_transaction_uuid", ref)
+      .maybeSingle()
+    if (byEsewaUuid) return byEsewaUuid
+
+    // Try esewa_transaction_code (returned in success URL as transaction_code param)
+    const { data: byEsewaCode } = await supabase
+      .from("donations")
+      .select(selectFields)
+      .eq("esewa_transaction_code", ref)
+      .maybeSingle()
+    if (byEsewaCode) return byEsewaCode
+
+    // Try stripe_session_id
+    const { data: byStripeSession } = await supabase
+      .from("donations")
+      .select(selectFields)
+      .eq("stripe_session_id", ref)
+      .maybeSingle()
+    if (byStripeSession) return byStripeSession
+
+    // Try payment_id (e.g., "esewa:TX123" or "khalti:PIDX123")
+    const { data: byPaymentId } = await supabase
+      .from("donations")
+      .select(selectFields)
+      .eq("payment_id", ref)
+      .maybeSingle()
+    if (byPaymentId) return byPaymentId
+
+    // Try payment_id with provider-prefixed variants
+    const variants = [`khalti:${ref}`, `esewa:${ref}`, `esewa:code:${ref}`]
+    for (const variant of variants) {
+      const { data: byVariant } = await supabase
+        .from("donations")
+        .select(selectFields)
+        .eq("payment_id", variant)
+        .maybeSingle()
+      if (byVariant) return byVariant
+    }
+
+    return null
+  } catch (error) {
+    console.error("getDonationByPaymentRef error:", error)
+    return null
+  }
+}
+

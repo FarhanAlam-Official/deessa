@@ -5,6 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Heart, Repeat, Loader2, CreditCard, Lock, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { startTransition } from "react"
 import type { PaymentProvider } from "@/lib/payments/config"
@@ -51,6 +52,7 @@ export function DonationForm({
     lastName: "",
     email: "",
     phone: "",
+    message: "",
   })
 
   const presetAmounts = [25, 50, 100, 250, 500]
@@ -120,6 +122,7 @@ export function DonationForm({
       donorName: `${donorInfo.firstName} ${donorInfo.lastName}`.trim(),
       donorEmail: donorInfo.email,
       donorPhone: donorInfo.phone || undefined,
+      donorMessage: donorInfo.message || undefined,
       isMonthly,
       provider,
     } as const
@@ -412,6 +415,20 @@ export function DonationForm({
               onChange={handleDonorInfoChange}
               className="w-full h-12 px-4 rounded-xl border-2 border-border bg-surface text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
             />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-foreground-muted mb-2">Message <span className="text-foreground-muted/70">(Optional)</span></label>
+            <Textarea
+              name="message"
+              placeholder="Share a message with us (optional)"
+              value={donorInfo.message}
+              onChange={(e) => setDonorInfo((prev) => ({ ...prev, message: e.target.value }))}
+              rows={3}
+              className="w-full px-4 py-3 rounded-xl border-2 border-border bg-surface text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+            />
+            <p className="text-xs text-foreground-muted/70 mt-1">
+              Let us know what inspired your donation or any special message you'd like to share.
+            </p>
           </div>
         </div>
 
