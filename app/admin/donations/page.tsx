@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { HandHeart, TrendingUp, Calendar, DollarSign } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { ExternalLink, ShieldCheck, FileText } from "lucide-react"
 import { canViewFinance, type AdminRole } from "@/lib/types/admin"
-import { formatCurrency } from "@/lib/utils/currency"
+import Link from "next/link"
+import { DonationsDashboard } from "./donations-table-client"
+
+const PAGE_SIZE = 25
 
 async function checkFinancePermission() {
   const supabase = await createClient()
@@ -24,8 +25,12 @@ async function checkFinancePermission() {
 
 async function getDonations() {
   const supabase = await createClient()
-  const { data } = await supabase.from("donations").select("*").order("created_at", { ascending: false })
-  return data || []
+  const { data, count } = await supabase
+    .from("donations")
+    .select("*", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(0, PAGE_SIZE - 1)
+  return { donations: data || [], total: count || 0 }
 }
 
 async function getDonationStats() {
@@ -33,7 +38,6 @@ async function getDonationStats() {
 
   const { data: donations } = await supabase.from("donations").select("amount, is_monthly, payment_status, currency")
 
-  // Separate totals by currency
   const totals = donations?.reduce((acc, d) => {
     if (d.payment_status === "completed") {
       const currency = d.currency || "NPR"
@@ -44,8 +48,10 @@ async function getDonationStats() {
 
   const monthlyDonors = donations?.filter((d) => d.is_monthly && d.payment_status === "completed").length || 0
   const totalDonors = donations?.filter((d) => d.payment_status === "completed").length || 0
+  const pendingCount = donations?.filter((d) => d.payment_status === "pending").length || 0
+  const failedCount = donations?.filter((d) => d.payment_status === "failed").length || 0
 
-  return { totals, monthlyDonors, totalDonors }
+  return { totals, monthlyDonors, totalDonors, pendingCount, failedCount }
 }
 
 export default async function DonationsPage() {
@@ -54,119 +60,48 @@ export default async function DonationsPage() {
     redirect("/admin")
   }
 
-  const [donations, stats] = await Promise.all([getDonations(), getDonationStats()])
-
-  const statusColors: Record<string, string> = {
-    completed: "bg-green-100 text-green-800",
-    pending: "bg-yellow-100 text-yellow-800",
-    failed: "bg-red-100 text-red-800",
-  }
+  const [{ donations, total }, stats] = await Promise.all([getDonations(), getDonationStats()])
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Donations</h1>
-        <p className="text-muted-foreground">View and manage donation records</p>
-      </div>
-
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Donations</CardTitle>
-            <DollarSign className="h-5 w-5 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-1">
-              {Object.entries(stats.totals).map(([currency, amount]) => (
-                <div key={currency} className="text-2xl font-bold">
-                  {formatCurrency(amount, currency, { showCode: true })}
-                </div>
-              ))}
-              {Object.keys(stats.totals).length === 0 && (
-                <div className="text-2xl font-bold">₨0</div>
-              )}
+      {/* ── Header ──────────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+              <FileText className="h-5 w-5 text-primary" />
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Donors</CardTitle>
-            <HandHeart className="h-5 w-5 text-pink-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalDonors}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Donors</CardTitle>
-            <TrendingUp className="h-5 w-5 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.monthlyDonors}</div>
-          </CardContent>
-        </Card>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Donations</h1>
+              <p className="text-sm text-muted-foreground">
+                Track and manage all donation records
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link href="/verify" className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4" />
+              Verify Receipt
+            </Link>
+          </Button>
+          <Button asChild size="sm">
+            <Link href="/admin/donations/review" className="flex items-center gap-2">
+              Review Donations
+              <ExternalLink className="h-3.5 w-3.5" />
+            </Link>
+          </Button>
+        </div>
       </div>
 
-      {/* Donations Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Donations</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Donor</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {donations.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    No donations recorded yet.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                donations.map((donation) => (
-                  <TableRow key={donation.id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{donation.donor_name}</p>
-                        <p className="text-sm text-muted-foreground">{donation.donor_email}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {formatCurrency(donation.amount, donation.currency, { showCode: true })}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={donation.is_monthly ? "default" : "secondary"}>
-                        {donation.is_monthly ? "Monthly" : "One-time"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className={statusColors[donation.payment_status]}>
-                        {donation.payment_status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        {new Date(donation.created_at).toLocaleDateString()}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      {/* ── Dashboard (stats + filters + table) ─────────────────────── */}
+      <DonationsDashboard
+        initialDonations={donations}
+        initialTotal={total}
+        initialStats={stats}
+        pageSize={PAGE_SIZE}
+      />
     </div>
   )
 }
