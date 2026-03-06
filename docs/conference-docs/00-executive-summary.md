@@ -126,11 +126,11 @@ The DEESSA Foundation Conference Management System is a complete digital solutio
 
 ## Supported Payment Systems
 
-| Payment Gateway | Coverage | Currency | Typical Users |
-|---|---|---|---|
-| **Stripe** | Global | USD (configurable) | International attendees, credit/debit cards |
-| **Khalti** | Nepal | NPR | Nepali banks, mobile wallets, cards |
-| **eSewa** | Nepal | NPR | Nepali digital wallet users |
+| Payment Gateway | Coverage | Currency           | Typical Users                               |
+| --------------- | -------- | ------------------ | ------------------------------------------- |
+| **Stripe**      | Global   | USD (configurable) | International attendees, credit/debit cards |
+| **Khalti**      | Nepal    | NPR                | Nepali banks, mobile wallets, cards         |
+| **eSewa**       | Nepal    | NPR                | Nepali digital wallet users                 |
 
 All three systems are:
 
@@ -177,18 +177,18 @@ The system is designed for **content control** by staff and **technical control*
 
 ## Operational Ownership
 
-| Responsibility | Owner |
-|---|---|
-| **Event Configuration** | DEESSA Program Staff |
-| **Registration Monitoring** | DEESSA Program Staff |
-| **Payment Verification** | DEESSA Finance Team |
-| **Attendee Communication** | DEESSA Program Staff |
-| **System Hosting & Uptime** | Vercel (third-party provider) |
-| **Database Backups** | Supabase (third-party provider) |
-| **Payment Gateway Accounts** | DEESSA Foundation (owns Stripe/Khalti/eSewa accounts) |
-| **Code Maintenance & Updates** | Development Partner / IT Consultant |
-| **Security & Access Control** | Development Partner + DEESSA IT Admin |
-| **Email Service** | Google Workspace (DEESSA-owned account) |
+| Responsibility                 | Owner                                                 |
+| ------------------------------ | ----------------------------------------------------- |
+| **Event Configuration**        | DEESSA Program Staff                                  |
+| **Registration Monitoring**    | DEESSA Program Staff                                  |
+| **Payment Verification**       | DEESSA Finance Team                                   |
+| **Attendee Communication**     | DEESSA Program Staff                                  |
+| **System Hosting & Uptime**    | Vercel (third-party provider)                         |
+| **Database Backups**           | Supabase (third-party provider)                       |
+| **Payment Gateway Accounts**   | DEESSA Foundation (owns Stripe/Khalti/eSewa accounts) |
+| **Code Maintenance & Updates** | Development Partner / IT Consultant                   |
+| **Security & Access Control**  | Development Partner + DEESSA IT Admin                 |
+| **Email Service**              | Google Workspace (DEESSA-owned account)               |
 
 ---
 
@@ -202,7 +202,7 @@ The system is designed for **content control** by staff and **technical control*
 4. **Payment Choice** - Chooses to pay immediately or later
 5. **Payment Processing** - Completes payment through chosen gateway
 6. **Confirmation** - Receives email confirmation with payment receipt
-7. **Event Reminders** - Receives pre-event emails with logistics *(if configured)*
+7. **Event Reminders** - Receives pre-event emails with logistics _(if configured)_
 
 ### The Admin Journey
 
@@ -282,12 +282,12 @@ These limitations are **intentional design choices** that simplify the system fo
 
 ### System Operating Costs
 
-| Component | Monthly Cost | Notes |
-|---|---|---|
-| Vercel Hosting | Free - $20 | Free for low traffic; scales with usage |
-| Supabase Database | Free - $25 | Free tier sufficient for most conferences |
-| Email Sending | $0 | Uses existing Google Workspace account |
-| Payment Processing | 2.9% + fees | Standard Stripe rates; Khalti/eSewa similar |
+| Component          | Monthly Cost | Notes                                       |
+| ------------------ | ------------ | ------------------------------------------- |
+| Vercel Hosting     | Free - $20   | Free for low traffic; scales with usage     |
+| Supabase Database  | Free - $25   | Free tier sufficient for most conferences   |
+| Email Sending      | $0           | Uses existing Google Workspace account      |
+| Payment Processing | 2.9% + fees  | Standard Stripe rates; Khalti/eSewa similar |
 
 **Total Fixed Cost:** $0 - $45/month depending on traffic  
 **Variable Cost:** Payment gateway fees only charged on successful transactions
