@@ -96,7 +96,7 @@ export async function verifyReceiptToken(
  * 
  * @param donationId - The donation ID
  * @param receiptNumber - The receipt number
- * @param baseUrl - The base URL of the site
+ * @param baseUrl - The base URL of the site (optional, auto-detected if not provided)
  * @returns Full download URL with token
  */
 export async function generateReceiptDownloadUrl(
@@ -106,13 +106,26 @@ export async function generateReceiptDownloadUrl(
 ): Promise<string> {
   const token = await generateReceiptToken(donationId, receiptNumber)
   
-  // Use provided baseUrl, or fall back to environment variables
-  // NEXT_PUBLIC_APP_URL is preferred as it's specifically for API/backend URLs
-  // NEXT_PUBLIC_SITE_URL is the fallback for frontend URLs
-  const siteUrl = baseUrl || 
-                  process.env.NEXT_PUBLIC_APP_URL || 
-                  process.env.NEXT_PUBLIC_SITE_URL || 
-                  "http://localhost:3000"
+  // Use provided baseUrl or auto-detect from environment
+  let siteUrl = baseUrl
+  
+  if (!siteUrl) {
+    // Try environment variables in order of priority
+    siteUrl = process.env.NEXT_PUBLIC_APP_URL || 
+              process.env.NEXT_PUBLIC_SITE_URL
+    
+    // If still not set, check if running on Vercel
+    if (!siteUrl && process.env.VERCEL_URL) {
+      // VERCEL_URL is automatically available in Vercel deployments
+      // It doesn't include protocol, so we add https://
+      siteUrl = `https://${process.env.VERCEL_URL}`
+    }
+    
+    // Final fallback for development
+    if (!siteUrl) {
+      siteUrl = "http://localhost:3000"
+    }
+  }
   
   return `${siteUrl}/api/receipts/download?token=${token}`
 }

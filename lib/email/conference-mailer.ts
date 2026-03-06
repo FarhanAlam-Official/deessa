@@ -29,6 +29,8 @@ function createGmailTransporter() {
   })
 }
 
+import { getAppBaseUrl } from '@/lib/utils'
+
 function escapeHtml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
@@ -206,7 +208,7 @@ export async function sendConferencePaymentLinkEmail(params: {
 }): Promise<ConferenceEmailResult> {
   try {
     const transporter = createGmailTransporter()
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+    const siteUrl = getAppBaseUrl()
     const paymentUrl = `${siteUrl}/complete-payment?rid=${encodeURIComponent(params.registrationId)}`
     const shortId = `DEESSA-2026-${params.registrationId.slice(0, 6).toUpperCase()}`
     const safeFullName = escapeHtml(params.fullName)

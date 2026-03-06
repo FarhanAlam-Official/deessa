@@ -3,6 +3,7 @@
 import type { PaymentMode } from "./config"
 import { validateAmount, validateEmail, validateName, fetchWithTimeout, logPaymentEvent } from "./security"
 import { KhaltiError } from "./errors"
+import { getAppBaseUrl } from "@/lib/utils"
 
 /** Only allows relative paths or absolute URLs whose host matches baseUrl. Returns null if invalid. */
 function getSafeReturnUrl(returnUrl: string, baseUrl: string): string | null {
@@ -67,7 +68,7 @@ export async function startKhaltiPayment(
   }
 
   const baseUrl = process.env.KHALTI_BASE_URL || "https://khalti.com/api/v2"
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  const siteUrl = getAppBaseUrl()
 
   let returnUrl: string
   if (donation.returnUrl != null && donation.returnUrl !== "") {
@@ -163,7 +164,7 @@ export async function startKhaltiPayment(
   // Build payload with all required and optional fields
   const payload = {
     return_url: returnUrl,
-    website_url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+    website_url: getAppBaseUrl(),
     amount: amountInPaisa,
     purchase_order_id: donation.id,
     purchase_order_name: donation.donorName || "Donation",

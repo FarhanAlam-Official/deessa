@@ -20,6 +20,7 @@ import {
   Circle,
   Rect,
 } from "@react-pdf/renderer"
+import { getAppBaseUrl } from "@/lib/utils"
 
 // ---------------------------------------------------------------------------
 // Types
@@ -779,7 +780,8 @@ export function ReceiptDocumentV2({ data }: { data: ReceiptPDFData }) {
   if (org.vat_registration_number) taxItems.push({ label: "VAT Reg.", value: org.vat_registration_number })
   if (org.ird_exemption_number) taxItems.push({ label: "IRD Exemption", value: org.ird_exemption_number })
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dessafoundation.org"
+  // Get base URL with automatic Vercel deployment detection
+  const appUrl = getAppBaseUrl()
 
   return (
     <Document

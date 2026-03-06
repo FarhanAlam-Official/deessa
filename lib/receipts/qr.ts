@@ -6,6 +6,7 @@
  */
 
 import QRCode from 'qrcode';
+import { getAppBaseUrl } from '@/lib/utils';
 
 /**
  * Generate a QR code as base64 data URL for receipt verification
@@ -18,8 +19,8 @@ import QRCode from 'qrcode';
  * // Returns: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
  */
 export async function verificationQRBase64(verificationId: string): Promise<string> {
-  // Get base URL from environment
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dessafoundation.org';
+  // Get base URL from environment (auto-detects Vercel deployments)
+  const baseUrl = getAppBaseUrl();
   
   // Construct verification URL
   const verificationUrl = `${baseUrl}/verify/${verificationId}`;
@@ -45,6 +46,6 @@ export async function verificationQRBase64(verificationId: string): Promise<stri
  * @returns Full verification URL
  */
 export function getVerificationUrl(verificationId: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dessafoundation.org';
+  const baseUrl = getAppBaseUrl();
   return `${baseUrl}/verify/${verificationId}`;
 }

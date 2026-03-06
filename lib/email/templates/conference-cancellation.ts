@@ -4,6 +4,8 @@
  * Theme: warm red-orange to clearly signal cancellation
  */
 
+import { getAppBaseUrl } from '@/lib/utils'
+
 function escapeHtml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
@@ -24,6 +26,7 @@ export function ConferenceCancellationTemplate(props: ConferenceCancellationTemp
   const firstName = fullName.split(" ")[0]
   const safeFullName = escapeHtml(fullName)
   const safeFirstName = escapeHtml(firstName)
+  const siteUrl = getAppBaseUrl()
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -135,7 +138,7 @@ export function ConferenceCancellationTemplate(props: ConferenceCancellationTemp
                   <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
                     <tr>
                       <td align="center" style="padding-bottom:12px;">
-                        <a href="${process.env.NEXT_PUBLIC_SITE_URL}/conference/register"
+                        <a href="${siteUrl}/conference/register"
                            style="display:inline-block;background:linear-gradient(135deg,#DC2626,#B91C1C);color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:12px;padding:14px 36px;letter-spacing:0.3px;">
                           Register Again →
                         </a>
@@ -165,7 +168,7 @@ export function ConferenceCancellationTemplate(props: ConferenceCancellationTemp
             <td align="center" style="padding:28px 0;">
               <p style="margin:0 0 4px;font-size:12px;color:#9CA3AF;">DEESSA Foundation — Empowering Communities Across Nepal</p>
               <p style="margin:0;font-size:11px;color:#CBD5E1;">
-                <a href="${process.env.NEXT_PUBLIC_SITE_URL}" style="color:#DC2626;">deessafoundation.org.np</a>
+                <a href="${siteUrl}" style="color:#DC2626;">deessafoundation.org.np</a>
               </p>
             </td>
           </tr>

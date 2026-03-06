@@ -26,6 +26,8 @@ import { startKhaltiPayment } from "@/lib/payments/khalti";
 
 import { startEsewaPayment } from "@/lib/payments/esewa";
 
+import { getAppBaseUrl } from "@/lib/utils";
+
 import type {
   ConferenceRegistration,
   ConferenceRegistrationPublic,
@@ -543,8 +545,8 @@ export async function startConferencePayment(
 
           // Pass conference metadata so the webhook can identify this as a conference payment
 
-          successUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/conference/register/payment-success?rid=${registrationId}`,
-          cancelUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/conference/register/pending-payment?rid=${registrationId}&email=${encodeURIComponent(email)}`,
+          successUrl: `${getAppBaseUrl()}/conference/register/payment-success?rid=${registrationId}`,
+          cancelUrl: `${getAppBaseUrl()}/conference/register/pending-payment?rid=${registrationId}&email=${encodeURIComponent(email)}`,
           metadata: {
             conference_registration_id: registrationId,
             payment_type: "conference_registration",
@@ -578,7 +580,7 @@ export async function startConferencePayment(
 
           donorPhone: reg.phone || undefined,
           // Redirect Khalti back to the conference success page (not donation return)
-          returnUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/conference/register/payment-success?rid=${registrationId}`,
+          returnUrl: `${getAppBaseUrl()}/conference/register/payment-success?rid=${registrationId}`,
         },
 
         mode,

@@ -3,6 +3,8 @@
  * Sent when admin sets status to "confirmed"
  */
 
+import { getAppBaseUrl } from '@/lib/utils'
+
 interface ConferenceConfirmationTemplateProps {
   fullName: string
   registrationId: string
@@ -25,7 +27,7 @@ export function ConferenceConfirmationTemplate(props: ConferenceConfirmationTemp
   const safeAttendanceMode = escapeHtml(attendanceMode ?? "")
   const workshopList = workshops?.length ? workshops.map(escapeHtml).join(", ") : "None selected"
   const isInPerson = attendanceMode === "in-person"
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deessafoundation.org.np"
+  const siteUrl = getAppBaseUrl()
 
   // Google Calendar link
   const gcalTitle = encodeURIComponent("DEESSA National Conference 2026")

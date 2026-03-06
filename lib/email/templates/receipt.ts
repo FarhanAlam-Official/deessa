@@ -11,6 +11,8 @@
  * - Proper currency formatting with spacing
  */
 
+import { getAppBaseUrl } from '@/lib/utils'
+
 // ── Shared HTML escaping (same pattern as conference-registration.ts) ─────────
 function escapeHtml(str: string): string {
   return str
@@ -46,7 +48,7 @@ export function ReceiptEmailTemplate({
     INR: { symbol: "₹", name: "Indian Rupee" },
   }
   const currencyInfo = currencyLabels[currency] || { symbol: currency, name: currency }
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://deessafoundation.org.np"
+  const siteUrl = getAppBaseUrl()
 
   // Escape all user-supplied values before interpolating into HTML
   const safeDonorName = escapeHtml(donorName)
