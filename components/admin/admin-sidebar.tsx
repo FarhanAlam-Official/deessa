@@ -23,6 +23,7 @@ import {
   Layers,
   PanelLeftClose,
   Podcast,
+  Receipt,
 } from "lucide-react"
 import { type AdminUser, hasPermission, canViewFinance, canManageUsers } from "@/lib/types/admin"
 import {
@@ -115,6 +116,14 @@ export function AdminSidebar({ adminUser }: AdminSidebarProps) {
       icon: HandHeart,
       permission: "donations",
       requiresFinance: true,
+    },
+    {
+      name: "Payments",
+      href: "/admin/payments",
+      icon: Receipt,
+      permission: "donations",
+      requiresFinance: true,
+      description: "Receipt & Email Monitoring",
     },
     {
       name: "Volunteers",

@@ -35,6 +35,12 @@ execute-commits.ps1
 COMMIT_PLAN.md
 execute-conference-commits.ps1
 COMMIT_PLAN_FEB_15_28.md
+execute-refinements-commits.ps1
+COMMIT_PLAN_FEB27_MAR2.md
+execute-march-commits.ps1
+execute-march-completion.ps1
+execute-admin-enhancement-commits.ps1
+execute-payments-v2-scripts.ps1
 
 # Large media files
 public/websiteClip/*.mp4

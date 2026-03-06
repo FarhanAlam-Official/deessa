@@ -77,7 +77,7 @@ export function Navbar() {
                   alt="Deesha Foundation"
                   width={96}
                   height={96}
-                  className="object-contain scale-[250%] group-hover:scale-[260%] transition-transform duration-200"
+                  className="object-contain scale-[120%] group-hover:scale-[130%] transition-transform duration-200"
                   priority
                 />
               </div>

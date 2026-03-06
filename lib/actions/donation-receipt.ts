@@ -7,7 +7,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
-import { generateAndStoreReceipt, sendReceiptToDonor } from "@/lib/receipts/service"
+import { generateAndStoreReceipt, sendReceiptToDonor, resendReceiptEmail } from "@/lib/receipts/service"
 import { getOrganizationDetails } from "@/lib/receipts/generator"
 
 function getServiceSupabase() {
@@ -36,7 +36,9 @@ export async function generateReceiptForDonation(
   input: GenerateReceiptInput,
 ): Promise<GenerateReceiptResult> {
   try {
-    const supabase = await createClient()
+    // Must use service role client — this runs inside webhook API routes where there
+    // is no user session, so the anon client is RLS-blocked on the donations table.
+    const supabase = getServiceSupabase()
 
     // Get donation details
     const { data: donation, error } = await supabase
@@ -71,6 +73,7 @@ export async function generateReceiptForDonation(
       donation.provider || "unknown",
       new Date(donation.created_at),
       donation.is_monthly,
+      donation.provider_ref ?? undefined,
     )
 
     if (!receiptResult.success) {
@@ -90,6 +93,7 @@ export async function generateReceiptForDonation(
         receiptResult.receiptUrl,
         donation.amount,
         donation.currency,
+        donation.verification_id ?? undefined,
       )
 
       if (!emailResult.success) {
@@ -110,6 +114,74 @@ export async function generateReceiptForDonation(
       success: false,
       message: "An error occurred while generating the receipt",
     }
+  }
+}
+
+/**
+ * Ensure the receipt email has been sent for a confirmed donation.
+ * Called as a fallback when the success-page receipt poll times out.
+ *
+ * Logic:
+ *  - If receipt already exists + email already sent → no-op, return existing data
+ *  - If receipt exists but email not sent → resend email
+ *  - If no receipt yet → kick off full generation (idempotent)
+ */
+export async function ensureReceiptSent(
+  donationId: string,
+): Promise<{ success: boolean; message: string; receiptNumber?: string; receiptUrl?: string }> {
+  try {
+    const supabase = getServiceSupabase()
+
+    const { data: donation, error } = await supabase
+      .from("donations")
+      .select("id, receipt_number, receipt_url, receipt_sent_at, donor_name, donor_email, amount, currency, payment_status, verification_id")
+      .eq("id", donationId)
+      .single()
+
+    if (error || !donation) {
+      return { success: false, message: "Donation not found" }
+    }
+
+    if (donation.payment_status !== "completed") {
+      return { success: false, message: "Payment not yet confirmed" }
+    }
+
+    // Receipt already generated
+    if (donation.receipt_number && donation.receipt_url) {
+      // Email already sent — nothing to do
+      if (donation.receipt_sent_at) {
+        return {
+          success: true,
+          message: "Receipt already sent",
+          receiptNumber: donation.receipt_number,
+          receiptUrl: donation.receipt_url,
+        }
+      }
+
+      // Email not yet sent — send it now
+      const emailResult = await sendReceiptToDonor(
+        donationId,
+        donation.donor_name,
+        donation.donor_email,
+        donation.receipt_number,
+        donation.receipt_url,
+        donation.amount,
+        donation.currency,
+        donation.verification_id ?? undefined,
+      )
+      return {
+        success: emailResult.success,
+        message: emailResult.success ? "Receipt email sent" : emailResult.message,
+        receiptNumber: donation.receipt_number,
+        receiptUrl: donation.receipt_url,
+      }
+    }
+
+    // Receipt not generated yet — run full generation (idempotent)
+    return generateReceiptForDonation({ donationId })
+  } catch (error) {
+    console.error("ensureReceiptSent error:", error)
+    return { success: false, message: "An error occurred while sending the receipt" }
   }
 }
 

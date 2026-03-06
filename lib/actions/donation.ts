@@ -1,16 +1,25 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { getPaymentMode, getPaymentSettings, getSupportedProviders, type PaymentProvider } from "@/lib/payments/config"
 import { startStripeCheckout } from "@/lib/payments/stripe"
 import { startKhaltiPayment } from "@/lib/payments/khalti"
 import { startEsewaPayment } from "@/lib/payments/esewa"
+
+function getServiceSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) throw new Error("Missing Supabase service role env vars")
+  return createServiceClient(url, key)
+}
 
 export type DonationFormData = {
   amount: number
   donorName: string
   donorEmail: string
   donorPhone?: string
+  donorMessage?: string
   isMonthly: boolean
 }
 
@@ -68,6 +77,7 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
         donor_name: input.donorName,
         donor_email: input.donorEmail,
         donor_phone: input.donorPhone || null,
+        donor_message: input.donorMessage || null,
         is_monthly: input.isMonthly,
         payment_status: "pending",
         provider: input.provider,
@@ -141,8 +151,9 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
       }
       
       // Persist provider references before returning (eSewa returns early)
+      // Use service role: anon client has no RLS UPDATE policy on donations.
       const paymentId = transactionId ? `${input.provider}:${transactionId}` : null
-      await supabase
+      await getServiceSupabase()
         .from("donations")
         .update({
           payment_id: paymentId,
@@ -169,8 +180,13 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
     // Persist provider transaction reference for webhook/callback reconciliation.
     // We prefix with the provider so admins can easily see which gateway was used.
     const paymentId = transactionId ? `${input.provider}:${transactionId}` : null
-    
-    const { error: updateError } = await supabase
+
+    // IMPORTANT: use service role client for this UPDATE.
+    // The anon client (used for INSERT above) has no RLS UPDATE policy on donations,
+    // so provider-specific columns like khalti_pidx / stripe_session_id would be
+    // silently dropped, breaking all subsequent webhook/status lookups.
+    const serviceSupabase = getServiceSupabase()
+    const { error: updateError } = await serviceSupabase
       .from("donations")
       .update({
         payment_id: paymentId,
@@ -180,7 +196,7 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
       .eq("id", donation.id)
 
     if (updateError) {
-      console.error("Failed to update donation payment_id:", updateError.message)
+      console.error("Failed to update donation payment_id:", updateError.message, updateError)
     }
 
     return {

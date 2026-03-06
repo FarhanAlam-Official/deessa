@@ -1,54 +1,74 @@
 "use server"
 
-import crypto from "crypto"
 import { NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { getPaymentMode } from "@/lib/payments/config"
 import {
-  verifyAmountMatch,
-  fetchWithTimeout,
   logPaymentEvent,
   maskSensitiveData,
 } from "@/lib/payments/security"
-import { sendConferenceConfirmationEmail } from "@/lib/email/conference-mailer"
+import { createEsewaAdapter } from "@/lib/payments/adapters/EsewaAdapter"
+import { getPaymentService } from "@/lib/payments/core/PaymentService"
 import { generateReceiptForDonation } from "@/lib/actions/donation-receipt"
+import { handleConferenceVerification } from "./conference-handler"
+import { checkRateLimit, getClientIP } from "@/lib/rate-limit"
 
 /**
- * Verify HMAC-SHA256 signature for eSewa v2 API response.
- * Returns { valid: true } on success or { valid: false, reason } on failure.
- * Reused by both the donation and conference registration branches.
+ * eSewa Success Callback Handler (V2)
+ * 
+ * This endpoint handles eSewa payment success callbacks using the V2 architecture:
+ * - Uses EsewaAdapter for signature verification and payload normalization
+ * - Uses PaymentService for centralized payment confirmation
+ * - Removes inline donation status updates
+ * - Maintains conference registration support (separate handler)
+ * 
+ * Flow:
+ * 1. Parse and decode eSewa callback data
+ * 2. Lookup donation by transaction_uuid
+ * 3. If not found, check for conference registration
+ * 4. Use EsewaAdapter.verify() for signature and server-side verification
+ * 5. Use PaymentService.confirmDonation() for state transition
+ * 6. Enqueue receipt generation (non-blocking)
+ * 7. Redirect to success page
  */
-function verifyEsewaSignature(
-  responseData: any,
-  signed_field_names: string | undefined,
-  signature: string | undefined,
-  secretKey: string,
-): { valid: true } | { valid: false; reason: string } {
-  if (!signature || !signed_field_names) {
-    return { valid: false, reason: "missing_signature_fields" }
-  }
-  const fields = String(signed_field_names).split(",").map((s) => s.trim()).filter(Boolean)
-  const required = ["total_amount", "transaction_uuid", "product_code"]
-  if (!required.every((r) => fields.includes(r))) {
-    return { valid: false, reason: "signed_fields_missing_required" }
-  }
-  const message = fields.map((field) => `${field}=${responseData[field]}`).join(",")
-  const hmac = crypto.createHmac("sha256", secretKey)
-  hmac.update(message)
-  const expectedSignature = hmac.digest("base64")
-  try {
-    const isValid = crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(signature))
-    return isValid ? { valid: true } : { valid: false, reason: "signature_mismatch" }
-  } catch {
-    return { valid: false, reason: "signature_mismatch" }
-  }
-}
-
 export async function GET(request: Request) {
   const mode = getPaymentMode()
   const url = new URL(request.url)
 
+  // 1. Apply distributed rate limiting (20 requests per minute per IP for callbacks)
+  const clientIP = getClientIP(request)
+  const rateLimitIdentifier = clientIP 
+    ? `esewa-success:ip:${clientIP}`
+    : `esewa-success:ip:unknown`
+  
+  const rateLimit = await checkRateLimit({
+    identifier: rateLimitIdentifier,
+    maxAttempts: 20, // Higher limit for legitimate callbacks
+    windowMinutes: 1,
+  })
+  
+  if (!rateLimit.allowed) {
+    logPaymentEvent("eSewa success - rate limit exceeded", {
+      ip: clientIP,
+      resetAt: rateLimit.resetAt?.toISOString()
+    }, "warn")
+    return NextResponse.json(
+      { 
+        error: "Rate limit exceeded. Please try again later.",
+        retryAfter: rateLimit.resetAt?.toISOString()
+      },
+      { 
+        status: 429,
+        headers: {
+          "Retry-After": rateLimit.resetAt 
+            ? Math.ceil((rateLimit.resetAt.getTime() - Date.now()) / 1000).toString()
+            : "60"
+        }
+      },
+    )
+  }
+
+  // 2. Parse eSewa callback data
   // eSewa v2 sends data as base64 encoded query parameter
   const encodedData = url.searchParams.get("data")
   const isMock = url.searchParams.get("mock") === "1"
@@ -84,22 +104,13 @@ export async function GET(request: Request) {
 
   const {
     transaction_code,
-    status,
-    total_amount,
     transaction_uuid,
-    product_code,
-    signed_field_names,
-    signature,
   } = responseData
 
   // Validate required fields
-  if (!transaction_uuid || !status || total_amount === undefined) {
-    logPaymentEvent("eSewa success - missing required fields", {
-      hasTransactionUuid: !!transaction_uuid,
-      hasStatus: !!status,
-      hasTotalAmount: total_amount !== undefined,
-    }, "warn")
-    return NextResponse.json({ error: "Missing required response fields" }, { status: 400 })
+  if (!transaction_uuid) {
+    logPaymentEvent("eSewa success - missing transaction_uuid", {}, "warn")
+    return NextResponse.json({ error: "Missing transaction_uuid" }, { status: 400 })
   }
 
   // Use service role client to bypass RLS for payment verification
@@ -111,112 +122,51 @@ export async function GET(request: Request) {
   const supabase = createServiceClient(supabaseUrl, serviceRoleKey)
 
   // Find donation by exact transaction_uuid binding
-  const { data: donation, error: searchError } = await supabase
+  let { data: donation, error: searchError } = await supabase
     .from("donations")
     .select("*")
     .eq("esewa_transaction_uuid", transaction_uuid)
     .single()
 
+  // Fallback: esewa_transaction_uuid format is "{timestamp}-{donationId}"
+  // If the column was NULL (RLS blocked the UPDATE before service-role fix),
+  // extract the donation ID from the UUID and look up by id directly.
+  if (!donation && transaction_uuid && transaction_uuid.includes("-")) {
+    const donationIdFromUuid = transaction_uuid.split("-").slice(1).join("-")
+    if (donationIdFromUuid.length > 0) {
+      const { data: byId } = await supabase
+        .from("donations")
+        .select("*")
+        .eq("id", donationIdFromUuid)
+        .single()
+      if (byId) {
+        donation = byId
+        searchError = null
+        // Backfill the column so future lookups work
+        await supabase
+          .from("donations")
+          .update({ esewa_transaction_uuid: transaction_uuid, provider_ref: transaction_uuid })
+          .eq("id", donationIdFromUuid)
+        console.warn(`[eSewa] Backfilled esewa_transaction_uuid for donation ${donationIdFromUuid}`)
+      }
+    }
+  }
+
   if (searchError || !donation) {
     // ── Conference registration fallback branch ─────────────────────────────────
     // eSewa may be paying for a conference registration instead of a donation.
-    const { data: reg } = await supabase
-      .from("conference_registrations")
-      .select("*")
-      .eq("esewa_transaction_uuid", transaction_uuid)
-      .single()
-
-    if (reg) {
-      // Validate status
-      if (status !== "COMPLETE") {
-        logPaymentEvent("eSewa success - conference payment not completed", {
-          regId: reg.id,
-          status,
-          transactionUuid: maskSensitiveData(transaction_uuid),
-        }, "warn")
-        await supabase.from("conference_registrations").update({ payment_status: "failed", payment_failed_at: new Date().toISOString() }).eq("id", reg.id)
-        return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&status=failed`, url.origin))
-      }
-      if (reg.payment_status === "paid") {
-        return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&paid=1`, url.origin))
-      }
-
-      // Amount verification
-      const expectedAmt = parseFloat((reg.payment_amount || 0).toString())
-      const actualAmt = parseFloat(total_amount.toString())
-      const av = verifyAmountMatch(expectedAmt, actualAmt, "NPR", 0.01)
-      if (!av.valid) {
-        await supabase.from("conference_registrations")
-          .update({ payment_status: "review", esewa_transaction_uuid: transaction_uuid, payment_review_at: new Date().toISOString() })
-          .eq("id", reg.id)
-        return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&status=review`, url.origin))
-      }
-
-      // HMAC signature verification (required in live mode; skip for mock)
-      if (!isMock && mode === "live") {
-        const secretKey = process.env.ESEWA_SECRET_KEY
-        if (!secretKey) {
-          logPaymentEvent("eSewa success - missing ESEWA_SECRET_KEY in live mode", {}, "error")
-          return NextResponse.json({ error: "Server misconfigured" }, { status: 500 })
-        }
-        const sigResult = verifyEsewaSignature(responseData, signed_field_names, signature, secretKey)
-        if (!sigResult.valid) {
-          logPaymentEvent("eSewa success - conference registration signature invalid", {
-            regId: reg.id,
-            transactionUuid: maskSensitiveData(transaction_uuid),
-            reason: sigResult.reason,
-          }, "error")
-          await supabase
-            .from("conference_registrations")
-            .update({ payment_status: "failed", payment_failed_at: new Date().toISOString() })
-            .eq("id", reg.id)
-          return NextResponse.redirect(
-            new URL(`/conference/register/payment-success?rid=${reg.id}&status=failed`, url.origin),
-          )
-        }
-      }
-
-      const { error: regUpdateError } = await supabase
-        .from("conference_registrations")
-        .update({
-          status: "confirmed",
-          payment_status: "paid",
-          payment_provider: "esewa",
-          payment_id: `esewa:${transaction_uuid}`,
-          provider_ref: transaction_uuid,
-          payment_paid_at: new Date().toISOString(),
-          confirmed_at: new Date().toISOString(),
-        })
-        .eq("id", reg.id)
-
-      if (regUpdateError) {
-        logPaymentEvent("eSewa success - conference registration update failed", {
-          regId: reg.id,
-          transactionUuid: maskSensitiveData(transaction_uuid),
-          error: regUpdateError,
-        }, "error")
-        return NextResponse.redirect(
-          new URL(`/conference/register/payment-success?rid=${reg.id}&status=failed`, url.origin),
-        )
-      }
-
-      sendConferenceConfirmationEmail({
-        fullName: reg.full_name,
-        email: reg.email,
-        registrationId: reg.id,
-        attendanceMode: reg.attendance_mode || "",
-        role: reg.role || undefined,
-        workshops: reg.workshops || undefined,
-      })
-        .then((r) => {
-          if (r.success)
-            supabase.from("conference_registrations")
-              .update({ last_confirmation_email_sent_at: new Date().toISOString() })
-              .eq("id", reg.id).then(() => {})
-        })
-        .catch((e) => console.error("Non-fatal: eSewa conference confirmation email:", e))
-
-      return NextResponse.redirect(new URL(`/conference/register/payment-success?rid=${reg.id}&paid=1`, url.origin))
+    // This is handled by a separate function to avoid code duplication
+    const conferenceResult = await handleConferenceVerification(
+      supabase,
+      transaction_uuid,
+      responseData,
+      url,
+      mode,
+      isMock
+    )
+    
+    if (conferenceResult) {
+      return conferenceResult
     }
 
     logPaymentEvent("eSewa success - donation not found", {
@@ -226,141 +176,152 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Donation not found" }, { status: 404 })
   }
 
-  // Verify signature (required in live mode; skip for mock)
-  if (!isMock && mode === "live") {
-    const secretKey = process.env.ESEWA_SECRET_KEY
-    if (!secretKey) {
-      logPaymentEvent("eSewa success - missing ESEWA_SECRET_KEY in live mode", {}, "error")
-      return NextResponse.json({ error: "Server misconfigured" }, { status: 500 })
-    }
-    const sigResult = verifyEsewaSignature(responseData, signed_field_names, signature, secretKey)
-    if (!sigResult.valid) {
-      logPaymentEvent("eSewa success - invalid signature", {
-        donationId: donation.id,
-        transactionUuid: maskSensitiveData(transaction_uuid),
-        reason: sigResult.reason,
-      }, "error")
-      return NextResponse.json({ error: "Invalid response signature" }, { status: 400 })
-    }
-  }
+  // ── Donation Payment Verification (V2 Architecture) ─────────────────────────
 
-  // Check if payment status is COMPLETE
-  if (status !== "COMPLETE") {
-    logPaymentEvent("eSewa success - payment not completed", {
+  try {
+    // Initialize adapters and services
+    // ConfigurationError here means ESEWA_SECRET_KEY / ESEWA_MERCHANT_ID is missing in .env
+    let esewaAdapter
+    try {
+      esewaAdapter = createEsewaAdapter()
+    } catch (configError) {
+      const msg = configError instanceof Error ? configError.message : String(configError)
+      console.error('[eSewa] Adapter configuration error — check ESEWA_SECRET_KEY / ESEWA_MERCHANT_ID env vars:', msg)
+      return NextResponse.redirect(
+        new URL(`/donate/cancel?provider=esewa&reason=configuration_error`, url.origin)
+      )
+    }
+
+    const paymentService = getPaymentService()
+
+    // Verify payment using EsewaAdapter
+    let verificationResult
+    try {
+      verificationResult = await esewaAdapter.verify(responseData, {
+        mode: isMock ? 'mock' : mode,
+        query: { data: encodedData || undefined },
+      })
+    } catch (verifyError) {
+      const msg = verifyError instanceof Error ? verifyError.message : String(verifyError)
+      console.error('[eSewa] Verification failed:', msg, { transaction_uuid, donationId: donation.id })
+      return NextResponse.redirect(
+        new URL(
+          `/donate/cancel?provider=esewa&reason=${encodeURIComponent(msg.slice(0, 80))}`,
+          url.origin
+        )
+      )
+    }
+
+    logPaymentEvent("eSewa success - verification completed", {
       donationId: donation.id,
-      status,
+      success: verificationResult.success,
+      status: verificationResult.status,
       transactionUuid: maskSensitiveData(transaction_uuid),
-    }, "warn")
-    
-    // Mark as failed
-    await supabase
-      .from("donations")
-      .update({ payment_status: "failed" })
-      .eq("id", donation.id)
-    
-    return NextResponse.redirect(
-      new URL(`/donate/cancel?provider=esewa&reason=${encodeURIComponent(status)}`, url.origin),
-    )
-  }
+    })
 
-  // Idempotency check
-  if (donation.payment_status === "completed") {
-    logPaymentEvent("eSewa success - already completed", {
+    // Extract event ID for idempotency
+    const metadata = esewaAdapter.extractMetadata(responseData)
+    const eventId = metadata.eventId
+
+    // Confirm donation using PaymentService
+    const confirmResult = await paymentService.confirmDonation({
+      donationId: donation.id,
+      provider: 'esewa',
+      verificationResult,
+      eventId,
+    })
+
+    logPaymentEvent("eSewa success - confirmation completed", {
+      donationId: donation.id,
+      status: confirmResult.status,
+      success: confirmResult.success,
+    })
+
+    // Handle different confirmation results
+    if (confirmResult.status === 'already_processed') {
+      // Payment already processed - redirect to success
+      return NextResponse.redirect(
+        new URL(
+          `/donate/success?provider=esewa&transaction_code=${encodeURIComponent(transaction_code || transaction_uuid)}&esewa_uuid=${encodeURIComponent(transaction_uuid)}${isMock ? "&mock=1" : ""}`,
+          url.origin
+        )
+      )
+    }
+
+    if (confirmResult.status === 'review') {
+      // Payment requires manual review - redirect to cancel with reason
+      logPaymentEvent("eSewa success - payment requires review", {
+        donationId: donation.id,
+        reason: confirmResult.metadata?.reviewReason,
+      }, "warn")
+      
+      return NextResponse.redirect(
+        new URL(`/donate/cancel?provider=esewa&reason=amount_mismatch`, url.origin)
+      )
+    }
+
+    if (confirmResult.status === 'failed' || !confirmResult.success) {
+      // Payment verification failed - redirect to cancel
+      logPaymentEvent("eSewa success - payment failed", {
+        donationId: donation.id,
+        error: confirmResult.error,
+      }, "error")
+      
+      return NextResponse.redirect(
+        new URL(
+          `/donate/cancel?provider=esewa&reason=${encodeURIComponent(confirmResult.error || 'verification_failed')}`,
+          url.origin
+        )
+      )
+    }
+
+    // Payment confirmed successfully
+    logPaymentEvent("eSewa success - payment completed", {
       donationId: donation.id,
       transactionCode: maskSensitiveData(transaction_code || ""),
+      transactionUuid: maskSensitiveData(transaction_uuid),
+      amount: verificationResult.amount,
     })
-    return NextResponse.redirect(
-      new URL(`/donate/success?provider=esewa&transaction_code=${encodeURIComponent(transaction_code || "")}`, url.origin),
-    )
-  }
 
-  // Verify amount matches
-  const expectedAmount = parseFloat(donation.amount.toString())
-  const actualAmount = parseFloat(total_amount.toString())
-  const amountVerification = verifyAmountMatch(expectedAmount, actualAmount, "NPR", 0.01)
-
-  if (!amountVerification.valid) {
-    logPaymentEvent("eSewa success - amount mismatch", {
-      donationId: donation.id,
-      expected: expectedAmount,
-      actual: actualAmount,
-      warning: amountVerification.error,
-    }, "warn")
-    await supabase
-      .from("donations")
-      .update({ payment_status: "review", provider: "esewa", provider_ref: transaction_uuid })
-      .eq("id", donation.id)
-
-    return NextResponse.redirect(
-      new URL(`/donate/cancel?provider=esewa&reason=amount_mismatch`, url.origin),
-    )
-  }
-
-  // Idempotency / replay protection using payment_events ledger (best-effort if table exists)
-  try {
-    const eventId = transaction_code ? `code:${transaction_code}` : `uuid:${transaction_uuid}`
-    const { error: eventErr } = await supabase
-      .from("payment_events")
-      .insert({ provider: "esewa", event_id: eventId, donation_id: donation.id })
-    if (eventErr) {
-      if ((eventErr as any).code === "23505" || String((eventErr as any).message || "").toLowerCase().includes("duplicate")) {
-        return NextResponse.redirect(
-          new URL(`/donate/success?provider=esewa&transaction_code=${encodeURIComponent(transaction_code || transaction_uuid)}${isMock ? "&mock=1" : ""}`, url.origin),
-        )
-      }
-    }
-  } catch {
-    // ignore if ledger missing
-  }
-
-  // Update donation status
-  const { error: updateError } = await supabase
-    .from("donations")
-    .update({
-      payment_status: "completed",
-      payment_id: `esewa:${transaction_code || transaction_uuid}`,
-      provider: "esewa",
-      provider_ref: transaction_uuid,
-      esewa_transaction_code: transaction_code || null,
-    })
-    .eq("id", donation.id)
-
-  if (updateError) {
-    logPaymentEvent("eSewa success - update failed", {
-      donationId: donation.id,
-      error: updateError,
-    }, "error")
-    return NextResponse.json({ error: "Failed to update donation" }, { status: 500 })
-  }
-
-  logPaymentEvent("eSewa success - payment completed", {
-    donationId: donation.id,
-    transactionCode: maskSensitiveData(transaction_code || ""),
-    transactionUuid: maskSensitiveData(transaction_uuid),
-    amount: actualAmount,
-  })
-
-  // Fire-and-forget receipt generation.
-  // Non-blocking: never delays the redirect.
-  // Idempotent: generateReceiptForDonation checks if receipt already exists.
-  generateReceiptForDonation({ donationId: donation.id })
-    .then((r) => {
-      if (!r.success) {
-        logPaymentEvent("eSewa success - receipt generation failed (non-fatal)", {
+    // Fire-and-forget receipt generation.
+    // Non-blocking: never delays the redirect.
+    // Idempotent: generateReceiptForDonation checks if receipt already exists.
+    generateReceiptForDonation({ donationId: donation.id })
+      .then((r) => {
+        if (!r.success) {
+          logPaymentEvent("eSewa success - receipt generation failed (non-fatal)", {
+            donationId: donation.id,
+            message: r.message,
+          }, "warn")
+        }
+      })
+      .catch((e) =>
+        logPaymentEvent("eSewa success - receipt generation error (non-fatal)", {
           donationId: donation.id,
-          message: r.message,
-        }, "warn")
-      }
-    })
-    .catch((e) =>
-      logPaymentEvent("eSewa success - receipt generation error (non-fatal)", {
-        donationId: donation.id,
-        error: e instanceof Error ? e.message : String(e),
-      }, "error"),
+          error: e instanceof Error ? e.message : String(e),
+        }, "error"),
+      )
+
+    // Redirect to success page
+    return NextResponse.redirect(
+      new URL(
+        `/donate/success?provider=esewa&transaction_code=${encodeURIComponent(transaction_code || transaction_uuid)}&esewa_uuid=${encodeURIComponent(transaction_uuid)}${isMock ? "&mock=1" : ""}`,
+        url.origin
+      )
     )
 
-  // Redirect to success page
-  return NextResponse.redirect(
-    new URL(`/donate/success?provider=esewa&transaction_code=${encodeURIComponent(transaction_code || transaction_uuid)}${isMock ? "&mock=1" : ""}`, url.origin),
-  )
+  } catch (error) {
+    // Handle verification or confirmation errors
+    logPaymentEvent("eSewa success - unexpected error", {
+      donationId: donation.id,
+      error: error instanceof Error ? error.message : String(error),
+    }, "error")
+
+    return NextResponse.redirect(
+      new URL(
+        `/donate/cancel?provider=esewa&reason=${encodeURIComponent('system_error')}`,
+        url.origin
+      )
+    )
+  }
 }
