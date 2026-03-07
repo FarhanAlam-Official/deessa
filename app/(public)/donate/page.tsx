@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Heart, Shield, CreditCard, Repeat, CheckCircle, HelpCircle } from "lucide-react"
+import { Heart, Shield, CreditCard, Repeat, CheckCircle, HelpCircle, Search } from "lucide-react"
 import { Section } from "@/components/ui/section"
 import { Button } from "@/components/ui/button"
 import { DonationForm } from "@/components/donation-form"
@@ -143,6 +143,18 @@ export default async function DonatePage() {
                   </li>
                 </ul>
               </div>
+
+              <Link href="/verify" className="block bg-surface border border-border rounded-2xl p-5 hover:border-primary/40 hover:shadow-md transition-all group">
+                <div className="flex items-center gap-3">
+                  <div className="size-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <Search className="size-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground text-sm">Already donated?</p>
+                    <p className="text-xs text-foreground-muted">Verify your receipt →</p>
+                  </div>
+                </div>
+              </Link>
             </div>
           </div>
         </div>
@@ -224,6 +236,22 @@ export default async function DonatePage() {
               </div>
             ))}
           </div>
+        </div>
+      </Section>
+
+      {/* Verify Receipt */}
+      <Section className="bg-surface">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="size-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Search className="size-7 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Already Donated?</h2>
+          <p className="text-foreground-muted mb-6">
+            Verify your donation receipt using your verification ID or receipt number.
+          </p>
+          <Button asChild size="lg" variant="outline" className="rounded-full">
+            <Link href="/verify">Verify Your Receipt</Link>
+          </Button>
         </div>
       </Section>
 
