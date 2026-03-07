@@ -16,12 +16,18 @@ interface OrganizationDetails {
   vat_registration_number: string
   pan_number: string
   swc_registration_number: string
+  ird_exemption_number: string
   address: string
   phone: string
   email: string
+  website: string
   logo_url: string
   receipt_prefix: string
   receipt_number_start: number
+  authorized_signatory_name: string
+  authorized_signatory_designation: string
+  stamp_url: string
+  signature_url: string
 }
 
 interface OrganizationSettingsFormProps {
@@ -40,12 +46,18 @@ export function OrganizationSettingsForm({ initialData }: OrganizationSettingsFo
       vat_registration_number: "",
       pan_number: "",
       swc_registration_number: "",
+      ird_exemption_number: "",
       address: "",
       phone: "",
       email: "",
+      website: "",
       logo_url: "",
       receipt_prefix: "RCP",
       receipt_number_start: 1000,
+      authorized_signatory_name: "",
+      authorized_signatory_designation: "",
+      stamp_url: "",
+      signature_url: "",
     },
   )
 
@@ -64,7 +76,7 @@ export function OrganizationSettingsForm({ initialData }: OrganizationSettingsFo
     setIsSubmitting(true)
 
     try {
-      await updateSiteSetting("organization_details", formData)
+      await updateSiteSetting("organization_details", formData as unknown as Record<string, unknown>)
       setSuccess("Organization details updated successfully!")
       router.refresh()
 
@@ -194,6 +206,34 @@ export function OrganizationSettingsForm({ initialData }: OrganizationSettingsFo
             placeholder="Social Welfare Council registration"
           />
         </div>
+        <div>
+          <Label htmlFor="ird_exemption_number">IRD Tax Exemption Certificate No.</Label>
+          <Input
+            id="ird_exemption_number"
+            name="ird_exemption_number"
+            value={formData.ird_exemption_number}
+            onChange={handleChange}
+            disabled={isSubmitting}
+            placeholder="IRD exemption certificate number (if applicable)"
+          />
+          <p className="text-xs text-blue-700 mt-1">
+            Printed on receipts — Section 12, Income Tax Act 2058
+          </p>
+        </div>
+      </div>
+
+      {/* Website */}
+      <div>
+        <Label htmlFor="website">Website</Label>
+        <Input
+          id="website"
+          name="website"
+          type="url"
+          value={formData.website}
+          onChange={handleChange}
+          disabled={isSubmitting}
+          placeholder="https://www.dessafoundation.org"
+        />
       </div>
 
       {/* Logo */}
@@ -220,6 +260,142 @@ export function OrganizationSettingsForm({ initialData }: OrganizationSettingsFo
             />
           </div>
         )}
+      </div>
+
+      {/* Authorized Signatory */}
+      <div className="space-y-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
+        <div>
+          <h3 className="font-semibold text-purple-900">Authorized Signatory</h3>
+          <p className="text-xs text-purple-700 mt-1">
+            Printed at the bottom of every donation receipt PDF
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="authorized_signatory_name">Signatory Name</Label>
+            <Input
+              id="authorized_signatory_name"
+              name="authorized_signatory_name"
+              value={formData.authorized_signatory_name}
+              onChange={handleChange}
+              disabled={isSubmitting}
+              placeholder="e.g., Dr. Jane Doe"
+            />
+          </div>
+          <div>
+            <Label htmlFor="authorized_signatory_designation">Designation</Label>
+            <Input
+              id="authorized_signatory_designation"
+              name="authorized_signatory_designation"
+              value={formData.authorized_signatory_designation}
+              onChange={handleChange}
+              disabled={isSubmitting}
+              placeholder="e.g., Executive Director"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Receipt Branding */}
+      <div className="space-y-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
+        <div>
+          <h3 className="font-semibold text-amber-900">Receipt Official Branding</h3>
+          <p className="text-xs text-amber-700 mt-1">
+            Add official stamp and digital signature to receipts for legal compliance
+          </p>
+        </div>
+        
+        <div>
+          <Label htmlFor="signature_url">Digital Signature URL</Label>
+          <Input
+            id="signature_url"
+            name="signature_url"
+            type="url"
+            value={formData.signature_url}
+            onChange={handleChange}
+            disabled={isSubmitting}
+            placeholder="https://example.com/signature.png"
+          />
+          <p className="text-xs text-amber-700 mt-1">
+            Must be a valid HTTPS URL. Recommended size: 120×40px. Displayed on left side of receipt footer.
+          </p>
+          {formData.signature_url && (
+            <div className="mt-2 p-2 bg-white rounded border border-amber-200">
+              <p className="text-xs text-amber-800 mb-1 font-medium">Preview:</p>
+              <img
+                src={formData.signature_url}
+                alt="Digital Signature Preview"
+                className="h-10 w-auto border border-gray-200"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none"
+                  const parent = e.currentTarget.parentElement
+                  if (parent) {
+                    const errorMsg = parent.querySelector('.error-message')
+                    if (!errorMsg) {
+                      const msg = document.createElement('p')
+                      msg.className = 'error-message text-xs text-red-600 mt-1'
+                      msg.textContent = '⚠️ Failed to load image. Please check the URL.'
+                      parent.appendChild(msg)
+                    }
+                  }
+                }}
+                onLoad={(e) => {
+                  const parent = e.currentTarget.parentElement
+                  if (parent) {
+                    const errorMsg = parent.querySelector('.error-message')
+                    if (errorMsg) errorMsg.remove()
+                  }
+                }}
+              />
+            </div>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="stamp_url">Official Stamp URL</Label>
+          <Input
+            id="stamp_url"
+            name="stamp_url"
+            type="url"
+            value={formData.stamp_url}
+            onChange={handleChange}
+            disabled={isSubmitting}
+            placeholder="https://example.com/stamp.png"
+          />
+          <p className="text-xs text-amber-700 mt-1">
+            Must be a valid HTTPS URL. Recommended size: 80×80px. Displayed on right side of receipt footer.
+          </p>
+          {formData.stamp_url && (
+            <div className="mt-2 p-2 bg-white rounded border border-amber-200">
+              <p className="text-xs text-amber-800 mb-1 font-medium">Preview:</p>
+              <img
+                src={formData.stamp_url}
+                alt="Official Stamp Preview"
+                className="h-20 w-auto border border-gray-200"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none"
+                  const parent = e.currentTarget.parentElement
+                  if (parent) {
+                    const errorMsg = parent.querySelector('.error-message')
+                    if (!errorMsg) {
+                      const msg = document.createElement('p')
+                      msg.className = 'error-message text-xs text-red-600 mt-1'
+                      msg.textContent = '⚠️ Failed to load image. Please check the URL.'
+                      parent.appendChild(msg)
+                    }
+                  }
+                }}
+                onLoad={(e) => {
+                  const parent = e.currentTarget.parentElement
+                  if (parent) {
+                    const errorMsg = parent.querySelector('.error-message')
+                    if (errorMsg) errorMsg.remove()
+                  }
+                }}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Receipt Settings */}
