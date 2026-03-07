@@ -11,6 +11,7 @@ import {
   getReceiptForDisplay,
   getOrganizationDetailsForReceipt,
   getDonationByPaymentRef,
+  ensureReceiptSent,
 } from "@/lib/actions/donation-receipt"
 
 interface DonationData {
@@ -27,12 +28,6 @@ interface DonationData {
 
 interface VerificationResult {
   success: boolean
-  session?: {
-    id: string
-    payment_status?: string
-    amount_total?: number
-    currency?: string
-  }
   donation?: DonationData | null
   error?: string
 }
@@ -44,6 +39,9 @@ export function SuccessContent() {
   const [provider, setProvider] = useState<"stripe" | "khalti" | "esewa">("stripe")
   const [receipt, setReceipt] = useState<any>(null)
   const [isFetchingReceipt, setIsFetchingReceipt] = useState(false)
+  const [receiptTimedOut, setReceiptTimedOut] = useState(false)
+  const [ensureEmailSent, setEnsureEmailSent] = useState(false)
+  const [ensureEmailStatus, setEnsureEmailStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [organizationDetails, setOrganizationDetails] = useState<{
     name: string
     vatNumber: string
@@ -74,58 +72,70 @@ export function SuccessContent() {
 
     // ── Khalti ──────────────────────────────────────────────────────────────
     if (providerParam === "khalti" && pidx) {
-      getDonationByPaymentRef(pidx)
-        .then((don) => {
-          setVerification({
-            success: true,
-            donation: don
-              ? {
-                  id: don.id,
-                  amount: don.amount,
-                  currency: don.currency,
-                  donor_name: don.donor_name,
-                  donor_email: don.donor_email,
-                  donor_phone: don.donor_phone ?? undefined,
-                  is_monthly: don.is_monthly,
-                  payment_status: don.payment_status,
-                  created_at: don.created_at,
-                }
-              : null,
-          })
+      // Use read-only status endpoint (no mutation)
+      fetch(`/api/payments/khalti/status?pidx=${encodeURIComponent(pidx)}`)
+        .then(async (response) => {
+          const data = await response.json()
+          if (response.ok && data.success && data.donation) {
+            setVerification({
+              success: true,
+              donation: {
+                id: data.donation.id,
+                amount: data.donation.amount,
+                currency: data.donation.currency,
+                donor_name: data.donation.donor_name,
+                donor_email: data.donation.donor_email,
+                donor_phone: data.donation.donor_phone ?? undefined,
+                is_monthly: data.donation.is_monthly,
+                payment_status: data.donation.payment_status,
+                created_at: data.donation.created_at,
+              },
+            })
+          } else {
+            setVerification({ success: false, error: data.error || "Donation not found" })
+          }
           setIsLoading(false)
         })
-        .catch(() => {
-          setVerification({ success: true, donation: null })
+        .catch((error) => {
+          console.error("Error fetching Khalti status:", error)
+          setVerification({ success: false, error: "Failed to fetch payment status" })
           setIsLoading(false)
         })
       return
     }
 
     // ── eSewa ────────────────────────────────────────────────────────────────
-    const esewaRef = transactionCode || refId
+    // Prefer the full UUID (esewa_uuid param) over the short transaction_code for status lookup
+    const esewaUuid = searchParams.get("esewa_uuid")
+    const esewaRef = esewaUuid || transactionCode || refId
     if ((providerParam === "esewa" || esewaRef) && esewaRef) {
-      getDonationByPaymentRef(esewaRef)
-        .then((don) => {
-          setVerification({
-            success: true,
-            donation: don
-              ? {
-                  id: don.id,
-                  amount: don.amount,
-                  currency: don.currency,
-                  donor_name: don.donor_name,
-                  donor_email: don.donor_email,
-                  donor_phone: don.donor_phone ?? undefined,
-                  is_monthly: don.is_monthly,
-                  payment_status: don.payment_status,
-                  created_at: don.created_at,
-                }
-              : null,
-          })
+      // Use read-only status endpoint (no mutation)
+      fetch(`/api/payments/esewa/status?transaction_uuid=${encodeURIComponent(esewaRef)}`)
+        .then(async (response) => {
+          const data = await response.json()
+          if (response.ok && data.success && data.donation) {
+            setVerification({
+              success: true,
+              donation: {
+                id: data.donation.id,
+                amount: data.donation.amount,
+                currency: data.donation.currency,
+                donor_name: data.donation.donor_name,
+                donor_email: data.donation.donor_email,
+                donor_phone: data.donation.donor_phone ?? undefined,
+                is_monthly: data.donation.is_monthly,
+                payment_status: data.donation.payment_status,
+                created_at: data.donation.created_at,
+              },
+            })
+          } else {
+            setVerification({ success: false, error: data.error || "Donation not found" })
+          }
           setIsLoading(false)
         })
-        .catch(() => {
-          setVerification({ success: true, donation: null })
+        .catch((error) => {
+          console.error("Error fetching eSewa status:", error)
+          setVerification({ success: false, error: "Failed to fetch payment status" })
           setIsLoading(false)
         })
       return
@@ -139,15 +149,15 @@ export function SuccessContent() {
         return
       }
 
-      const verifySession = async () => {
+      const checkStatus = async () => {
         try {
-          const response = await fetch(`/api/payments/stripe/verify?session_id=${sessionId}`)
+          const response = await fetch(`/api/payments/stripe/status?session_id=${sessionId}`)
           const data = await response.json()
 
           if (response.ok && data.success) {
             if (data.donation?.payment_status === "pending") {
               // Set initial state, then poll for the DB update
-              setVerification({ success: true, session: data.session, donation: data.donation })
+              setVerification({ success: true, donation: data.donation })
               setIsLoading(false)
 
               let attempts = 0
@@ -156,14 +166,13 @@ export function SuccessContent() {
               const pollForUpdate = setInterval(async () => {
                 attempts++
                 try {
-                  const pollResponse = await fetch(`/api/payments/stripe/verify?session_id=${sessionId}`)
+                  const pollResponse = await fetch(`/api/payments/stripe/status?session_id=${sessionId}`)
                   const pollData = await pollResponse.json()
 
                   if (pollResponse.ok && pollData.success && pollData.donation) {
                     // Merge: always preserve donor PII whichever poll first delivers it
                     setVerification((prev) => ({
                       success: true,
-                      session: pollData.session || prev?.session,
                       donation: {
                         ...prev?.donation,
                         ...pollData.donation,
@@ -188,21 +197,21 @@ export function SuccessContent() {
               }, 2000)
             } else {
               // Already completed/failed
-              setVerification({ success: true, session: data.session, donation: data.donation })
+              setVerification({ success: true, donation: data.donation })
               setIsLoading(false)
             }
           } else {
-            setVerification({ success: false, error: data.error || "Verification failed" })
+            setVerification({ success: false, error: data.error || "Status check failed" })
             setIsLoading(false)
           }
         } catch (error) {
-          console.error("Error verifying session:", error)
-          setVerification({ success: false, error: "Failed to verify payment session" })
+          console.error("Error checking status:", error)
+          setVerification({ success: false, error: "Failed to check payment status" })
           setIsLoading(false)
         }
       }
 
-      verifySession()
+      checkStatus()
       return
     }
 
@@ -210,10 +219,31 @@ export function SuccessContent() {
     setIsLoading(false)
   }, [searchParams])
 
-  // Stable scalar deps — NOT the full donation object — so this effect doesn't
+  // Stable scalar deps — NOT the full donation object — so these effects don't
   // re-fire on every poll update that creates a new object reference.
   const donationId = verification?.donation?.id
   const paymentStatus = verification?.donation?.payment_status
+
+  // When poll times out, trigger email fallback once
+  useEffect(() => {
+    if (!receiptTimedOut || !donationId || ensureEmailSent) return
+    setEnsureEmailSent(true)
+    setEnsureEmailStatus('sending')
+
+    ensureReceiptSent(donationId)
+      .then((result) => {
+        // If receipt was found and returned, surface it on the page
+        if (result.receiptNumber) {
+          setReceipt((prev: typeof receipt) => prev ?? {
+            receipt_number: result.receiptNumber,
+            receipt_url: result.receiptUrl,
+          })
+        }
+        setEnsureEmailStatus(result.success ? 'sent' : 'error')
+      })
+      .catch(() => setEnsureEmailStatus('error'))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [receiptTimedOut, donationId])
 
   // Fetch receipt once when payment is confirmed.
   useEffect(() => {
@@ -258,11 +288,17 @@ export function SuccessContent() {
             if (!cancelled) { setReceipt(data); setIsFetchingReceipt(false) }
           } else if (attempts >= 15) {
             clearInterval(pollTimer!)
-            if (!cancelled) setIsFetchingReceipt(false)
+            if (!cancelled) {
+              setIsFetchingReceipt(false)
+              setReceiptTimedOut(true)
+            }
           }
         } catch (e) {
           console.error("Receipt poll error:", e)
-          if (attempts >= 15) { clearInterval(pollTimer!); if (!cancelled) setIsFetchingReceipt(false) }
+          if (attempts >= 15) {
+            clearInterval(pollTimer!)
+            if (!cancelled) { setIsFetchingReceipt(false); setReceiptTimedOut(true) }
+          }
         }
       }, 2000)
     }
@@ -313,8 +349,8 @@ export function SuccessContent() {
   }
 
   const donation = verification.donation
-  const amount = donation?.amount || (verification.session?.amount_total ? verification.session.amount_total / 100 : 0)
-  const currency = donation?.currency || verification.session?.currency?.toUpperCase() || "USD"
+  const amount = donation?.amount || 0
+  const currency = donation?.currency || "USD"
 
   return (
     <div className="max-w-3xl mx-auto text-center">
@@ -369,6 +405,33 @@ export function SuccessContent() {
               <div className="flex items-center gap-3">
                 <Loader2 className="size-5 text-blue-600 animate-spin" />
                 <p className="text-sm text-blue-800">Generating your receipt — this takes a few seconds...</p>
+              </div>
+            </div>
+          )}
+
+          {donation.payment_status === "completed" && receiptTimedOut && !receipt && (
+            <div className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-left">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="size-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-amber-800 mb-1">Receipt is taking longer than expected</p>
+                  <p className="text-sm text-amber-700 mb-2">
+                    Your payment was confirmed. We&apos;re sending your receipt to{" "}
+                    <span className="font-medium">{donation.donor_email}</span>.
+                  </p>
+                  {ensureEmailStatus === 'sending' && (
+                    <div className="flex items-center gap-2 text-amber-700 text-sm">
+                      <Loader2 className="size-3.5 animate-spin" />
+                      Sending receipt email...
+                    </div>
+                  )}
+                  {ensureEmailStatus === 'sent' && (
+                    <p className="text-sm text-green-700 font-medium">✓ Receipt email sent. Please check your inbox.</p>
+                  )}
+                  {ensureEmailStatus === 'error' && (
+                    <p className="text-sm text-red-700">Could not send automatically — please contact support if you don&apos;t receive your receipt within an hour.</p>
+                  )}
+                </div>
               </div>
             </div>
           )}
