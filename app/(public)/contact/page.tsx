@@ -174,8 +174,8 @@ export default function ContactPage() {
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Have a Quick Question?</h2>
           <p className="text-white/80 mb-2">
             Check our FAQ or email us directly at{" "}
-            <a href="mailto:info@dessafoundation.org" className="underline">
-              info@dessafoundation.org
+            <a href="mailto:deessa.social@gmail.com" className="underline">
+              deessa.social@gmail.com
             </a>
           </p>
         </div>

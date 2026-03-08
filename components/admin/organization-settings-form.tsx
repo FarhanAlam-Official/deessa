@@ -136,7 +136,7 @@ export function OrganizationSettingsForm({ initialData }: OrganizationSettingsFo
             value={formData.email}
             onChange={handleChange}
             disabled={isSubmitting}
-            placeholder="info@dessafoundation.org"
+            placeholder="deessa.social@gmail.com"
           />
         </div>
         <div>

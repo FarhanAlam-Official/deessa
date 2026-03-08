@@ -149,7 +149,7 @@ export function Footer() {
                 </div>
                 <div>
                   <p className="text-gray-400 text-xs uppercase tracking-wider">Location</p>
-                  <p className="text-white text-sm font-medium">Kathmandu, Nepal</p>
+                  <p className="text-white text-sm font-medium">Dhobighat Nayabato, Sanepa, Lalitpur 44600, Nepal</p>
                 </div>
               </div>
               
@@ -159,7 +159,7 @@ export function Footer() {
                 </div>
                 <div>
                   <p className="text-gray-400 text-xs uppercase tracking-wider">Email</p>
-                  <p className="text-white text-sm font-medium">info@deessafoundation.org</p>
+                  <p className="text-white text-sm font-medium">deessa.social@gmail.com</p>
                 </div>
               </div>
               
