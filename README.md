@@ -314,7 +314,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **deessa Foundation**
 
 - **Address:** Kathmandu, Nepal
-- **Email:** <info@deessa.org>
+- **Email:** <deessa.social@gmail.com>
 - **Phone:** +977-XXXXXXXXX
 - **Social Media:** [Facebook](#) | [Twitter](#) | [Instagram](#)
 

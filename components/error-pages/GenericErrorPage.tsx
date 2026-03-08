@@ -51,7 +51,7 @@ export default function GenericErrorPage({
         `Digest: ${digest || "N/A"}\n`+
         `Time: ${new Date().toISOString()}\n`
       )
-      window.location.href = `mailto:support@sewabazaar.com?subject=${subject}&body=${body}`
+      window.location.href = `mailto:deessa.social@gmail.com?subject=${subject}&body=${body}`
       showToast.info({ title: "Opening mail client" })
     } catch {
       showToast.error({ title: "Could not open mail client" })

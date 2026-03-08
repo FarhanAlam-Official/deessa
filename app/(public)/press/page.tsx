@@ -14,12 +14,12 @@ export const metadata: Metadata = {
 const pressContacts = [
   {
     name: "Media Inquiries",
-    email: "press@dessafoundation.org",
+    email: "deessa.social@gmail.com",
     role: "General press questions and interview requests",
   },
   {
     name: "Partnership Inquiries",
-    email: "partnerships@dessafoundation.org",
+    email: "deessa.social@gmail.com",
     role: "Corporate partnerships and collaborations",
   },
 ]
@@ -208,7 +208,7 @@ export default function PressPage() {
             If you need additional materials or have specific media requests, please reach out to our press team.
           </p>
           <Button asChild size="lg" variant="secondary">
-            <a href="mailto:press@dessafoundation.org">Contact Press Team</a>
+            <a href="mailto:deessa.social@gmail.com">Contact Press Team</a>
           </Button>
         </div>
       </section>

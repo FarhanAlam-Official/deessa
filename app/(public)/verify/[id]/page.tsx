@@ -453,7 +453,7 @@ export default async function VerificationPage({ params }: VerificationPageProps
                 </svg>
                 <p className="text-[11px] text-gray-400 leading-relaxed italic">
                   If you suspect a fraudulent receipt, please report it immediately to our compliance team at{" "}
-                  <a href="mailto:verify@deessa.org" className="text-red-400 hover:underline">verify@deessa.org</a>
+                  <a href="mailto:deessa.social@gmail.com" className="text-red-400 hover:underline">deessa.social@gmail.com</a>
                 </p>
               </div>
             </div>

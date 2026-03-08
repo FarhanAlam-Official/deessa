@@ -179,7 +179,7 @@ export default function VerifyPage() {
                   <br />
                   <span className="inline-flex items-center gap-1">
                     <Mail className="w-3 h-3" />
-                    Email: <a href="mailto:verify@deessa.org" className="text-[rgb(63,171,222)] hover:underline">verify@deessa.org</a>
+                    Email: <a href="mailto:deessa.social@gmail.com" className="text-[rgb(63,171,222)] hover:underline">deessa.social@gmail.com</a>
                   </span>
                 </p>
               </div>
