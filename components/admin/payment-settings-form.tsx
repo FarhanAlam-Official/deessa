@@ -14,11 +14,11 @@ import { updatePaymentSettings } from "@/lib/actions/admin-payments"
 
 interface PaymentSettingsFormProps {
   settings: PaymentSettings
-  paymentMode: "mock" | "live"
+  paymentMode?: "mock" | "live"
   envConfigured: Record<PaymentProvider, boolean>
 }
 
-export function PaymentSettingsForm({ settings, paymentMode, envConfigured }: PaymentSettingsFormProps) {
+export function PaymentSettingsForm({ settings, envConfigured }: PaymentSettingsFormProps) {
   const router = useRouter()
   const [enabledProviders, setEnabledProviders] = useState<PaymentProvider[]>(settings.enabledProviders)
   const [primaryProvider, setPrimaryProvider] = useState<PaymentProvider>(settings.primaryProvider)
@@ -99,7 +99,7 @@ export function PaymentSettingsForm({ settings, paymentMode, envConfigured }: Pa
             {(Object.keys(providerLabel) as PaymentProvider[]).map((provider) => {
               const enabled = enabledProviders.includes(provider)
               const configured = envConfigured[provider]
-              const effectivelyAvailable = paymentMode === "mock" || (enabled && configured)
+              const effectivelyAvailable = enabled && configured
 
               return (
                 <div key={provider} className="flex flex-col justify-between rounded-lg border p-4 space-y-3">
@@ -115,12 +115,6 @@ export function PaymentSettingsForm({ settings, paymentMode, envConfigured }: Pa
                     </p>
                   </div>
                   <p className="text-[11px] text-muted-foreground">
-                    Mode:{" "}
-                    <span className="font-semibold uppercase">
-                      {paymentMode}
-                      {paymentMode === "mock" ? " (sandbox, no real charges)" : ""}
-                    </span>
-                    <br />
                     Env:{" "}
                     <span className={configured ? "text-green-700 font-medium" : "text-red-700 font-medium"}>
                       {configured ? "keys configured" : "missing keys"}

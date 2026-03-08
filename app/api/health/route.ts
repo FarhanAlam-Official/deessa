@@ -10,7 +10,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validatePaymentConfiguration } from '@/lib/payments/validation'
 import { createClient } from '@/lib/supabase/server'
-import { getPaymentMode } from '@/lib/payments/config'
 
 export const dynamic = 'force-dynamic'
 
@@ -181,18 +180,8 @@ async function checkPaymentConfiguration(): Promise<HealthCheck> {
  */
 async function checkProviders(): Promise<HealthCheck> {
   const startTime = Date.now()
-  const paymentMode = getPaymentMode()
 
   try {
-    // In mock mode, providers are always "available"
-    if (paymentMode === 'mock') {
-      return {
-        status: 'pass',
-        message: 'Running in mock mode - provider checks skipped',
-        responseTime: Date.now() - startTime
-      }
-    }
-
     const providerStatuses: string[] = []
     let hasFailures = false
     let hasWarnings = false

@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 
 export type PaymentProvider = "stripe" | "khalti" | "esewa"
-export type PaymentMode = "mock" | "live"
 
 export interface PaymentSettings {
   enabledProviders: PaymentProvider[]
@@ -17,26 +16,7 @@ const DEFAULT_PAYMENT_SETTINGS: PaymentSettings = {
   allowRecurring: false,
 }
 
-export function getPaymentMode(): PaymentMode {
-  const envMode = process.env.PAYMENT_MODE === "live" ? "live" : "mock"
-
-  // Guardrail: never allow mock mode in production deployments.
-  // This prevents signature verification from being skipped on public endpoints.
-  if (process.env.NODE_ENV === "production" && envMode !== "live") {
-    throw new Error(
-      'PAYMENT_MODE must be "live" in production. Refusing to run with mock mode.',
-    )
-  }
-
-  return envMode
-}
-
 export function isProviderEnvConfigured(provider: PaymentProvider): boolean {
-  if (getPaymentMode() === "mock") {
-    // In mock mode we intentionally do not require any real secrets
-    return true
-  }
-
   switch (provider) {
     case "stripe":
       // Stripe secret key is required, webhook secret is optional (webhooks won't work without it, but checkout will)
@@ -89,13 +69,8 @@ export async function getPaymentSettings(): Promise<PaymentSettings> {
 }
 
 export function getSupportedProviders(settings: PaymentSettings): PaymentProvider[] {
-  // In live mode, a provider is usable only if both env and settings allow it
-  if (getPaymentMode() === "live") {
-    return settings.enabledProviders.filter((p) => isProviderEnvConfigured(p))
-  }
-
-  // In mock mode, we allow all enabled providers regardless of env
-  return settings.enabledProviders
+  // A provider is usable only if both env vars and settings allow it
+  return settings.enabledProviders.filter((p) => isProviderEnvConfigured(p))
 }
 
 

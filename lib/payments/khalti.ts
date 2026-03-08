@@ -1,6 +1,5 @@
 "use server"
 
-import type { PaymentMode } from "./config"
 import { validateAmount, validateEmail, validateName, fetchWithTimeout, logPaymentEvent } from "./security"
 import { KhaltiError } from "./errors"
 import { getAppBaseUrl } from "@/lib/utils"
@@ -43,13 +42,9 @@ export interface KhaltiDonationContext {
 
 /**
  * Initiate a Khalti payment.
- *
- * NOTE: In mock mode this does not perform any network calls and simply
- * returns a simulated but structurally-aligned response.
  */
 export async function startKhaltiPayment(
   donation: KhaltiDonationContext,
-  mode: PaymentMode,
 ): Promise<KhaltiInitResult> {
   // Validate inputs
   const amountValidation = validateAmount(donation.amount, "NPR")
@@ -81,22 +76,6 @@ export async function startKhaltiPayment(
     returnUrl =
       process.env.KHALTI_RETURN_URL ||
       `${siteUrl}/payments/khalti/return`
-  }
-
-  if (mode === "mock") {
-    const mockPidx = `khalti_mock_${donation.id}`
-    const mockUrl = `${returnUrl}?pidx=${mockPidx}&mock=1`
-
-    logPaymentEvent("Khalti payment initiated (mock)", {
-      donationId: donation.id,
-      amount: donation.amount,
-      pidx: mockPidx,
-    })
-
-    return {
-      redirectUrl: mockUrl,
-      pidx: mockPidx,
-    }
   }
 
   const secretKey = process.env.KHALTI_SECRET_KEY

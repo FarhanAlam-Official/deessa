@@ -122,24 +122,6 @@ export class StripeAdapter extends BaseProviderAdapter {
     payload: unknown,
     context?: VerificationContext
   ): Promise<Stripe.Event> {
-    const mode = context?.mode || this.getPaymentMode()
-
-    // In mock mode, skip signature verification (development only)
-    if (mode === 'mock') {
-      console.warn('StripeAdapter: Running in mock mode - signature verification bypassed')
-      
-      // Parse payload as JSON
-      const body = typeof payload === 'string' ? payload : JSON.stringify(payload)
-      try {
-        return JSON.parse(body) as Stripe.Event
-      } catch (error) {
-        throw VerificationError.invalidPayload(
-          'stripe',
-          'Failed to parse webhook payload as JSON'
-        )
-      }
-    }
-
     // Live mode: Require signature verification
     if (!this.config.webhookSecret) {
       throw ConfigurationError.missingCredentials('stripe', 'STRIPE_WEBHOOK_SECRET')
@@ -619,21 +601,6 @@ export class StripeAdapter extends BaseProviderAdapter {
     }
   }
 
-  /**
-   * Get payment mode from environment
-   */
-  private getPaymentMode(): 'live' | 'mock' {
-    const mode = process.env.PAYMENT_MODE
-    
-    // Guardrail: never allow mock mode in production
-    if (process.env.NODE_ENV === 'production' && mode !== 'live') {
-      throw new Error(
-        'PAYMENT_MODE must be "live" in production. Refusing to run with mock mode.'
-      )
-    }
-
-    return mode === 'live' ? 'live' : 'mock'
-  }
 }
 
 /**

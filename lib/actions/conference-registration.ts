@@ -14,7 +14,6 @@ import {
 import { getConferenceSettings } from "@/lib/actions/conference-settings";
 
 import {
-  getPaymentMode,
   getPaymentSettings,
   getSupportedProviders,
   type PaymentProvider,
@@ -507,8 +506,6 @@ export async function startConferencePayment(
       actualProvider = availableProviders[0];
     }
 
-    const mode = getPaymentMode();
-
     // Use the configured currency for all providers.
 
     // NOTE: Stripe supports most currencies. Khalti and eSewa are NPR-only.
@@ -552,8 +549,6 @@ export async function startConferencePayment(
             payment_type: "conference_registration",
           },
         },
-
-        mode,
       );
 
       redirectUrl = result.redirectUrl;
@@ -579,11 +574,8 @@ export async function startConferencePayment(
           donorEmail: reg.email,
 
           donorPhone: reg.phone || undefined,
-          // Redirect Khalti back to the conference success page (not donation return)
           returnUrl: `${getAppBaseUrl()}/conference/register/payment-success?rid=${registrationId}`,
-        },
-
-        mode,
+        }
       );
 
       redirectUrl = result.redirectUrl;
@@ -597,9 +589,7 @@ export async function startConferencePayment(
       };
     } else if (actualProvider === "esewa") {
       const result = await startEsewaPayment(
-        { id: registrationId, amount: fee.amount, currency: "NPR" },
-
-        mode,
+        { id: registrationId, amount: fee.amount, currency: "NPR" }
       );
 
       redirectUrl = result.redirectUrl;

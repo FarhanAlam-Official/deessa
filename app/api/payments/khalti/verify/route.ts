@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
-import { getPaymentMode } from "@/lib/payments/config"
 import {
   validateUUID,
   verifyAmountMatch,
@@ -16,8 +15,6 @@ import { VerificationError, ConfigurationError } from "@/lib/payments/core/error
 import { checkRateLimit, getClientIP } from "@/lib/rate-limit"
 
 export async function POST(request: Request) {
-  const mode = getPaymentMode()
-
   try {
     // 1. Apply distributed rate limiting (10 requests per minute per IP)
     const clientIP = getClientIP(request)
@@ -123,7 +120,7 @@ export async function POST(request: Request) {
 
       if (reg) {
         // TODO: Task 8.2 - Extract to shared verification logic
-        return await handleConferenceVerification(supabase, reg, pidx, mode)
+        return await handleConferenceVerification(supabase, reg, pidx)
       }
 
       // Neither donation nor conference registration found
@@ -189,7 +186,7 @@ export async function POST(request: Request) {
     try {
       const verificationResult = await khaltiAdapter.verify(
         { pidx, donation_id: donation.id, amount: donation.amount },
-        { mode }
+        {}
       )
 
       // Use PaymentService to confirm the donation
@@ -332,10 +329,9 @@ export async function POST(request: Request) {
  * TODO: Task 8.3 - Standardize response format to match donation flow
  */
 async function handleConferenceVerification(
-  supabase: any, // Using any to avoid complex Supabase type issues
+  supabase: any,
   reg: any,
-  pidx: string,
-  mode: 'live' | 'mock'
+  pidx: string
 ) {
   // Idempotency check
   if (reg.payment_status === "paid") {
@@ -348,46 +344,7 @@ async function handleConferenceVerification(
     return NextResponse.json({ ok: true, status: "review", message: "Payment under review" }, { status: 200 })
   }
 
-  // Mock mode — confirm immediately
-  if (mode === "mock") {
-    const { error: updateError } = await supabase.from("conference_registrations").update({
-      status: "confirmed",
-      payment_status: "paid",
-      payment_provider: "khalti",
-      payment_id: `khalti:${pidx}`,
-      provider_ref: pidx,
-      payment_paid_at: new Date().toISOString(),
-      confirmed_at: new Date().toISOString(),
-    }).eq("id", reg.id)
-
-    if (updateError) {
-      logPaymentEvent("Khalti verify (conference mock) - update failed", {
-        regId: reg.id,
-        pidx: maskSensitiveData(pidx),
-        error: updateError,
-      }, "error")
-      return NextResponse.json({ ok: false, error: "Failed to update registration" }, { status: 500 })
-    }
-
-    sendConferenceConfirmationEmail({
-      fullName: reg.full_name,
-      email: reg.email,
-      registrationId: reg.id,
-      attendanceMode: reg.attendance_mode || "",
-      role: reg.role || undefined,
-      workshops: reg.workshops || undefined,
-    })
-      .then((r) => {
-        if (r.success)
-          supabase.from("conference_registrations")
-            .update({ last_confirmation_email_sent_at: new Date().toISOString() })
-            .eq("id", reg.id).then(() => {})
-      })
-      .catch((e) => console.error("Non-fatal: Khalti conference confirmation email:", e))
-    return NextResponse.json({ ok: true, status: "paid", mock: true }, { status: 200 })
-  }
-
-  // Live mode — call Khalti lookup API
+  // Call Khalti lookup API
   logPaymentEvent("Khalti verify (conference) - live lookup", { regId: reg.id, pidx: maskSensitiveData(pidx) })
 
   const secretKey = process.env.KHALTI_SECRET_KEY

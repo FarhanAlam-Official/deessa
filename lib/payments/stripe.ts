@@ -1,9 +1,5 @@
 "use server"
 
-
-
-import type { PaymentMode } from "./config"
-
 import type Stripe from "stripe"
 
 import { getAppBaseUrl } from "@/lib/utils"
@@ -135,67 +131,9 @@ export async function verifyStripeSession(
 
   sessionId: string,
 
-  mode: PaymentMode,
-
 ): Promise<StripeSessionVerificationResult> {
 
   try {
-
-    if (mode === "mock") {
-
-      // In mock mode, validate the session ID format and return mock data
-
-      if (!sessionId.startsWith("cs_test_mock_")) {
-
-        return {
-
-          success: false,
-
-          error: "Invalid mock session ID format",
-
-          statusCode: 400,
-
-        }
-
-      }
-
-
-
-      // Extract donation ID from mock session ID
-
-      const donationId = sessionId.replace("cs_test_mock_", "")
-
-      
-
-      return {
-
-        success: true,
-
-        session: {
-
-          id: sessionId,
-
-          object: "checkout.session",
-
-          status: "complete",
-
-          payment_status: "paid",
-
-          client_reference_id: donationId,
-
-          metadata: {
-
-            donation_id: donationId,
-
-          },
-
-        } as unknown as Stripe.Checkout.Session,
-
-      }
-
-    }
-
-
 
     const stripe = await getStripeClient()
 
@@ -281,8 +219,6 @@ export async function startStripeCheckout(
 
   donation: StripeDonationContext,
 
-  mode: PaymentMode,
-
 ): Promise<StripeCheckoutResult> {
 
   try {
@@ -307,28 +243,6 @@ export async function startStripeCheckout(
       process.env.STRIPE_CANCEL_URL ||
 
       `${baseUrl}/donate/cancel`
-
-
-
-    if (mode === "mock") {
-
-      // Simulated, but structurally similar to a real Checkout session
-
-      const mockSessionId = `cs_test_mock_${donation.id}`
-
-      const mockUrl = `${successUrl}${successUrl.includes("?") ? "&" : "?"}session_id=${mockSessionId}&mock=1`
-
-
-
-      return {
-
-        redirectUrl: mockUrl,
-
-        sessionId: mockSessionId,
-
-      }
-
-    }
 
 
 

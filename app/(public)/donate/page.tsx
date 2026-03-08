@@ -4,7 +4,7 @@ import { Heart, Shield, CreditCard, Repeat, CheckCircle, HelpCircle, Search } fr
 import { Section } from "@/components/ui/section"
 import { Button } from "@/components/ui/button"
 import { DonationForm } from "@/components/donation/donation-form"
-import { getPaymentMode, getPaymentSettings, getSupportedProviders } from "@/lib/payments/config"
+import { getPaymentSettings, getSupportedProviders } from "@/lib/payments/config"
 
 export const metadata: Metadata = {
   title: "Donate - Dessa Foundation",
@@ -67,7 +67,6 @@ const faqs = [
 export default async function DonatePage() {
   const settings = await getPaymentSettings()
   const enabledProviders = getSupportedProviders(settings)
-  const mode = getPaymentMode()
 
   return (
     <>
@@ -116,10 +115,6 @@ export default async function DonatePage() {
                 <p className="text-sm text-foreground-muted mb-4">
                   All payments are processed through industry-leading secure payment gateways. Your financial information is never stored on our servers.
                 </p>
-                <div className="flex items-center gap-2 text-xs text-foreground-muted">
-                  <span className="font-semibold">Mode:</span>
-                  <span className="uppercase px-2 py-1 bg-muted rounded">{mode}</span>
-                </div>
               </div>
 
               <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-6">

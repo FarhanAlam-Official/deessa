@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
-import { getPaymentMode } from "@/lib/payments/config"
 import { verifyStripeSession } from "@/lib/payments/stripe"
 import { sendConferenceConfirmationEmail } from "@/lib/email/conference-mailer"
 import { getConferenceSettings } from "@/lib/actions/conference-settings"
@@ -38,7 +37,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "rid and sessionId are required" }, { status: 400 })
     }
 
-    const mode = getPaymentMode()
     const supabase = createServiceRoleClient()
 
     // ── 1. Fetch registration ─────────────────────────────────────────────────
@@ -64,7 +62,7 @@ export async function POST(request: Request) {
     }
 
     // ── 2. Verify with Stripe ─────────────────────────────────────────────────
-    const verification = await verifyStripeSession(sessionId, mode)
+    const verification = await verifyStripeSession(sessionId)
     if (!verification.success || !verification.session) {
       return NextResponse.json(
         { ok: false, error: verification.error || "Could not verify Stripe session" },

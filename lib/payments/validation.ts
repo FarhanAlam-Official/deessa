@@ -8,7 +8,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
-import { getPaymentMode, type PaymentProvider } from './config'
+import type { PaymentProvider } from './config'
 
 export interface ValidationResult {
   valid: boolean
@@ -44,9 +44,6 @@ export async function validatePaymentConfiguration(): Promise<ValidationResult> 
   const envErrors = validateEnvironmentVariables()
   errors.push(...envErrors)
 
-  // 2. Validate payment mode in production
-  const modeErrors = validatePaymentMode()
-  errors.push(...modeErrors)
 
   // 3. Validate database schema
   try {
@@ -125,58 +122,39 @@ function validateEnvironmentVariables(): ValidationError[] {
     }
   }
 
-  // Payment mode specific validation
-  const paymentMode = process.env.PAYMENT_MODE
-  if (!paymentMode) {
+  // Stripe
+  if (process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_WEBHOOK_SECRET) {
     errors.push({
-      code: 'MISSING_PAYMENT_MODE',
-      message: 'PAYMENT_MODE environment variable is not set. Must be "live" or "mock"',
-      severity: 'critical'
-    })
-  } else if (paymentMode !== 'live' && paymentMode !== 'mock') {
-    errors.push({
-      code: 'INVALID_PAYMENT_MODE',
-      message: `PAYMENT_MODE must be "live" or "mock", got "${paymentMode}"`,
-      severity: 'critical'
+      code: 'MISSING_STRIPE_WEBHOOK_SECRET',
+      message: 'STRIPE_WEBHOOK_SECRET is required when STRIPE_SECRET_KEY is set in live mode',
+      severity: 'error'
     })
   }
 
-  // Validate provider-specific variables in live mode
-  if (paymentMode === 'live') {
-    // Stripe
-    if (process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_WEBHOOK_SECRET) {
-      errors.push({
-        code: 'MISSING_STRIPE_WEBHOOK_SECRET',
-        message: 'STRIPE_WEBHOOK_SECRET is required when STRIPE_SECRET_KEY is set in live mode',
-        severity: 'error'
-      })
-    }
+  // Khalti
+  if (process.env.KHALTI_SECRET_KEY && !process.env.KHALTI_BASE_URL) {
+    errors.push({
+      code: 'MISSING_KHALTI_BASE_URL',
+      message: 'KHALTI_BASE_URL is required when KHALTI_SECRET_KEY is set',
+      severity: 'error'
+    })
+  }
 
-    // Khalti
-    if (process.env.KHALTI_SECRET_KEY && !process.env.KHALTI_BASE_URL) {
-      errors.push({
-        code: 'MISSING_KHALTI_BASE_URL',
-        message: 'KHALTI_BASE_URL is required when KHALTI_SECRET_KEY is set',
-        severity: 'error'
-      })
-    }
+  // eSewa
+  if (process.env.ESEWA_MERCHANT_ID && !process.env.ESEWA_SECRET_KEY) {
+    errors.push({
+      code: 'MISSING_ESEWA_SECRET_KEY',
+      message: 'ESEWA_SECRET_KEY is required when ESEWA_MERCHANT_ID is set in live mode',
+      severity: 'error'
+    })
+  }
 
-    // eSewa
-    if (process.env.ESEWA_MERCHANT_ID && !process.env.ESEWA_SECRET_KEY) {
-      errors.push({
-        code: 'MISSING_ESEWA_SECRET_KEY',
-        message: 'ESEWA_SECRET_KEY is required when ESEWA_MERCHANT_ID is set in live mode',
-        severity: 'error'
-      })
-    }
-
-    if (process.env.ESEWA_MERCHANT_ID && !process.env.ESEWA_BASE_URL) {
-      errors.push({
-        code: 'MISSING_ESEWA_BASE_URL',
-        message: 'ESEWA_BASE_URL is required when ESEWA_MERCHANT_ID is set',
-        severity: 'error'
-      })
-    }
+  if (process.env.ESEWA_MERCHANT_ID && !process.env.ESEWA_BASE_URL) {
+    errors.push({
+      code: 'MISSING_ESEWA_BASE_URL',
+      message: 'ESEWA_BASE_URL is required when ESEWA_MERCHANT_ID is set',
+      severity: 'error'
+    })
   }
 
   // Receipt security
@@ -192,29 +170,6 @@ function validateEnvironmentVariables(): ValidationError[] {
   if (!process.env.GOOGLE_EMAIL || !process.env.GOOGLE_APP_PASSWORD) {
     // This is a warning, not an error, as receipts can still be generated
     // The warning will be added in validateProviderCredentials
-  }
-
-  return errors
-}
-
-/**
- * Validate payment mode configuration in production
- * 
- * Requirements: 20.2
- */
-function validatePaymentMode(): ValidationError[] {
-  const errors: ValidationError[] = []
-
-  const nodeEnv = process.env.NODE_ENV
-  const paymentMode = process.env.PAYMENT_MODE
-
-  // Critical: Never allow mock mode in production
-  if (nodeEnv === 'production' && paymentMode !== 'live') {
-    errors.push({
-      code: 'MOCK_MODE_IN_PRODUCTION',
-      message: 'PAYMENT_MODE must be "live" in production environment. Mock mode is not allowed in production to prevent security vulnerabilities.',
-      severity: 'critical'
-    })
   }
 
   return errors
@@ -303,16 +258,6 @@ async function validateDatabaseSchema(): Promise<ValidationError[]> {
  */
 async function validateProviderCredentials(): Promise<ValidationWarning[]> {
   const warnings: ValidationWarning[] = []
-  const paymentMode = getPaymentMode()
-
-  // Skip provider validation in mock mode
-  if (paymentMode === 'mock') {
-    warnings.push({
-      code: 'MOCK_MODE_ACTIVE',
-      message: 'Payment system is running in MOCK mode. Provider credentials are not validated.'
-    })
-    return warnings
-  }
 
   // Validate Stripe
   if (process.env.STRIPE_SECRET_KEY) {
