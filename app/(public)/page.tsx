@@ -1,371 +1,125 @@
-import Image from "next/image"
-import Link from "next/link"
-import { Heart, ArrowRight, GraduationCap, Users, MapPin, Stethoscope, UserRoundCheck, Mail } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Section } from "@/components/ui/section"
-import { InitiativeCard } from "@/components/ui/initiative-card"
-import { ProjectCard } from "@/components/ui/project-card"
-import { getFeaturedProjects } from "@/lib/data/projects"
-import { HeroVideo } from "@/components/hero-video"
-import { getHomeHeroSettings, getInitiativeSettings } from "@/lib/data/site-settings"
 import { SecretKeyListener } from "@/components/secret-key-listener"
+import { HeroCarousel } from "@/components/hero-carousel"
+import type { HeroSlide } from "@/components/hero-carousel"
+import { HomeFAQs } from "@/components/home-faqs"
+import { HomeAccessibilityButton } from "@/components/home-accessibility-button"
+import { HomeTestimonialsSlider } from "@/components/home-testimonials-slider"
+import {
+  OurStorySection,
+  MissionVisionSection,
+  EducationQuoteSection,
+  ExploreWorkSection,
+  CorePillarsSection,
+  TimelineSection,
+  AdvocacySection,
+  JoinMovementSection,
+  PodcastSection,
+  PartnersSection,
+  WhereWeWorkSection,
+  ShopSection,
+  ContactSection,
+  GlobalEnhancements,
+} from "@/components/homepage-sections"
+
+/* ──────────────────  STATIC DATA  ────────────────── */
+
+const heroSlides: HeroSlide[] = [
+  {
+    image:
+      "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1920&q=85",
+    title: "Hope for Every Child in Nepal",
+    subtitle:
+      "A society where everyone is understood, celebrated, and empowered.",
+    cta: "Start Donating",
+    ctaHref: "/donate",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&w=1920&q=85",
+    title: "Empowering 10,000+ Lives — and Counting",
+    subtitle:
+      "From classrooms to clinics, your support reaches the communities that need it most.",
+    cta: "See Our Impact",
+    ctaHref: "/impact",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1920&q=85",
+    title: "Volunteer With Us — Stand With Nepal",
+    subtitle:
+      "Join our community of changemakers and see your effort transform villages firsthand.",
+    cta: "Get Involved",
+    ctaHref: "/get-involved",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=1920&q=85",
+    title: "Building Schools, Building Futures",
+    subtitle:
+      "50+ schools built and counting. Every classroom we build unlocks a generation of potential.",
+    cta: "Explore Programs",
+    ctaHref: "/programs",
+  },
+]
+
+/* ──────────────────  PAGE  ────────────────── */
 
 export default async function HomePage() {
-  const projects = await getFeaturedProjects(3)
-  const heroSettings = await getHomeHeroSettings()
-  const initiatives = await getInitiativeSettings()
-
   return (
     <SecretKeyListener>
-      {/* Hero Section */}
-      <section className="w-full pt-8 pb-16 lg:pt-16 lg:pb-24 px-4 md:px-8 bg-background">
-        <div className="max-w-350 mx-auto grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          {/* Left Content */}
-          <div className="lg:col-span-5 flex flex-col gap-6 relative z-10">
-            <div className="flex items-center gap-3">
-              <span className="h-px w-8 bg-primary" />
-              <span className="text-primary font-bold tracking-widest uppercase text-xs">{heroSettings.badge}</span>
-            </div>
-            <h1 className="text-5xl md:text-6xl xl:text-7xl font-black text-foreground leading-[1.05] tracking-tight text-balance">
-              {heroSettings.title.split(' ').map((word, i) => {
-                if (word.toLowerCase() === 'every') {
-                  return (
-                    <span key={i} className="relative inline-block text-primary">
-                      {word}
-                      <svg
-                        className="absolute w-full h-3 bottom-1 left-0 text-primary/20 -z-10"
-                        preserveAspectRatio="none"
-                        viewBox="0 0 100 10"
-                      >
-                        <path d="M0 5 Q 50 10 100 5" fill="none" stroke="currentColor" strokeWidth="12" />
-                      </svg>
-                    </span>
-                  )
-                }
-                return <span key={i}>{word} </span>
-              })}
-            </h1>
-            <p className="text-lg md:text-xl text-foreground-muted leading-relaxed font-medium max-w-lg text-pretty">
-              {heroSettings.subtitle}
-            </p>
-            <div className="flex flex-wrap gap-4 mt-4">
-              <Button asChild size="lg" className="rounded-full h-14 px-8 shadow-lg shadow-primary/25">
-                <Link href="/donate">
-                  Start Donating
-                  <Heart className="ml-2 size-5 fill-current" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="rounded-full h-14 px-8 bg-transparent">
-                <Link href="/about">How We Work</Link>
-              </Button>
-            </div>
-            <div className="flex items-center gap-4 mt-8 pt-8 border-t border-border">
-              <div className="flex -space-x-3">
-                <Image
-                  src={heroSettings.donorImage1}
-                  alt="Donor"
-                  width={40}
-                  height={40}
-                  className="rounded-full border-2 border-surface object-cover"
-                />
-                <Image
-                  src={heroSettings.donorImage2}
-                  alt="Donor"
-                  width={40}
-                  height={40}
-                  className="rounded-full border-2 border-surface object-cover"
-                />
-                <div className="w-10 h-10 rounded-full border-2 border-surface bg-muted flex items-center justify-center text-xs font-bold text-foreground-muted">
-                  +2k
-                </div>
-              </div>
-              <p className="text-sm font-semibold text-foreground-muted">
-                Join 2,000+ monthly donors making a difference.
-              </p>
-            </div>
-          </div>
+      {/* Accessibility Button - fixed on right side */}
+      <HomeAccessibilityButton />
 
-          {/* Right Content - Image Grid */}
-          <div className="lg:col-span-7 relative">
-            <div className="absolute -top-20 -right-20 w-72 h-72 bg-yellow-100 rounded-full blur-3xl opacity-60 mix-blend-multiply" />
-            <div className="absolute bottom-0 left-10 w-72 h-72 bg-red-100 rounded-full blur-3xl opacity-60 mix-blend-multiply" />
-            <div className="grid grid-cols-12 gap-4 h-full relative z-10">
-              <div className="col-span-8 space-y-4">
-                <div className="relative group rounded-4xl overflow-hidden shadow-2xl h-100 lg:h-125">
-                  <Image
-                    src={heroSettings.mainImage}
-                    alt="Happy Nepali children"
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-md p-4 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
-                    <p className="text-xs font-bold uppercase tracking-wider text-primary mb-1">Impact Story</p>
-                    <p className="text-sm font-semibold text-foreground">Providing books to 500+ students in Gorkha.</p>
-                  </div>
-                </div>
-              </div>
-              <div className="col-span-4 space-y-4 pt-12">
-                <div className="relative rounded-4xl overflow-hidden shadow-xl aspect-3/4 group">
-                  {/* Video replacing image for testing - comment out video and uncomment Image below to revert */}
-                  <HeroVideo />
-                  {/* Original Image - uncomment below and comment out video above to revert
-                  <Image
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIbSVU06T05e97h5HGkLrHkYStnbYQkwzmRg7ALv-ZL5hNuclSRAIiEtnFyuI9cRH-YMtR-pZure02gYDVPziahnspKrlKVKaXMbZwUUn87yG0Efk7pm2WexkU4XJGmqjWZamzPnj45Hun2vsvOwqa0lUsvGBO1uGIZ796D8JQqWkcR3tIdmjcm6xeqh8ifKgxRXTvLl4uX2mp4jPYf579vKODNowVZQ9m6SJr6u6huslju1OStRG3SpoUa0QzyBJa-hz5q4oOb7M"
-                    alt="Women weaving"
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  */}
-                  {/* <span className="absolute bottom-4 left-4 text-white font-bold text-sm">Skills</span> */}
-                </div>
-                <div className="relative rounded-4xl overflow-hidden shadow-xl aspect-square group">
-                  <Image
-                    src={heroSettings.classroomImage}
-                    alt="Classroom"
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-primary/20 group-hover:bg-transparent transition-colors duration-300" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── 1. HERO BANNER CAROUSEL ── */}
+      <HeroCarousel slides={heroSlides} interval={6000} />
 
-      {/* Stats Section */}
-      <section className="bg-muted py-16 border-y border-border">
-        <div className="max-w-350 mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-surface p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-[4rem] -mr-4 -mt-4 transition-transform group-hover:scale-110" />
-              <GraduationCap className="size-10 text-primary mb-4 relative z-10" />
-              <div className="flex flex-col relative z-10">
-                <span className="text-4xl font-black text-foreground tracking-tight">50+</span>
-                <span className="text-sm font-bold text-foreground-muted uppercase tracking-wide mt-1">
-                  Schools Built
-                </span>
-              </div>
-            </div>
-            <div className="bg-surface p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-[4rem] -mr-4 -mt-4 transition-transform group-hover:scale-110" />
-              <Users className="size-10 text-blue-500 mb-4 relative z-10" />
-              <div className="flex flex-col relative z-10">
-                <span className="text-4xl font-black text-foreground tracking-tight">10k+</span>
-                <span className="text-sm font-bold text-foreground-muted uppercase tracking-wide mt-1">
-                  Lives Impacted
-                </span>
-              </div>
-            </div>
-            <div className="bg-surface p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-green-50 rounded-bl-[4rem] -mr-4 -mt-4 transition-transform group-hover:scale-110" />
-              <MapPin className="size-10 text-green-500 mb-4 relative z-10" />
-              <div className="flex flex-col relative z-10">
-                <span className="text-4xl font-black text-foreground tracking-tight">120</span>
-                <span className="text-sm font-bold text-foreground-muted uppercase tracking-wide mt-1">
-                  Villages Reached
-                </span>
-              </div>
-            </div>
-            <div className="bg-primary p-8 rounded-3xl shadow-lg flex flex-col justify-center items-start text-white relative overflow-hidden">
-              <svg
-                className="absolute -right-8 -bottom-8 w-40 h-40 text-white/10"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-              </svg>
-              <span className="font-bold text-xl mb-2">Be part of the stats</span>
-              <p className="text-white/80 text-sm mb-4 leading-relaxed">
-                Your contribution adds to these numbers every single day.
-              </p>
-              <Button asChild variant="secondary" size="sm" className="rounded-full z-10">
-                <Link href="/get-involved">Get Involved</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── 2. OUR STORY ── */}
+      <OurStorySection />
 
-      {/* Key Initiatives Section */}
-      <Section>
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
-          <div className="max-w-2xl">
-            <h2 className="text-3xl md:text-5xl font-black text-foreground mb-4 tracking-tight">Our Key Initiatives</h2>
-            <p className="text-foreground-muted text-lg">
-              We focus on holistic community development, creating sustainable ecosystems for growth.
-            </p>
-          </div>
-          <Link
-            href="/programs"
-            className="group flex items-center gap-2 font-bold text-foreground hover:text-primary transition-colors"
-          >
-            View All Programs
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <InitiativeCard
-            title={initiatives.education.title}
-            description={initiatives.education.description}
-            image={initiatives.education.image}
-            icon={GraduationCap}
-            href="/programs?category=education"
-          />
-          <InitiativeCard
-            title={initiatives.empowerment.title}
-            description={initiatives.empowerment.description}
-            image={initiatives.empowerment.image}
-            icon={UserRoundCheck}
-            href="/programs?category=empowerment"
-          />
-          <InitiativeCard
-            title={initiatives.health.title}
-            description={initiatives.health.description}
-            image={initiatives.health.image}
-            icon={Stethoscope}
-            href="/programs?category=health"
-          />
-        </div>
-      </Section>
+      {/* ── 3. MISSION, VISION, OBJECTIVES ── */}
+      <MissionVisionSection />
 
-      {/* CTA Section */}
-      <section className="py-24 bg-foreground text-white relative overflow-hidden">
-        <div
-          className="absolute top-0 right-0 w-1/2 h-full opacity-10"
-          style={{
-            backgroundImage: "radial-gradient(circle, #ea2a33 1px, transparent 1px)",
-            backgroundSize: "30px 30px",
-          }}
-        />
-        <div className="max-w-350 mx-auto px-4 md:px-8 relative z-10">
-          <div className="flex flex-col lg:flex-row gap-16 items-center">
-            <div className="flex-1">
-              <span className="text-primary font-bold tracking-widest uppercase text-sm mb-4 block">Take Action</span>
-              <h2 className="text-4xl md:text-6xl font-black mb-6 leading-tight text-balance">
-                Your Support Transforms Lives
-              </h2>
-              <p className="text-gray-400 text-lg md:text-xl mb-10 max-w-xl leading-relaxed">
-                Every donation goes directly to communities in need. Together, we can create lasting change in Nepal.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Button asChild size="lg" className="rounded-full h-14 px-8">
-                  <Link href="/donate">
-                    Donate Now
-                    <Heart className="ml-2 size-5 fill-current" />
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="lg"
-                  className="rounded-full h-14 px-8 bg-transparent border-gray-600 text-white hover:bg-white hover:text-foreground"
-                >
-                  <Link href="/get-involved">Become a Volunteer</Link>
-                </Button>
-              </div>
-            </div>
-            <div className="flex-1 grid grid-cols-3 gap-4">
-              {[
-                { amount: "$25", impact: "School supplies for 5 kids" },
-                { amount: "$50", impact: "Medical checkup for a village" },
-                { amount: "$100", impact: "Teacher training workshop" },
-              ].map((item) => (
-                <div
-                  key={item.amount}
-                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center hover:bg-white/20 transition-colors cursor-pointer"
-                >
-                  <div className="text-3xl font-black text-primary mb-2">{item.amount}</div>
-                  <p className="text-sm text-gray-300">{item.impact}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── 3b. EDUCATION QUOTE HIGHLIGHT ── */}
+      <EducationQuoteSection />
 
-      {/* Current Projects Section - Updated to use database projects */}
-      <Section className="bg-muted">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-          <div>
-            <span className="text-primary font-bold uppercase tracking-wider text-sm mb-2 block">Our Initiatives</span>
-            <h2 className="text-3xl md:text-4xl font-black text-foreground">Current Projects</h2>
-          </div>
-          <Button asChild variant="outline" className="rounded-full bg-transparent">
-            <Link href="/programs">View All Projects</Link>
-          </Button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projects.length > 0 ? (
-            projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                title={project.title}
-                description={project.description}
-                image={project.image}
-                icon={
-                  project.category === "education"
-                    ? GraduationCap
-                    : project.category === "health"
-                      ? Stethoscope
-                      : project.category === "empowerment"
-                        ? UserRoundCheck
-                        : MapPin
-                }
-                iconColor={
-                  project.category === "education"
-                    ? "text-primary"
-                    : project.category === "health"
-                      ? "text-green-600"
-                      : project.category === "empowerment"
-                        ? "text-purple-600"
-                        : "text-orange-600"
-                }
-                location={project.location}
-                category={project.category.charAt(0).toUpperCase() + project.category.slice(1)}
-                status={project.status}
-                raised={project.raised}
-                goal={project.goal}
-                metrics={project.metrics}
-                href={`/programs/${project.slug}`}
-              />
-            ))
-          ) : (
-            <div className="col-span-3 text-center py-12 text-foreground-muted">
-              <p>No projects available yet. Check back soon!</p>
-            </div>
-          )}
-        </div>
-      </Section>
+      {/* ── 4. EXPLORE OUR WORK ── */}
+      <ExploreWorkSection />
 
-      {/* Newsletter Section */}
-      <section className="py-24 bg-primary text-white relative overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')",
-          }}
-        />
-        <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
-          <Mail className="size-16 mb-6 text-white/80 mx-auto" />
-          <h2 className="text-3xl md:text-5xl font-black mb-6 text-balance">Join Our Community</h2>
-          <p className="text-lg md:text-xl text-primary-foreground/90 mb-10 max-w-2xl mx-auto">
-            Subscribe to our newsletter to receive updates on our projects, impact stories, and opportunities to get
-            involved.
-          </p>
-          <form className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email address"
-              required
-              className="grow h-14 px-6 rounded-full text-foreground border-0 focus:ring-4 focus:ring-white/30"
-            />
-            <Button type="submit" variant="secondary" size="lg" className="h-14 px-8 rounded-full">
-              Subscribe Now
-            </Button>
-          </form>
-        </div>
-      </section>
+      {/* ── 5. CORE PILLARS ── */}
+      <CorePillarsSection />
+
+      {/* ── 6. TIMELINE ── */}
+      <TimelineSection />
+
+      {/* ── 6b. ADVOCACY & RECOGNITION ── */}
+      <AdvocacySection />
+
+      {/* ── 7. TESTIMONIALS SLIDER ── */}
+      <HomeTestimonialsSlider />
+
+      {/* ── 8. JOIN THE MOVEMENT ── */}
+      <JoinMovementSection />
+
+      {/* ── 9. FEATURED PODCAST ── */}
+      <PodcastSection />
+
+      {/* ── 10. PARTNERS & SPONSORS ── */}
+      <PartnersSection />
+
+      {/* ── 11. WHERE WE WORK ── */}
+      <WhereWeWorkSection />
+
+      {/* ── 12. FAQs ── */}
+      <HomeFAQs />
+
+      {/* ── 13. SHOP OUR STORE ── */}
+      <ShopSection />
+
+      {/* ── 14. CONTACT / VISIT OFFICE ── */}
+      <ContactSection />
+
+      {/* ── GLOBAL ENHANCEMENTS ── */}
+      <GlobalEnhancements />
     </SecretKeyListener>
   )
 }
