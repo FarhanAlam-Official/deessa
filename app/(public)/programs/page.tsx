@@ -74,7 +74,7 @@ export default async function ProgramsPage({
               Making a Difference
             </span>
             <h1 className="text-white text-4xl md:text-5xl font-black leading-tight tracking-tight mb-4">
-              Our Programs & Initiatives
+              Our Programs <span className="font-sans font-light text-primary/80 align-baseline text-3xl md:text-4xl mx-1">&</span> Initiatives
             </h1>
             <p className="text-white/90 text-lg font-medium max-w-2xl leading-relaxed">
               Sustainable solutions for education, healthcare, and community development across Nepal.
@@ -90,11 +90,10 @@ export default async function ProgramsPage({
             <Link
               key={cat.id}
               href={cat.id === "all" ? "/programs" : `/programs?category=${cat.id}`}
-              className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
-                activeCategory === cat.id
-                  ? "bg-primary text-white shadow-lg shadow-primary/25"
-                  : "bg-background text-foreground-muted hover:bg-muted border border-border"
-              }`}
+              className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${activeCategory === cat.id
+                ? "bg-primary text-white shadow-lg shadow-primary/25"
+                : "bg-background text-foreground-muted hover:bg-muted border border-border"
+                }`}
             >
               {cat.icon && <cat.icon className="inline-block size-4 mr-2" />}
               {cat.label}

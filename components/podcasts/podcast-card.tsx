@@ -152,19 +152,20 @@ export function PodcastCard({
             Watch Episode
           </div>
 
-          <a
-            href={`https://www.youtube.com/watch?v=${podcast.youtubeId}`}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              window.open(`https://www.youtube.com/watch?v=${podcast.youtubeId}`, '_blank', 'noopener,noreferrer')
+            }}
             className={cn(
               "flex items-center gap-1.5 text-text-muted transition-all duration-300 hover:text-red-600 hover:scale-105",
               isPrimary ? "text-sm" : "text-xs"
             )}
-            onClick={(e) => e.stopPropagation()}
           >
             <Youtube className="size-4" />
             <span className="font-medium">View on YouTube</span>
-          </a>
+          </button>
         </div>
       </div>
     </Link>

@@ -46,20 +46,18 @@ export default function PodcastHighlightCard({ shortUrl, index }: PodcastHighlig
     }
   }, [activeInlineId, shortId]);
 
-  // Fetch video metadata on mount
+  // Fetch video metadata on mount via internal proxy (avoids browser CORS errors)
   useEffect(() => {
     if (!shortId) return;
     const fetchMetadata = async () => {
       try {
-        const response = await fetch(
-          `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${shortId}&format=json`
-        );
+        const response = await fetch(`/api/youtube/oembed?id=${encodeURIComponent(shortId)}`);
         if (response.ok) {
           const data = await response.json();
           setMetadata({ title: data.title });
         }
-      } catch (error) {
-        console.log('Could not fetch video metadata');
+      } catch {
+        // metadata is optional — silently skip
       }
     };
     fetchMetadata();

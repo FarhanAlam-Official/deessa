@@ -64,14 +64,14 @@ export interface BrandingSettings {
 export async function getHomeHeroSettings(): Promise<HomeHeroSettings> {
   const defaults: HomeHeroSettings = {
     mainImage:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuD7xPA5ZcI6zKmXhschYT9kJF4AqJ9KYyAa5qyutl1ZWv5adO6OvYLgL0wZmsSvQmp5iq8EBildkvodJmW6nQOiy52WDTtHveVZgJcxx0_cw_pXOEkv2E8ngXc8S6exY0flcsgm65QruhCVLREAaOyUXoPaJssWLYw4Gq3TRXCA6np2SOBQgIml3lxCiJQAcTos1hfbuZ1VmD0z_I8NvTTPYtKaIPbfibEi2YEU4fAP01FwBiwW62SkaoM5YiSpdS6RRW8rx6YqKo8",
+      "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1920&q=85",
     videoImage: "/Deesa-Intro .mp4",
     classroomImage:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBmzOd9EzUlZkbuXEdlrotwYaDKUdIoq7etYPho3JMYsWZZcml-2Ntzj9cDdMOcO_GbE9La2Jq5GKGewwQ2Ousghkb6a8TYJ99fkfg2mqMwY_gBODE6RIBn5hn82xionJLCGc111edDh08deMwKzbRmyp5QebA1DpEedy6mRKGROhkEeBfSL2LrG-mHp1IR2YMBRVEUR9NbBpCfJlC8WsU9U6Cu6zeVR1ACSJrfaWZTJ_ANEJYlR7oAG3lT40lHsF6JWKCLeO4zJEI",
+      "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1200&q=85",
     donorImage1:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuD7QgNEezbRHOt2MsvhmSehLCgOGp-3Um_oszh8418RlOSNyKzKOAhE5NsQkDGMiBytNLDU2yZh9PPHBg-AYg6BmnCa9iG8LQBC0_lkUqCrL4pJFU_So2-85IGkW34ZrQ6498mPet2J-ZYQLaHBN8o5wxwRN8c0jN5NXm81cUsCLvJIGZ-VL3p_FnKi-Nyw5LH9A9KrRzWbDzOsq255qtzgFx6N2X4ExaQ3QQWfCMH4LB-YcibEcm4plH8CXVi_GIywspD8opz3dl4",
+      "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=800&q=85",
     donorImage2:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAQzzIOZUDnI5i7x-Rnn2k4ELK3S1FCIb1F3EuSFxtUqWmskQ7-5WPPojjO-T1yebP4Zhgg-uFd3t4Hk6CSc5nT8xIoOsyxdpIQ5Zdyxboo1c4wL5UnBVoj1rY4vRO86yiTlhaheV6-PfvhGGWJWJVIHXp1jIfy84HkXDw5ZCKpkYujNgDoTCeJwKQNjZ9iLg_m-F0RkpFyF8pqHdtB7ydd2rNkidpGit3y_RPVuumO4GIzMhRneQ5STuJRSxMxhAG6TYvZBSVKoz4",
+      "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&w=800&q=85",
     title: "Hope for Every Child.",
     subtitle:
       "We are rewriting the future of rural Nepal through education, healthcare, and community empowerment.",
@@ -114,21 +114,21 @@ export async function getInitiativeSettings(): Promise<InitiativeSettings> {
       description:
         "Providing quality education, teacher training, and infrastructure to children in remote villages to ensure a brighter future.",
       image:
-        "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=1200&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=85",
     },
     empowerment: {
       title: "Women's Empowerment",
       description:
         "Creating sustainable livelihoods through vocational training, micro-finance support, and market access for rural women.",
       image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBIbSVU06T05e97h5HGkLrHkYStnbYQkwzmRg7ALv-ZL5hNuclSRAIiEtnFyuI9cRH-YMtR-pZure02gYDVPziahnspKrlKVKaXMbZwUUn87yG0Efk7pm2WexkU4XJGmqjWZamzPnj45Hun2vsvOwqa0lUsvGBO1uGIZ796D8JQqWkcR3tIdmjcm6xeqh8ifKgxRXTvLl4uX2mp4jPYf579vKODNowVZQ9m6SJr6u6huslju1OStRG3SpoUa0QzyBJa-hz5q4oOb7M",
+        "https://images.unsplash.com/photo-1607748851687-ba9a10438559?auto=format&fit=crop&w=1200&q=85",
     },
     health: {
       title: "Healthcare Access",
       description:
         "Delivering essential medical supplies, hygiene kits, and health camps to underserved communities lacking basic care.",
       image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAxrqVdNPir00ETd2JGAA3WauwEortBglt0nkjxKl-h1paBM8Lyf8gz6ZR4jzKuqxDhy5hTLRwtxzQGVqQoNW0iDyruM6dQ0ZJzvKo3Ul_O7O6CGv2qaWbeX2RzxfwhD248WORkY1xyktY_CVlEGlyrGv9UOwjrkFMThkGr5zsMsLSNZ4wH837KT5JEXn_tHHCHeZebXhKoJ-IMW4tdrCoYqZKnL_dpOwtXj87UDokTrTFsT_PjSxzMkB0rLOgesdoaMY37jp_YqQg",
+        "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1200&q=85",
     },
   }
 
@@ -166,7 +166,7 @@ export async function getPageHeroSettings(page: string): Promise<HeroSettings> {
   const defaultHeros: Record<string, HeroSettings> = {
     about: {
       image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuC5xzHfv2hii0hZm5knPtqnBhBXuF43kiNX-3L6bPoaNWoNJhuaBEp0UnvkJbxD_8jxmQHLjE0b1j-TMOJq_VOIrW9983EZgYM46P8MAwn7PzfzaLz2HsWKlKvt5lKXcXf_b6vms2V8NcnXaz9-_X8SNQsr6s7_GyimSfmkpcQ4Oh5YRcHnl1A7tisgSR5H6pZkE2H_RJ7Ed4vN8OmKIZ2WhCp5LlGraRVM17Ryo2wWWdRDFec31aYUj8Kv479a7Hlv2NIwScl7Eek",
+        "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&w=1920&q=85",
       title: "Our Story, Your Impact.",
       subtitle:
         "We are dedicated to bridging the gap between potential and opportunity in Nepal's most remote communities.",
@@ -175,7 +175,7 @@ export async function getPageHeroSettings(page: string): Promise<HeroSettings> {
     },
     contact: {
       image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuC5xzHfv2hii0hZm5knPtqnBhBXuF43kiNX-3L6bPoaNWoNJhuaBEp0UnvkJbxD_8jxmQHLjE0b1j-TMOJq_VOIrW9983EZgYM46P8MAwn7PzfzaLz2HsWKlKvt5lKXcXf_b6vms2V8NcnXaz9-_X8SNQsr6s7_GyimSfmkpcQ4Oh5YRcHnl1A7tisgSR5H6pZkE2H_RJ7Ed4vN8OmKIZ2WhCp5LlGraRVM17Ryo2wWWdRDFec31aYUj8Kv479a7Hlv2NIwScl7Eek",
+        "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1920&q=85",
       title: "Get in Touch",
       subtitle:
         "We'd love to hear from you. Reach out with questions, partnership opportunities, or just to say hello.",
@@ -184,7 +184,7 @@ export async function getPageHeroSettings(page: string): Promise<HeroSettings> {
     },
     impact: {
       image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuD7xPA5ZcI6zKmXhschYT9kJF4AqJ9KYyAa5qyutl1ZWv5adO6OvYLgL0wZmsSvQmp5iq8EBildkvodJmW6nQOiy52WDTtHveVZgJcxx0_cw_pXOEkv2E8ngXc8S6exY0flcsgm65QruhCVLREAaOyUXoPaJssWLYw4Gq3TRXCA6np2SOBQgIml3lxCiJQAcTos1hfbuZ1VmD0z_I8NvTTPYtKaIPbfibEi2YEU4fAP01FwBiwW62SkaoM5YiSpdS6RRW8rx6YqKo8",
+        "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1920&q=85",
       title: "Measuring What Matters",
       subtitle: "Every number tells a story. See the real impact of your support on communities across Nepal.",
       badge: "Transparency & Results",
@@ -192,7 +192,7 @@ export async function getPageHeroSettings(page: string): Promise<HeroSettings> {
     },
     press: {
       image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuC5xzHfv2hii0hZm5knPtqnBhBXuF43kiNX-3L6bPoaNWoNJhuaBEp0UnvkJbxD_8jxmQHLjE0b1j-TMOJq_VOIrW9983EZgYM46P8MAwn7PzfzaLz2HsWKlKvt5lKXcXf_b6vms2V8NcnXaz9-_X8SNQsr6s7_GyimSfmkpcQ4Oh5YRcHnl1A7tisgSR5H6pZkE2H_RJ7Ed4vN8OmKIZ2WhCp5LlGraRVM17Ryo2wWWdRDFec31aYUj8Kv479a7Hlv2NIwScl7Eek",
+        "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1920&q=85",
       title: "Press & Media Kit",
       subtitle:
         "Official brand resources, media materials, and press information for journalists, partners, and media professionals.",
@@ -201,7 +201,7 @@ export async function getPageHeroSettings(page: string): Promise<HeroSettings> {
     },
     programs: {
       image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBmzOd9EzUlZkbuXEdlrotwYaDKUdIoq7etYPho3JMYsWZZcml-2Ntzj9cDdMOcO_GbE9La2Jq5GKGewwQ2Ousghkb6a8TYJ99fkfg2mqMwY_gBODE6RIBn5hn82xionJLCGc111edDh08deMwKzbRmyp5QebA1DpEedy6mRKGROhkEeBfSL2LrG-mHp1IR2YMBRVEUR9NbBpCfJlC8WsU9U6Cu6zeVR1ACSJrfaWZTJ_ANEJYlR7oAG3lT40lHsF6JWKCLeO4zJEI",
+        "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1920&q=85",
       title: "Our Programs",
       subtitle:
         "Empowering communities through education, healthcare, and sustainable development initiatives across Nepal.",
@@ -210,7 +210,7 @@ export async function getPageHeroSettings(page: string): Promise<HeroSettings> {
     },
     stories: {
       image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBTfMn_PUEG4a1KDj3AFMHXBF1v_IJPW_L720huR7TChJeC5GpxHiQIqSHbrGSrcp7nbhNBqmHrOtfAwfOePW7deVTdhaqpW9p3RuHgNWAaKtVKLkIVbiWRgojNvsMTnh7gQw0ytUKGCw2fZw_ZCNSf3DABKQ7s4kl0MYDHj3Y3_zDUqnE6KaHOJPfh_OZjDEN7-qS3tWy0Q_pbCovZMi9z9WOr4xOlN35tu7iETQHqyap9HmtH3siRVhxHBPN6UM6hAxeHRSMP37E",
+        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1920&q=85",
       title: "Stories of Change",
       subtitle:
         "Real stories from the communities we serve, showcasing the transformative power of education and empowerment.",
@@ -219,7 +219,7 @@ export async function getPageHeroSettings(page: string): Promise<HeroSettings> {
     },
     events: {
       image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBoKtoVTzruG6gKPDBqOFn6sXswEYs8YYbbG-v2EGGbhON2BpX02eVTPd9aoriL-9H1k8EWyvMyMiwPmvaRMSjdeJUI22Exlld48BQpEVZF0JAPxSpPZAVgHGo0rs7nkFc9Ff6XNHjcFZ5OjqBG7dowxzlznYZOyA9Hmu0FFXggZzZJxb_rUB4DCTIE2YUpBthpEBpFDueXipv0tdyxcjGMwiC3QxRcbb57ENMyuIclrSbreZw2mTW7GZCg58sODpQxFtTkacxKPCo",
+        "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=1920&q=85",
       title: "Upcoming Events",
       subtitle: "Join us at our fundraising events, community gatherings, and volunteer opportunities.",
       badge: "Events & Activities",
@@ -227,7 +227,7 @@ export async function getPageHeroSettings(page: string): Promise<HeroSettings> {
     },
     get_involved: {
       image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBIbSVU06T05e97h5HGkLrHkYStnbYQkwzmRg7ALv-ZL5hNuclSRAIiEtnFyuI9cRH-YMtR-pZure02gYDVPziahnspKrlKVKaXMbZwUUn87yG0Efk7pm2WexkU4XJGmqjWZamzPnj45Hun2vsvOwqa0lUsvGBO1uGIZ796D8JQqWkcR3tIdmjcm6xeqh8ifKgxRXTvLl4uX2mp4jPYf579vKODNowVZQ9m6SJr6u6huslju1OStRG3SpoUa0QzyBJa-hz5q4oOb7M",
+        "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1920&q=85",
       title: "Join the Movement",
       subtitle: "Be part of the change. Volunteer with us and make a lasting impact on communities in need.",
       badge: "Get Involved",
@@ -235,7 +235,7 @@ export async function getPageHeroSettings(page: string): Promise<HeroSettings> {
     },
     donate: {
       image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuD7QgNEezbRHOt2MsvhmSehLCgOGp-3Um_oszh8418RlOSNyKzKOAhE5NsQkDGMiBytNLDU2yZh9PPHBg-AYg6BmnCa9iG8LQBC0_lkUqCrL4pJFU_So2-85IGkW34ZrQ6498mPet2J-ZYQLaHBN8o5wxwRN8c0jN5NXm81cUsCLvJIGZ-VL3p_FnKi-Nyw5LH9A9KrRzWbDzOsq255qtzgFx6N2X4ExaQ3QQWfCMH4LB-YcibEcm4plH8CXVi_GIywspD8opz3dl4",
+        "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&w=1920&q=85",
       title: "Make a Difference Today",
       subtitle: "Your donation directly supports education, healthcare, and community development in rural Nepal.",
       badge: "Donate Now",
@@ -271,9 +271,9 @@ export async function getPressGallerySettings(): Promise<PressGallerySettings> {
       return {
         images: [
           {
-            url: "https://lh3.googleusercontent.com/aida-public/AB6AXuD7xPA5ZcI6zKmXhschYT9kJF4AqJ9KYyAa5qyutl1ZWv5adO6OvYLgL0wZmsSvQmp5iq8EBildkvodJmW6nQOiy52WDTtHveVZgJcxx0_cw_pXOEkv2E8ngXc8S6exY0flcsgm65QruhCVLREAaOyUXoPaJssWLYw4Gq3TRXCA6np2SOBQgIml3lxCiJQAcTos1hfbuZ1VmD0z_I8NvTTPYtKaIPbfibEi2YEU4fAP01FwBiwW62SkaoM5YiSpdS6RRW8rx6YqKo8",
+            url: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=85",
             caption: "Children at school",
-            credit: "deessa Foundation",
+            credit: "Unsplash",
           },
         ],
       }

@@ -19,7 +19,7 @@ export default async function StoriesPage() {
     getFeaturedStory(),
     getLatestPodcasts(6),
   ])
-  
+
   const remainingStories = allStories.filter((s) => s.id !== featuredStory?.id)
 
   return (
@@ -38,7 +38,7 @@ export default async function StoriesPage() {
               Stories & Podcast
             </span>
             <h1 className="text-white text-4xl md:text-5xl font-black leading-tight tracking-tight mb-4">
-              Stories of Hope & Impact
+              Stories of Hope <span className="font-sans font-light text-primary/80 align-baseline text-3xl md:text-4xl mx-1">&</span> Impact
             </h1>
             <p className="text-white/90 text-lg font-medium max-w-2xl leading-relaxed">
               Discover real stories behind our work and explore our Living With Autism podcast series.
@@ -57,7 +57,7 @@ export default async function StoriesPage() {
             {/* Background decoration */}
             <div className="absolute -top-4 -left-4 w-24 h-24 bg-primary/5 rounded-full blur-3xl" />
             <div className="absolute -bottom-2 -right-6 w-32 h-32 bg-primary/3 rounded-full blur-3xl" />
-            
+
             <div className="relative">
               <div className="flex items-center gap-3 mb-4">
                 <div className="size-12 flex items-center justify-center bg-primary/10 rounded-2xl text-primary">
@@ -70,17 +70,17 @@ export default async function StoriesPage() {
                   <div className="w-12 h-0.5 bg-primary/30 mt-1" />
                 </div>
               </div>
-              
+
               <h2 className="text-3xl md:text-4xl font-black text-foreground leading-tight mb-4">
                 Latest Stories
               </h2>
-              
+
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <p className="text-foreground-muted text-lg leading-relaxed max-w-2xl">
                   Read inspiring narratives from individuals and communities we serve,
                   showcasing real impact and transformation.
                 </p>
-                
+
                 <div className="flex items-center gap-6 text-sm text-foreground-muted">
                   <div className="flex items-center gap-2">
                     <div className="size-2 bg-green-500 rounded-full" />

@@ -26,7 +26,8 @@ export function getYouTubeThumbnail(videoId: string, quality: 'default' | 'hq' |
 }
 
 /**
- * Fetches YouTube video metadata using oEmbed API
+ * Fetches YouTube video metadata via internal proxy to avoid CORS errors.
+ * Always call from client components — the proxy handles the external request server-side.
  */
 export async function fetchYouTubeMetadata(videoId: string): Promise<{
   title: string;
@@ -35,9 +36,7 @@ export async function fetchYouTubeMetadata(videoId: string): Promise<{
   authorUrl: string;
 } | null> {
   try {
-    const response = await fetch(
-      `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`
-    );
+    const response = await fetch(`/api/youtube/oembed?id=${encodeURIComponent(videoId)}`);
 
     if (!response.ok) {
       return null;
@@ -51,8 +50,7 @@ export async function fetchYouTubeMetadata(videoId: string): Promise<{
       authorName: data.author_name,
       authorUrl: data.author_url,
     };
-  } catch (error) {
-    console.error('Failed to fetch YouTube metadata:', error);
+  } catch {
     return null;
   }
 }

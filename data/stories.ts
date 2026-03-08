@@ -16,7 +16,7 @@ export const stories: Story[] = [
     slug: "sitas-journey",
     excerpt: "How a small scholarship changed the trajectory of an entire village in the Gandaki province.",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBTfMn_PUEG4a1KDj3AFMHXBF1v_IJPW_L720huR7TChJeC5GpxHiQIqSHbrGSrcp7nbhNBqmHrOtfAwfOePW7deVTdhaqpW9p3RuHgNWAaKtVKLkIVbiWRgojNvsMTnh7gQw0ytUKGCw2fZw_ZCNSf3DABKQ7s4kl0MYDHj3Y3_zDUqnE6KaHOJPfh_OZjDEN7-qS3tWy0Q_pbCovZMi9z9WOr4xOlN35tu7iETQHqyap9HmtH3siRVhxHBPN6UM6hAxeHRSMP37E",
+      "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=85",
     category: "Education",
     date: "Oct 12, 2023",
     readTime: "5 min read",
@@ -27,7 +27,7 @@ export const stories: Story[] = [
     slug: "building-resilience",
     excerpt: "Restoring homes and hope in affected rural areas through community-led building initiatives.",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAWOxNmDccyhJpQd9LUQlRriS_EtEXOT7UKyHlJsAsDXbRp0J1-uraEX4Su-5YSVYwKbb9N6LB_wnAkL5oO5kcblIxbBZNU6toDkLafX-EuRVV3OfdxkifvrfpLKoN8bS9_-ZCftP7kXVoNpA8_7XVE6jqstjyPO7tCXJtBmiI3lmG9jUXhQmni_wwYsWiCqlcvwd-HVXzxHkVVZQj7YoLu9cnA64bB9ulMP1YEO7mRH_SVd54Y5iwSVrsmrp6tjV0WKOmsJ2cBHxc",
+      "https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=800&q=85",
     category: "Relief",
     date: "Sep 28, 2023",
     readTime: "4 min read",
@@ -38,7 +38,7 @@ export const stories: Story[] = [
     slug: "health-camp-gandaki",
     excerpt: "Providing essential medical care, eye checkups, and medicine to remote communities.",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCX4oF6JVWW9dBXQfsbHL89ppsa_7oBLjeRmXXOXw-ks5SlvPi1XjtVsavZbm91LhiboktLA_e98BPftKBsEVZz6wK5gtRCzg7H44qcfjTsF66C1vwvo5JT6fCuLV2Xez-sqaXwN-Sqj97A8gD8Lyw01_qFYS3IiOM4qV4EB1eU2S9HDduPDoJPvxhY0SD6vGLu-8lqV_f1DAPtLTi29dNAYBkUOctB6MKxRl6OJ6CpW9Tg2ZQW-MD1rvdq4UkHBjd8-u8RFsW5skI",
+      "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=800&q=85",
     category: "Health",
     date: "Sep 15, 2023",
     readTime: "3 min read",
@@ -49,7 +49,7 @@ export const stories: Story[] = [
     slug: "empowering-women-skills",
     excerpt: "Tailoring workshops helping women gain financial independence and support their families.",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCuEEAnXb-p1Bn_Y-fywGH5T4I23gRh5Gi5XQd2s3e4qYlXIb3ortG0hrDCbVpNeUT0qlMsRSI0vZqNZCqdPhxAXF3flBISCm2w0yVuk6nuHtrg5Pt0Yi_DrHRHX-9F4_MIzDY4T_XHk7yrPHHVgr3JBOz3E-YJRfNvXpRD2ua4p4iLaT9wMWZ5SeMu2M288gqRahwG0V8mw6_Y8mopszkMymxEE7_-PGuAJjUZ1i1Tw63X4vld_Hp_gHkbOhAhvac1osYXV4FUah0",
+      "https://images.unsplash.com/photo-1607748851687-ba9a10438559?auto=format&fit=crop&w=800&q=85",
     category: "Empowerment",
     date: "Aug 30, 2023",
     readTime: "6 min read",
@@ -60,7 +60,7 @@ export const stories: Story[] = [
     slug: "clean-water-project",
     excerpt: "Access to clean water reduces disease by 40% in the targeted village districts.",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBJKRZZwWg7rsx_-TflON-vC7mDqsxHgiz0DTP6CEFNpmAD1n2rqQgD3DLFc4m9I6tEGX8kmend8W0ZSPeQc8tc3KOu4jNStG8Ow6KYqeGYG0z8WbMrnyx3lROdYRSAi-kOdTlRbGm73KSx4Q-lSj5WnUgrjtYRydbc3qgUh-G1J3xS4pgk7q8RPoGRd-1Q-JY-2MN52q46HhL0U3hAmMDz7oRt6Z16pLAAmj88wruauYB3wOhV268BOqFIlXB3FYZUTo4Z-g8KUJE",
+      "https://images.unsplash.com/photo-1594398901394-4e34939a4fd0?auto=format&fit=crop&w=800&q=85",
     category: "Infrastructure",
     date: "Aug 12, 2023",
     readTime: "4 min read",
@@ -71,7 +71,7 @@ export const stories: Story[] = [
     slug: "charity-run-kathmandu",
     excerpt: "Run for a cause. Our annual marathon raises awareness and funds for education.",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBHsR4GOwbA53coODAfSkl1j4XfaK7BivARIky5kqcqs_ikQN40Bw3H7gSp_7BjjCjopSp7eA-7EIMRBL7lcLhFE7YXL8pl-vRrNJckvImoFrR9HEw5zzD3G5ZjhUn3KcBMqMMlOfUYZzVBIijZBTLEXlyk8BMBitO3Qq9uPGiqBODowHwBtOIGecP6xEOQmbKygO6G5dzGmjtT0LnO-G4c-hmeS-CaSKvqePGp6mkOhwnqf4LcxJSP2QASp3sVf4VoNxNpAX_yOEQ",
+      "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=800&q=85",
     category: "Events",
     date: "Jul 20, 2023",
     readTime: "2 min read",
