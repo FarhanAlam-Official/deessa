@@ -321,7 +321,7 @@ export function ReceiptEmailTemplate({
                   <!-- Contact line -->
                   <p style="margin:0;font-size:13px;color:#94A3B8;line-height:1.6;text-align:center;">
                     Have questions about your donation?<br />
-                    <a href="mailto:thedeessafoundation@gmail.com" style="color:#3FABDE;font-weight:600;">thedeessafoundation@gmail.com</a>
+                    <a href="mailto:deessa.social@gmail.com" style="color:#3FABDE;font-weight:600;">deessa.social@gmail.com</a>
                   </p>
                 </td>
               </tr>

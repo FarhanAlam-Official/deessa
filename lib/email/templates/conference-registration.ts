@@ -180,7 +180,7 @@ export function ConferenceRegistrationTemplate(props: ConferenceRegistrationTemp
                   </table>
 
                   <p style="margin:0;font-size:13px;color:#94A3B8;line-height:1.6;text-align:center;">
-                    Questions? Reach us at <a href="mailto:conference@deessa.org.np" style="color:#3FABDE;">conference@deessa.org.np</a>
+                    Questions? Reach us at <a href="mailto:deessa.social@gmail.com" style="color:#3FABDE;">deessa.social@gmail.com</a>
                   </p>
                 </td>
               </tr>

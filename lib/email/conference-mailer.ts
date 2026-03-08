@@ -172,7 +172,7 @@ export async function sendCustomEmail(params: {
                   <hr style="margin:32px 0;border:none;border-top:1px solid #E2E8F0;"/>
                   <p style="margin:0;font-size:12px;color:#94A3B8;">
                     DEESSA Foundation &mdash; DEESSA National Conference 2026<br/>
-                    <a href="mailto:conference@deessa.org.np" style="color:#3FABDE;">conference@deessa.org.np</a>
+                    <a href="mailto:deessa.social@gmail.com" style="color:#3FABDE;">deessa.social@gmail.com</a>
                   </p>
                 </td>
               </tr>
