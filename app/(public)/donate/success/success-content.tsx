@@ -186,9 +186,42 @@ export function SuccessContent() {
                       clearInterval(pollForUpdate)
                     } else if (attempts >= maxAttempts) {
                       clearInterval(pollForUpdate)
+                      // Webhook did not update the donation in time — attempt a one-off
+                      // verification directly against Stripe as a self-healing fallback.
+                      try {
+                        const verifyResponse = await fetch(
+                          `/api/payments/stripe/verify?session_id=${sessionId}`
+                        )
+                        const verifyData = await verifyResponse.json()
+
+                        if (verifyResponse.ok && verifyData.success && verifyData.donation) {
+                          setVerification((prev) => ({
+                            success: true,
+                            donation: {
+                              ...prev?.donation,
+                              ...verifyData.donation,
+                              donor_name:
+                                verifyData.donation.donor_name ||
+                                prev?.donation?.donor_name ||
+                                "",
+                              donor_email:
+                                verifyData.donation.donor_email ||
+                                prev?.donation?.donor_email ||
+                                "",
+                              donor_phone:
+                                verifyData.donation.donor_phone ??
+                                prev?.donation?.donor_phone,
+                            } as DonationData,
+                          }))
+                        }
+                      } catch (verifyError) {
+                        console.error("Error triggering Stripe verify fallback:", verifyError)
+                      }
                     }
                   } else if (attempts >= maxAttempts) {
                     clearInterval(pollForUpdate)
+                    // Final attempt failed — optional: we could surface a softer UI message here,
+                    // but we keep the existing optimistic success UX and rely on support contact.
                   }
                 } catch (pollError) {
                   console.error("Error polling for status update:", pollError)

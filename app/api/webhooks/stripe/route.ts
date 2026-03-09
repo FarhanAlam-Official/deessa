@@ -390,6 +390,13 @@ export async function POST(request: Request) {
   let event: Stripe.Event;
 
   try {
+    console.log("Stripe webhook: Incoming request", {
+      hasSignature: !!signature,
+      url: request.url,
+      method: request.method,
+      env: process.env.VERCEL_ENV || process.env.NODE_ENV || "unknown",
+    });
+
     const body = await request.text();
 
     const secret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -412,7 +419,18 @@ export async function POST(request: Request) {
 
     const Stripe = (await import("stripe")).default;
 
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+
+    if (!secretKey) {
+      console.error("Stripe webhook error: STRIPE_SECRET_KEY is not configured");
+
+      return NextResponse.json(
+        { error: "Stripe not configured" },
+        { status: 500 }
+      );
+    }
+
+    const stripe = new Stripe(secretKey, {
       apiVersion: "2024-06-20",
     });
 
@@ -439,6 +457,11 @@ export async function POST(request: Request) {
   try {
     switch (event.type) {
       case "checkout.session.completed": {
+        console.log("Stripe webhook: checkout.session.completed received", {
+          id: event.id,
+          livemode: event.livemode,
+        });
+
         const session = event.data.object as Stripe.Checkout.Session;
 
         // ── Conference registration branch ───────────────────────────────────
@@ -854,6 +877,10 @@ export async function POST(request: Request) {
 
       default:
         // Unhandled event types are acknowledged but not processed
+        console.log("Stripe webhook: Unhandled event type", {
+          id: event.id,
+          type: event.type,
+        });
         break;
     }
   } catch (err) {
