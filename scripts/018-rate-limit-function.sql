@@ -18,7 +18,9 @@ DECLARE
   v_now timestamptz := NOW();
   v_new_expires timestamptz := v_now + (p_window_minutes * INTERVAL '1 minute');
 BEGIN
-  -- Atomic upsert: increment or reset based on expiry
+  -- Atomic upsert: increment or reset based on expiry.
+  -- RETURN QUERY is required so the result has a destination (PostgreSQL 42601).
+  RETURN QUERY
   INSERT INTO rate_limits (identifier, attempts, expires_at)
   VALUES (p_identifier, 1, v_new_expires)
   ON CONFLICT (identifier) DO UPDATE
