@@ -1,8 +1,9 @@
 import type { Metadata } from "next"
-import { Mail, Phone, MapPin, Clock, Send, Shield, Award } from "lucide-react"
+import { Suspense } from "react"
+import { Mail, Phone, MapPin, Clock, Send, Shield, Award, Loader2 } from "lucide-react"
 import { Section } from "@/components/ui/section"
 import { Button } from "@/components/ui/button"
-import { ContactForm } from "@/components/contact-form"
+import { ContactFormPrefilled } from "@/components/contact-form-prefilled"
 
 export const metadata: Metadata = {
   title: "Contact Us - Dessa Foundation",
@@ -89,7 +90,9 @@ export default function ContactPage() {
             <p className="text-foreground-muted mb-8">
               Fill out the form below and we&apos;ll get back to you within 24 hours.
             </p>
-            <ContactForm />
+            <Suspense fallback={<div className="flex items-center gap-2 text-foreground-muted text-sm py-8"><Loader2 className="size-4 animate-spin" />Loading form…</div>}>
+              <ContactFormPrefilled />
+            </Suspense>
           </div>
 
           {/* Map Placeholder */}

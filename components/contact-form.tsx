@@ -7,7 +7,12 @@ import { Send, CheckCircle, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { submitContactForm } from "@/lib/actions/contact"
 
-export function ContactForm() {
+interface ContactFormProps {
+  initialSubject?: string
+  initialMessage?: string
+}
+
+export function ContactForm({ initialSubject = "", initialMessage = "" }: ContactFormProps) {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -17,8 +22,8 @@ export function ContactForm() {
     lastName: "",
     email: "",
     phone: "",
-    subject: "",
-    message: "",
+    subject: initialSubject,
+    message: initialMessage,
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -57,7 +62,7 @@ export function ContactForm() {
         <Button
           onClick={() => {
             setIsSubmitted(false)
-            setFormData({ firstName: "", lastName: "", email: "", phone: "", subject: "", message: "" })
+            setFormData({ firstName: "", lastName: "", email: "", phone: "", subject: initialSubject, message: initialMessage })
           }}
           variant="outline"
           className="mt-4 rounded-full"
@@ -138,9 +143,10 @@ export function ContactForm() {
           <option value="">Select a topic</option>
           <option value="General Inquiry">General Inquiry</option>
           <option value="Donation Questions">Donation Questions</option>
+          <option value="Donation Support">Donation Support</option>
           <option value="Volunteering">Volunteering</option>
           <option value="Partnership Opportunities">Partnership Opportunities</option>
-          <option value="Media & Press">Media & Press</option>
+          <option value="Media & Press">Media &amp; Press</option>
           <option value="Other">Other</option>
         </select>
       </div>
