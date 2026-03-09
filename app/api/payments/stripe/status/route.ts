@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient()
     const { data: donation, error } = await supabase
       .from('donations')
-      .select('id, payment_status, provider, amount, currency, donor_name, donor_email, donor_phone, is_monthly, created_at')
+      .select('id, payment_status, provider, amount, currency, donor_name, donor_email, donor_phone, is_monthly, created_at, provider_ref, payment_id, stripe_session_id')
       .eq('stripe_session_id', sessionId)
       .single()
 
@@ -51,7 +51,10 @@ export async function GET(request: NextRequest) {
         is_monthly: donation.is_monthly,
         payment_status: donation.payment_status,
         created_at: donation.created_at,
-        provider: donation.provider
+        provider: donation.provider,
+        provider_ref: donation.provider_ref,
+        payment_id: donation.payment_id,
+        stripe_session_id: donation.stripe_session_id,
       }
     })
 

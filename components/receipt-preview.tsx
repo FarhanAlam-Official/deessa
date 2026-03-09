@@ -22,6 +22,25 @@ interface ReceiptPreviewProps {
   swcNumber?: string
 }
 
+/**
+ * Convert an absolute receipt URL to a relative path so that the fetch
+ * always targets the current host. This is necessary because the URL is
+ * stored in the database at generation time (on Vercel) and will contain
+ * the production domain even when the page is served from localhost.
+ *
+ * e.g. "https://deessa-foundation.vercel.app/api/receipts/download?token=…"
+ *   → "/api/receipts/download?token=…"
+ */
+function toRelativeUrl(url: string): string {
+  try {
+    const parsed = new URL(url)
+    return `${parsed.pathname}${parsed.search}`
+  } catch {
+    // Already relative or malformed — use as-is
+    return url
+  }
+}
+
 export function ReceiptPreview({
   receiptNumber,
   receiptUrl,
@@ -37,6 +56,9 @@ export function ReceiptPreview({
   panNumber,
   swcNumber,
 }: ReceiptPreviewProps) {
+  // Always use a relative URL so the fetch goes to the current host,
+  // not the absolute Vercel domain stored in the database.
+  const relativeReceiptUrl = toRelativeUrl(receiptUrl)
   const [isDownloading, setIsDownloading] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -52,7 +74,7 @@ export function ReceiptPreview({
     setPreviewLoading(true)
     setPreviewError(false)
 
-    fetch(receiptUrl)
+    fetch(relativeReceiptUrl)
       .then((r) => {
         if (!r.ok) throw new Error("fetch failed")
         return r.blob()
@@ -84,7 +106,7 @@ export function ReceiptPreview({
   const handleDownload = async () => {
     try {
       setIsDownloading(true)
-      const response = await fetch(receiptUrl)
+      const response = await fetch(relativeReceiptUrl)
 
       if (!response.ok) {
         throw new Error("Download failed")
@@ -147,7 +169,7 @@ export function ReceiptPreview({
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(receiptUrl)
+      await navigator.clipboard.writeText(receiptUrl) // share the original absolute URL
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
       notifications.showSuccess({
