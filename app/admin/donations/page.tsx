@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { ExternalLink, ShieldCheck, FileText } from "lucide-react"
 import { canViewFinance, type AdminRole } from "@/lib/types/admin"
 import Link from "next/link"
-import { DonationsDashboard } from "./donations-table-client"
+import { DonationsDashboard } from "../../../components/admin/donations/donations-table-client"
 
 const PAGE_SIZE = 25
 

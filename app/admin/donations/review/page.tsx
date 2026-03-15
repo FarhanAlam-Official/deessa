@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { canViewFinance, type AdminRole } from "@/lib/types/admin"
-import { ReviewDashboardClient } from "./review-dashboard-client"
+import { ReviewDashboardClient } from "@/components/admin/donations/review-dashboard-client"
 import { Button } from "@/components/ui/button"
 import { FileText } from "lucide-react"
 import Link from "next/link"
