@@ -3,7 +3,7 @@ import Link from "next/link"
 import { Heart, Shield, CreditCard, Repeat, CheckCircle, HelpCircle, Search } from "lucide-react"
 import { Section } from "@/components/ui/section"
 import { Button } from "@/components/ui/button"
-import { DonationForm } from "@/components/donation-form"
+import { DonationForm } from "@/components/donation/donation-form"
 import { getPaymentMode, getPaymentSettings, getSupportedProviders } from "@/lib/payments/config"
 
 export const metadata: Metadata = {
