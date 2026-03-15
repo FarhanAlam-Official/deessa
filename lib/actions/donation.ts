@@ -19,6 +19,7 @@ export type DonationFormData = {
   donorName: string
   donorEmail: string
   donorPhone?: string
+  donorMessage?: string
   isMonthly: boolean
 }
 
@@ -76,6 +77,7 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
         donor_name: input.donorName,
         donor_email: input.donorEmail,
         donor_phone: input.donorPhone || null,
+        donor_message: input.donorMessage || null,
         is_monthly: input.isMonthly,
         payment_status: "pending",
         provider: input.provider,
