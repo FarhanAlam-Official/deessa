@@ -322,6 +322,14 @@ export class PaymentService {
             donation_id: donationId,
             provider: provider,
             transaction_id: verificationResult.transactionId,
+            
+            // Store all Stripe-specific IDs
+            payment_intent_id: verificationResult.metadata?.paymentIntentId || null,
+            session_id: verificationResult.metadata?.sessionId || null,
+            subscription_id: verificationResult.metadata?.subscriptionId || null,
+            customer_id: verificationResult.metadata?.customerId || null,
+            invoice_id: verificationResult.metadata?.invoiceId || null,
+            
             amount: verificationResult.amount,
             currency: verificationResult.currency,
             verified_amount: verificationResult.amount,

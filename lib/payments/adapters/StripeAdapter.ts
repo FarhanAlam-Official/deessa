@@ -227,19 +227,38 @@ export class StripeAdapter extends BaseProviderAdapter {
     const amount = session.amount_total ? this.convertToMajorUnits(session.amount_total) : 0
     const currency = (session.currency || 'usd').toUpperCase()
 
-    // Extract transaction ID (session ID or subscription ID)
-    const transactionId = session.subscription && typeof session.subscription === 'string'
-      ? session.subscription
-      : session.id
+    // Extract ALL relevant Stripe IDs
+    const paymentIntentId = session.payment_intent 
+      ? (typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent.id)
+      : null
+    
+    const subscriptionId = session.subscription
+      ? (typeof session.subscription === 'string' ? session.subscription : session.subscription.id)
+      : null
+    
+    const customerId = session.customer
+      ? (typeof session.customer === 'string' ? session.customer : session.customer.id)
+      : null
 
-    // Build metadata
+    // Primary transaction ID: payment_intent for one-time, subscription for recurring
+    const transactionId = subscriptionId || paymentIntentId || session.id
+
+    // Build comprehensive metadata with all Stripe references
     const metadata: Record<string, unknown> = {
+      // All Stripe references
       sessionId: session.id,
-      subscriptionId: session.subscription || null,
-      customerId: session.customer || null,
+      paymentIntentId: paymentIntentId,
+      subscriptionId: subscriptionId,
+      customerId: customerId,
+      invoiceId: null, // Not available in checkout.session.completed
+      
+      // Additional context
       mode: session.mode,
       paymentStatus: session.payment_status,
       eventId: event.id,
+      
+      // For backward compatibility
+      legacyTransactionId: session.id,
     }
 
     return {
