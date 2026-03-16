@@ -23,15 +23,15 @@
 
 ## 1. Public Pages Overview
 
-| Page | Route | Rendering | Auth Required | Purpose |
-|---|---|---|---|---|
-| **Conference Landing** | `/conference` | SSR | No | Marketing page showcasing event |
-| **Registration Form** | `/conference/register` | CSR | No | 4-step registration wizard |
-| **Payment Options** | `/conference/register/payment-options` | CSR | No | Pay Now vs Pay Later choice |
-| **Pending Payment** | `/conference/register/pending-payment` | CSR | No | Provider selection & payment init |
-| **Payment Success** | `/conference/register/payment-success` | CSR | No | Post-payment verification & status |
-| **Registration Success** | `/conference/register/success` | CSR | No | Free registration confirmation |
-| **Payment Failure** | `/conference/register/failure` | CSR | No | Payment declined fallback |
+| Page                     | Route                                  | Rendering | Auth Required | Purpose                            |
+| ------------------------ | -------------------------------------- | --------- | ------------- | ---------------------------------- |
+| **Conference Landing**   | `/conference`                          | SSR       | No            | Marketing page showcasing event    |
+| **Registration Form**    | `/conference/register`                 | CSR       | No            | 4-step registration wizard         |
+| **Payment Options**      | `/conference/register/payment-options` | CSR       | No            | Pay Now vs Pay Later choice        |
+| **Pending Payment**      | `/conference/register/pending-payment` | CSR       | No            | Provider selection & payment init  |
+| **Payment Success**      | `/conference/register/payment-success` | CSR       | No            | Post-payment verification & status |
+| **Registration Success** | `/conference/register/success`         | CSR       | No            | Free registration confirmation     |
+| **Payment Failure**      | `/conference/register/failure`         | CSR       | No            | Payment declined fallback          |
 
 ---
 
@@ -51,7 +51,7 @@ import { getConferenceSettings } from '@/lib/actions/conference-settings'
 
 export default async function ConferencePage() {
   const settings = await getConferenceSettings()
-  
+
   return (
     // Render page with settings
   )
@@ -129,7 +129,7 @@ export function ConferenceRegistrationForm() {
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState<Partial<RegistrationFormData>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  
+
   // Step navigation logic
   // Form submission logic
 }
@@ -154,8 +154,8 @@ const schema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
-  organization: z.string().optional()
-})
+  organization: z.string().optional(),
+});
 ```
 
 #### Step 2: Participation
@@ -194,36 +194,38 @@ const schema = z.object({
 
 ```typescript
 const handleSubmit = async () => {
-  setIsSubmitting(true)
-  
-  const result = await registerForConference(formData)
-  
+  setIsSubmitting(true);
+
+  const result = await registerForConference(formData);
+
   if (result.success) {
     if (result.paymentRequired) {
       // Redirect to payment options with query params
-      router.push(`/conference/register/payment-options?rid=${result.registrationId}&email=${formData.email}&amount=${result.paymentAmount}&currency=${result.paymentCurrency}`)
+      router.push(
+        `/conference/register/payment-options?rid=${result.registrationId}&email=${formData.email}&amount=${result.paymentAmount}&currency=${result.paymentCurrency}`,
+      );
     } else {
       // Free registration - go to success page
-      router.push('/conference/register/success')
+      router.push("/conference/register/success");
     }
   } else {
     // Show error toast
   }
-}
+};
 ```
 
 ### 3.4 UI Components Used
 
-| Component | Library | Purpose |
-|---|---|---|
-| `Input` | Shadcn/ui | Text inputs |
-| `Label` | Shadcn/ui | Form labels |
+| Component    | Library   | Purpose             |
+| ------------ | --------- | ------------------- |
+| `Input`      | Shadcn/ui | Text inputs         |
+| `Label`      | Shadcn/ui | Form labels         |
 | `RadioGroup` | Shadcn/ui | Radio button groups |
-| `Checkbox` | Shadcn/ui | Checkboxes |
-| `Select` | Shadcn/ui | Dropdown selects |
-| `Button` | Shadcn/ui | Action buttons |
-| `Card` | Shadcn/ui | Content containers |
-| `useToast` | Shadcn/ui | Error notifications |
+| `Checkbox`   | Shadcn/ui | Checkboxes          |
+| `Select`     | Shadcn/ui | Dropdown selects    |
+| `Button`     | Shadcn/ui | Action buttons      |
+| `Card`       | Shadcn/ui | Content containers  |
+| `useToast`   | Shadcn/ui | Error notifications |
 
 ### 3.5 State Management
 
@@ -260,12 +262,12 @@ const handleSubmit = async () => {
 
 ### 4.2 URL Parameters
 
-| Param | Required | Type | Description |
-|---|---|---|---|
-| `rid` | Yes | uuid | Registration ID |
-| `email` | Yes | string | Registrant email |
-| `amount` | Yes | number | Payment amount |
-| `currency` | Yes | string | Currency code (NPR/USD) |
+| Param      | Required | Type   | Description             |
+| ---------- | -------- | ------ | ----------------------- |
+| `rid`      | Yes      | uuid   | Registration ID         |
+| `email`    | Yes      | string | Registrant email        |
+| `amount`   | Yes      | number | Payment amount          |
+| `currency` | Yes      | string | Currency code (NPR/USD) |
 
 **Example**:
 
@@ -302,21 +304,21 @@ PaymentOptionsPage
 
 ```typescript
 const handlePayLater = async () => {
-  setSendingEmail(true)
-  
-  const response = await fetch('/api/conference/resend-payment-link', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ registrationId: rid, email })
-  })
-  
+  setSendingEmail(true);
+
+  const response = await fetch("/api/conference/resend-payment-link", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ registrationId: rid, email }),
+  });
+
   if (response.ok) {
-    setEmailSent(true)
+    setEmailSent(true);
     // Show success message
   }
-  
-  setSendingEmail(false)
-}
+
+  setSendingEmail(false);
+};
 ```
 
 ---
@@ -336,28 +338,28 @@ const handlePayLater = async () => {
 useEffect(() => {
   async function fetchRegistration() {
     const response = await fetch(
-      `/api/conference/verify-registration?rid=${rid}&email=${email}`
-    )
-    const data = await response.json()
-    
+      `/api/conference/verify-registration?rid=${rid}&email=${email}`,
+    );
+    const data = await response.json();
+
     if (data.ok) {
-      setRegistration(data)
+      setRegistration(data);
       // Check if expired
       if (data.expired) {
-        setError('Registration expired. Please register again.')
+        setError("Registration expired. Please register again.");
       }
     }
   }
-  
-  fetchRegistration()
-}, [rid, email])
+
+  fetchRegistration();
+}, [rid, email]);
 ```
 
 ### 5.3 Payment Provider Selection
 
 ```tsx
 <div className="space-y-4">
-  {availableProviders.map(provider => (
+  {availableProviders.map((provider) => (
     <Card
       key={provider}
       className="cursor-pointer hover:border-primary"
@@ -383,43 +385,43 @@ useEffect(() => {
 
 ```typescript
 const handlePaymentStart = async (provider: string) => {
-  setInitiatingPayment(true)
-  
-  const response = await fetch('/api/conference/start-payment', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ registrationId: rid, email, provider })
-  })
-  
-  const data = await response.json()
-  
+  setInitiatingPayment(true);
+
+  const response = await fetch("/api/conference/start-payment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ registrationId: rid, email, provider }),
+  });
+
+  const data = await response.json();
+
   if (data.ok) {
     if (data.requiresFormSubmit) {
       // eSewa: Create hidden form and submit
-      const form = document.createElement('form')
-      form.method = 'POST'
-      form.action = data.redirectUrl
-      
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = data.redirectUrl;
+
       Object.entries(data.formData).forEach(([key, value]) => {
-        const input = document.createElement('input')
-        input.type = 'hidden'
-        input.name = key
-        input.value = value as string
-        form.appendChild(input)
-      })
-      
-      document.body.appendChild(form)
-      form.submit()
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = value as string;
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
     } else {
       // Stripe/Khalti: Direct redirect
-      window.location.href = data.redirectUrl
+      window.location.href = data.redirectUrl;
     }
   } else {
-    setError(data.error)
+    setError(data.error);
   }
-  
-  setInitiatingPayment(false)
-}
+
+  setInitiatingPayment(false);
+};
 ```
 
 ### 5.5 States
@@ -442,11 +444,11 @@ const handlePaymentStart = async (provider: string) => {
 
 ### 6.2 URL Parameters
 
-| Param | Provider | Description |
-|---|---|---|
-| `rid` | All | Registration ID |
-| `session_id` | Stripe | Stripe Checkout Session ID |
-| `pidx` | Khalti | Khalti payment index |
+| Param        | Provider | Description                |
+| ------------ | -------- | -------------------------- |
+| `rid`        | All      | Registration ID            |
+| `session_id` | Stripe   | Stripe Checkout Session ID |
+| `pidx`       | Khalti   | Khalti payment index       |
 
 **Examples**:
 
@@ -459,97 +461,99 @@ const handlePaymentStart = async (provider: string) => {
 
 ```typescript
 useEffect(() => {
-  if (hasVerified.current) return // Prevent double-verify (React StrictMode)
-  hasVerified.current = true
-  
+  if (hasVerified.current) return; // Prevent double-verify (React StrictMode)
+  hasVerified.current = true;
+
   async function verifyPayment() {
     if (session_id) {
       // Stripe verification
-      await fetch('/api/conference/confirm-stripe-session', {
-        method: 'POST',
-        body: JSON.stringify({ rid, sessionId: session_id })
-      })
+      await fetch("/api/conference/confirm-stripe-session", {
+        method: "POST",
+        body: JSON.stringify({ rid, sessionId: session_id }),
+      });
     } else if (pidx) {
       // Khalti verification
-      await fetch('/api/payments/khalti/verify', {
-        method: 'POST',
-        body: JSON.stringify({ pidx, purchase_order_id: rid })
-      })
+      await fetch("/api/payments/khalti/verify", {
+        method: "POST",
+        body: JSON.stringify({ pidx, purchase_order_id: rid }),
+      });
     }
-    
+
     // Start polling status
-    startPolling()
+    startPolling();
   }
-  
-  verifyPayment()
-}, [])
+
+  verifyPayment();
+}, []);
 ```
 
 ### 6.4 Polling Logic
 
 ```typescript
 const fetchStatus = async () => {
-  const response = await fetch(`/api/conference/status?rid=${rid}`)
-  const data = await response.json()
-  
+  const response = await fetch(`/api/conference/status?rid=${rid}`);
+  const data = await response.json();
+
   if (data.ok) {
-    setStatus(data.status)
-    setPaymentStatus(data.paymentStatus)
-    
+    setStatus(data.status);
+    setPaymentStatus(data.paymentStatus);
+
     // Stop polling if terminal state reached
-    if (['confirmed', 'cancelled', 'expired'].includes(data.status)) {
-      clearInterval(pollInterval)
+    if (["confirmed", "cancelled", "expired"].includes(data.status)) {
+      clearInterval(pollInterval);
     }
   }
-}
+};
 
 // Poll every 5 seconds, max 18 times (90 seconds total)
 const pollInterval = setInterval(() => {
   if (pollCount >= 18) {
-    clearInterval(pollInterval)
-    setStatus('timeout')
-    return
+    clearInterval(pollInterval);
+    setStatus("timeout");
+    return;
   }
-  
-  fetchStatus()
-  setPollCount(c => c + 1)
-}, 5000)
+
+  fetchStatus();
+  setPollCount((c) => c + 1);
+}, 5000);
 ```
 
 ### 6.5 UI States
 
-| Status | Payment Status | UI Shown |
-|---|---|---|
-| Loading | - | Spinner + "Verifying payment..." |
-| Processing | unpaid | Spinner + "Processing payment..." (polling) |
-| Confirmed | paid | ✓ Success card + "Registration Confirmed!" |
-| Review | review | ⚠️ Warning card + "Payment under review" |
-| Cancelled | - | ✗ Error card + "Registration cancelled" |
-| Expired | - | ✗ Error card + "Registration expired" |
-| Timeout | - | ⏱️ Timeout card + "Verification taking longer than expected" |
+| Status     | Payment Status | UI Shown                                                     |
+| ---------- | -------------- | ------------------------------------------------------------ |
+| Loading    | -              | Spinner + "Verifying payment..."                             |
+| Processing | unpaid         | Spinner + "Processing payment..." (polling)                  |
+| Confirmed  | paid           | ✓ Success card + "Registration Confirmed!"                   |
+| Review     | review         | ⚠️ Warning card + "Payment under review"                     |
+| Cancelled  | -              | ✗ Error card + "Registration cancelled"                      |
+| Expired    | -              | ✗ Error card + "Registration expired"                        |
+| Timeout    | -              | ⏱️ Timeout card + "Verification taking longer than expected" |
 
 ### 6.6 Success State Content
 
 ```tsx
-{status === 'confirmed' && (
-  <Card className="border-green-500">
-    <CardHeader>
-      <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
-      <CardTitle>Registration Confirmed!</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p>Thank you, {registration.fullName}!</p>
-      <p>Confirmation email sent to: {registration.email}</p>
-      <p>Attendance: {registration.attendanceMode}</p>
-      
-      <div className="mt-6 space-y-2">
-        <Button onClick={() => router.push('/conference')}>
-          Back to Conference Page
-        </Button>
-      </div>
-    </CardContent>
-  </Card>
-)}
+{
+  status === "confirmed" && (
+    <Card className="border-green-500">
+      <CardHeader>
+        <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
+        <CardTitle>Registration Confirmed!</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p>Thank you, {registration.fullName}!</p>
+        <p>Confirmation email sent to: {registration.email}</p>
+        <p>Attendance: {registration.attendanceMode}</p>
+
+        <div className="mt-6 space-y-2">
+          <Button onClick={() => router.push("/conference")}>
+            Back to Conference Page
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 ```
 
 ---
@@ -572,16 +576,16 @@ const pollInterval = setInterval(() => {
       <CheckCircle className="w-20 h-20 text-green-500 mx-auto" />
       <CardTitle className="text-3xl">Registration Successful!</CardTitle>
     </CardHeader>
-    
+
     <CardContent className="space-y-4">
       <p className="text-lg text-center">
         Thank you for registering for our conference.
       </p>
-      
+
       <p className="text-center text-muted-foreground">
         You will receive a confirmation email shortly with event details.
       </p>
-      
+
       <div className="bg-blue-50 p-4 rounded-lg">
         <h3 className="font-semibold mb-2">What's Next?</h3>
         <ul className="list-disc list-inside space-y-1">
@@ -590,11 +594,8 @@ const pollInterval = setInterval(() => {
           <li>Review the agenda on the conference page</li>
         </ul>
       </div>
-      
-      <Button 
-        className="w-full" 
-        onClick={() => router.push('/conference')}
-      >
+
+      <Button className="w-full" onClick={() => router.push("/conference")}>
         Return to Conference Page
       </Button>
     </CardContent>
@@ -615,10 +616,10 @@ const pollInterval = setInterval(() => {
 
 ### 8.2 URL Parameters
 
-| Param | Description |
-|---|---|
-| `rid` | Registration ID (to enable retry) |
-| `email` | Registrant email |
+| Param    | Description                          |
+| -------- | ------------------------------------ |
+| `rid`    | Registration ID (to enable retry)    |
+| `email`  | Registrant email                     |
 | `reason` | Optional failure reason from gateway |
 
 ### 8.3 Content
@@ -629,38 +630,42 @@ const pollInterval = setInterval(() => {
     <XCircle className="w-16 h-16 text-red-500 mx-auto" />
     <CardTitle>Payment Failed</CardTitle>
   </CardHeader>
-  
+
   <CardContent className="space-y-4">
     <p>We couldn't process your payment.</p>
-    
     {reason && (
       <Alert variant="destructive">
         <AlertDescription>{reason}</AlertDescription>
       </Alert>
     )}
-    
     <div className="space-y-2">
-      <Button 
-        onClick={() => router.push(`/conference/register/pending-payment?rid=${rid}&email=${email}`)}
+      <Button
+        onClick={() =>
+          router.push(
+            `/conference/register/pending-payment?rid=${rid}&email=${email}`,
+          )
+        }
         className="w-full"
       >
         Try Again
       </Button>
-      
-      <Button 
+
+      <Button
         variant="outline"
-        onClick={() => router.push('/conference')}
+        onClick={() => router.push("/conference")}
         className="w-full"
       >
         Return to Conference Page
       </Button>
     </div>
-    
     <p className="text-sm text-muted-foreground text-center">
       Need help? Contact us at {settings.contactEmail}
     </p>
-
-// Note: The settings object (with contactEmail) should be loaded via getConferenceSettings() on the server or using a client-side hook (e.g., useConferenceSettings) in the CSR component. Pass the resulting settings prop into the Payment Failure page/component to access settings.contactEmail.
+    // Note: The settings object (with contactEmail) should be loaded via
+    getConferenceSettings() on the server or using a client-side hook (e.g.,
+    useConferenceSettings) in the CSR component. Pass the resulting settings
+    prop into the Payment Failure page/component to access
+    settings.contactEmail.
   </CardContent>
 </Card>
 ```

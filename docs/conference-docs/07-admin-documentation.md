@@ -66,15 +66,15 @@
 
 ### 1.3 Key Features
 
-| Feature | Description | Use Case |
-|---|---|---|
-| **Registration List** | View all registrations in table format | Monitor registrations |
-| **Detail View** | Click row to see full registration details + PII | Review specific registration |
-| **Quick Actions** | One-click actions (confirm, cancel, extend) | Fast operations |
-| **CSV Export** | Download all registrations as CSV | Excel analysis, printing badges |
-| **Settings** | Edit conference name, dates, pricing | Update for new event |
-| **Search** | Filter by name, email, registration ID | Find specific user |
-| **Status Filter** | Show only confirmed/pending/expired | Focus on action items |
+| Feature               | Description                                      | Use Case                        |
+| --------------------- | ------------------------------------------------ | ------------------------------- |
+| **Registration List** | View all registrations in table format           | Monitor registrations           |
+| **Detail View**       | Click row to see full registration details + PII | Review specific registration    |
+| **Quick Actions**     | One-click actions (confirm, cancel, extend)      | Fast operations                 |
+| **CSV Export**        | Download all registrations as CSV                | Excel analysis, printing badges |
+| **Settings**          | Edit conference name, dates, pricing             | Update for new event            |
+| **Search**            | Filter by name, email, registration ID           | Find specific user              |
+| **Status Filter**     | Show only confirmed/pending/expired              | Focus on action items           |
 
 ---
 
@@ -86,16 +86,16 @@
 
 **Columns Displayed**:
 
-| Column | Description | Example |
-|---|---|---|
-| **Full Name** | Registrant's name | "John Doe" |
-| **Email** | Contact email | "<john@example.com>" |
-| **Attendance** | In-person or Virtual | "In-person" |
-| **Status** | Registration status | "Confirmed" |
-| **Payment Status** | Payment state | "Paid" |
-| **Amount** | Payment amount | "$20" / "NPR 800" |
-| **Created** | Registration date/time | "Feb 28, 2026 10:30 AM" |
-| **Actions** | Quick action buttons | [View] [Confirm] [Cancel] |
+| Column             | Description            | Example                   |
+| ------------------ | ---------------------- | ------------------------- |
+| **Full Name**      | Registrant's name      | "John Doe"                |
+| **Email**          | Contact email          | "<john@example.com>"      |
+| **Attendance**     | In-person or Virtual   | "In-person"               |
+| **Status**         | Registration status    | "Confirmed"               |
+| **Payment Status** | Payment state          | "Paid"                    |
+| **Amount**         | Payment amount         | "$20" / "NPR 800"         |
+| **Created**        | Registration date/time | "Feb 28, 2026 10:30 AM"   |
+| **Actions**        | Quick action buttons   | [View] [Confirm] [Cancel] |
 
 **Status Badge Colors**:
 
@@ -438,17 +438,17 @@ WHERE id = 'registration-id';
 
 ### 4.2 Settings Form Fields
 
-| Field | Type | Description | Example |
-|---|---|---|---|
-| **Conference Name** | Text | Event title | "DEESSA Global Conference 2026" |
-| **Conference Date** | Date | Event start date | "2026-06-15" |
-| **Conference End Date** | Date | Event end date (optional) | "2026-06-17" |
-| **Location** | Text | Physical address (for in-person) | "Kathmandu, Nepal" |
-| **Virtual Link** | URL | Zoom/Teams link (shown to virtual attendees) | "<https://zoom.us/j/>..." |
-| **Deadline** | DateTime | Last day to register | "2026-06-01 23:59" |
-| **In-Person Price (USD)** | Number | Amount in US dollars | "20.00" |
-| **Virtual Price (NPR)** | Number | Amount in Nepalese Rupees | "800" |
-| **Registration Enabled** | Toggle | Enable/disable registration form | ON / OFF |
+| Field                     | Type     | Description                                  | Example                         |
+| ------------------------- | -------- | -------------------------------------------- | ------------------------------- |
+| **Conference Name**       | Text     | Event title                                  | "DEESSA Global Conference 2026" |
+| **Conference Date**       | Date     | Event start date                             | "2026-06-15"                    |
+| **Conference End Date**   | Date     | Event end date (optional)                    | "2026-06-17"                    |
+| **Location**              | Text     | Physical address (for in-person)             | "Kathmandu, Nepal"              |
+| **Virtual Link**          | URL      | Zoom/Teams link (shown to virtual attendees) | "<https://zoom.us/j/>..."       |
+| **Deadline**              | DateTime | Last day to register                         | "2026-06-01 23:59"              |
+| **In-Person Price (USD)** | Number   | Amount in US dollars                         | "20.00"                         |
+| **Virtual Price (NPR)**   | Number   | Amount in Nepalese Rupees                    | "800"                           |
+| **Registration Enabled**  | Toggle   | Enable/disable registration form             | ON / OFF                        |
 
 ### 4.3 Updating Settings
 
@@ -478,14 +478,14 @@ WHERE id = 'registration-id';
 
 ### 4.4 Settings Impact
 
-| Setting Changed | Impact | Action Required |
-|---|---|---|
-| **Conference Name** | Updates landing page title | Verify homepage looks correct |
-| **Dates** | Updates landing page info | Update marketing materials |
-| **Price** | New registrants see new price | Existing pending registrations use OLD price (intended) |
-| **Deadline** | Form shows "Registration closes on [date]" | None |
-| **Virtual Link** | Sent in confirmation email | Test email to yourself |
-| **Registration Enabled = OFF** | Form shows "Registration closed" | None (can toggle back ON anytime) |
+| Setting Changed                | Impact                                     | Action Required                                         |
+| ------------------------------ | ------------------------------------------ | ------------------------------------------------------- |
+| **Conference Name**            | Updates landing page title                 | Verify homepage looks correct                           |
+| **Dates**                      | Updates landing page info                  | Update marketing materials                              |
+| **Price**                      | New registrants see new price              | Existing pending registrations use OLD price (intended) |
+| **Deadline**                   | Form shows "Registration closes on [date]" | None                                                    |
+| **Virtual Link**               | Sent in confirmation email                 | Test email to yourself                                  |
+| **Registration Enabled = OFF** | Form shows "Registration closed"           | None (can toggle back ON anytime)                       |
 
 ---
 
@@ -537,11 +537,11 @@ WHERE id = 'registration-id';
 
 **Refund Timeline**:
 
-| Gateway | Refund Processing Time |
-|---|---|
-| Stripe | 5-10 business days |
-| Khalti | 3-7 business days |
-| eSewa | 7-14 business days (manual process) |
+| Gateway | Refund Processing Time              |
+| ------- | ----------------------------------- |
+| Stripe  | 5-10 business days                  |
+| Khalti  | 3-7 business days                   |
+| eSewa   | 7-14 business days (manual process) |
 
 ---
 
@@ -706,7 +706,7 @@ id,full_name,email,phone,country,organization,attendance_mode,dietary_restrictio
 - Use search to narrow results
 - Use status filters to show subset
 
-**Solution** (Future Enhancement)**:
+**Solution** (Future Enhancement)\*\*:
 
 - Developer must implement pagination (see [10: Improvements & Risks](10-improvements-risks.md) Section 3.4)
 
