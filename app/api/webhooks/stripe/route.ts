@@ -2,8 +2,6 @@
 
 import { NextResponse } from "next/server";
 
-import { createClient } from "@/lib/supabase/server";
-
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 import { getPaymentMode } from "@/lib/payments/config";
@@ -100,7 +98,7 @@ async function confirmDonation(
       return false;
     }
 
-    // Log result
+    // Log successful payment confirmation
     console.log('Stripe webhook: Payment confirmed', {
       donationId,
       sessionId: session.id,
@@ -108,15 +106,12 @@ async function confirmDonation(
     });
 
     // Generate receipt inline (fire-and-forget with error tracking)
-    // Note: enqueuePostPaymentJob() is a stub for future job queue implementation.
-    // Until then, we call generateReceiptForDonation() directly to ensure donors
-    // receive their receipts. Failures are logged to receipt_failures table for
-    // manual retry via admin interface.
     if (result.status === 'confirmed' || result.status === 'already_processed') {
       try {
         const receiptResult = await generateReceiptForDonation({ donationId });
         if (receiptResult.success) {
-          console.log(`Stripe webhook: Receipt generated for donation ${donationId}`, {
+          console.log('Stripe webhook: Receipt generated', {
+            donationId,
             receiptNumber: receiptResult.receiptNumber,
           });
         } else {
@@ -127,10 +122,9 @@ async function confirmDonation(
         }
       } catch (receiptError) {
         // Non-fatal: log but do NOT fail the webhook response.
-        // A failed receipt must never cause Stripe to retry the payment webhook.
-        console.error('Stripe webhook: Failed to generate receipt', {
+        console.error('Stripe webhook: Receipt generation error', {
           donationId,
-          error: receiptError instanceof Error ? receiptError.message : 'Unknown error'
+          error: receiptError instanceof Error ? receiptError.message : 'Unknown error',
         });
       }
     }
@@ -188,23 +182,19 @@ async function confirmConferenceRegistrationFromWebhook(
       });
 
     if (eventErr) {
-      if (
-        (eventErr as any).code === "23505" ||
-        String(eventErr.message).includes("duplicate")
-      ) {
-        console.log("Stripe webhook (conference): already processed", eventId);
-
+      if ((eventErr as any).code === "23505" || String(eventErr.message).includes("duplicate")) {
+        // Already processed - skip silently
         return;
       }
       // Log unexpected errors for observability, but continue processing
-      console.warn("Stripe webhook (conference): payment_events insert failed (non-duplicate)", {
+      console.warn("Stripe webhook (conference): payment_events insert failed", {
         eventId,
-        error: eventErr,
+        error: eventErr.message,
       });
     }
   } catch {
-    // Table may not have column yet — log and continue processing
-    console.warn("Stripe webhook (conference): payment_events table error — continuing", eventId);
+    // Table may not have column yet — continue processing
+    console.warn("Stripe webhook (conference): payment_events table error");
   }
   const { data: reg, error: fetchErr } = await supabase
 
@@ -217,11 +207,7 @@ async function confirmConferenceRegistrationFromWebhook(
     .single();
 
   if (fetchErr || !reg) {
-    console.error(
-      "Stripe webhook (conference): registration not found",
-      registrationId
-    );
-
+    console.error("Stripe webhook (conference): registration not found", registrationId);
     return;
   }
 
@@ -270,75 +256,56 @@ async function confirmConferenceRegistrationFromWebhook(
     // (this handles cases where registration was saved with NPR but Stripe charged USD)
 
     if (actualMinor === null) {
-      console.error(
-        "Stripe webhook (conference): no amount_total in session — flagging for review",
-        {
-          registrationId,
-          sessionId: session.id,
-        }
-      );
+      console.error("Stripe webhook (conference): no amount_total in session", {
+        registrationId,
+        sessionId: session.id,
+      });
 
       await supabase
-
         .from("conference_registrations")
-
-        .update({ payment_status: "review", payment_review_at: new Date().toISOString(), stripe_session_id: session.id })
-
+        .update({ 
+          payment_status: "review", 
+          payment_review_at: new Date().toISOString(), 
+          stripe_session_id: session.id 
+        })
         .eq("id", registrationId);
 
       return;
     }
 
     if (expectedMinor !== actualMinor) {
-      console.error(
-        "Stripe webhook (conference): amount mismatch — flagging for review",
-        {
-          registrationId,
-          expectedMinor,
-          actualMinor,
-          regCurrency,
-          sessionCurrency,
-        }
-      );
+      console.error("Stripe webhook (conference): amount mismatch", {
+        registrationId,
+        expected: expectedMinor,
+        actual: actualMinor,
+      });
 
       await supabase
-
         .from("conference_registrations")
-
-        .update({ payment_status: "review", payment_review_at: new Date().toISOString(), stripe_session_id: session.id })
-
+        .update({ 
+          payment_status: "review", 
+          payment_review_at: new Date().toISOString(), 
+          stripe_session_id: session.id 
+        })
         .eq("id", registrationId);
 
       return;
     }
 
     // Currency mismatch is non-fatal — sync DB to Stripe's currency and continue
-
     if (regCurrency !== sessionCurrency) {
-      console.warn(
-        "Stripe webhook (conference): currency mismatch — syncing DB currency to Stripe",
-        {
-          registrationId,
-          regCurrency,
-          sessionCurrency,
-        }
-      );
-
       const { error: currencyUpdateError } = await supabase
-
         .from("conference_registrations")
-
         .update({ payment_currency: sessionCurrency.toUpperCase() })
-
-        .eq("id", registrationId)
+        .eq("id", registrationId);
       
       if (currencyUpdateError) {
         console.error("Stripe webhook (conference): failed to sync currency", {
-          registrationId, regCurrency, sessionCurrency,
-          error: currencyUpdateError
-        })
-        throw new Error(`Failed to update registration currency: ${currencyUpdateError.message}`)
-      };
+          registrationId,
+          error: currencyUpdateError.message,
+        });
+        throw new Error(`Failed to update registration currency: ${currencyUpdateError.message}`);
+      }
     }
   }
 
@@ -375,34 +342,26 @@ async function confirmConferenceRegistrationFromWebhook(
   }
 
   // Send confirmation email (non-blocking — failure must not fail the webhook)
-
   sendConferenceConfirmationEmail({
     fullName: reg.full_name,
-
     email: reg.email,
-
     registrationId: reg.id,
-
     attendanceMode: reg.attendance_mode || "",
-
     role: reg.role || undefined,
-
     workshops: reg.workshops || undefined,
   })
     .then((r) => {
-      if (r.success)
-        supabase.from("conference_registrations")
+      if (r.success) {
+        supabase
+          .from("conference_registrations")
           .update({ last_confirmation_email_sent_at: new Date().toISOString() })
-          .eq("id", registrationId).then(() => {})
+          .eq("id", registrationId)
+          .then(() => {});
+      }
     })
-    .catch((err) =>
-      console.error("Non-fatal: webhook confirmation email failed:", err)
-    );
+    .catch((err) => console.error("Conference confirmation email failed:", err));
 
-  console.log(
-    "Stripe webhook (conference): confirmed registration",
-    registrationId
-  );
+  console.log("Stripe webhook (conference): confirmed", registrationId);
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -511,7 +470,6 @@ export async function POST(request: Request) {
         // ── Donation payment confirmation ────────────────────────────────────
 
         const confirmed = await confirmDonation(session, event.id);
-        
         if (!confirmed) {
           // Return error so Stripe can retry
           return NextResponse.json(
@@ -533,16 +491,7 @@ export async function POST(request: Request) {
 
         if (conferenceRegistrationId) {
           // Don't change the registration status — session expired but the
-
           // registration itself may still be within its 24h window.
-
-          // The cron job will handle true expiry when expires_at passes.
-
-          console.log(
-            "Stripe webhook (conference): payment session expired (no action)",
-            conferenceRegistrationId
-          );
-
           break;
         }
 
@@ -693,16 +642,10 @@ export async function POST(request: Request) {
       case "customer.subscription.created": {
         const subscription = event.data.object as Stripe.Subscription;
 
-        // Find donation via subscription metadata or customer metadata
-
         const donationId = subscription.metadata?.donation_id;
 
         if (!donationId) {
-          console.warn(
-            "customer.subscription.created: No donation ID in subscription metadata",
-            subscription.id
-          );
-
+          console.warn('Stripe webhook: No donation ID in subscription metadata');
           break;
         }
 
@@ -797,11 +740,22 @@ export async function POST(request: Request) {
             if (result.success && (result.status === 'confirmed' || result.status === 'already_processed')) {
               // Generate receipt inline (fire-and-forget)
               try {
-                await generateReceiptForDonation({ donationId: verificationResult.donationId });
+                const receiptResult = await generateReceiptForDonation({ donationId: verificationResult.donationId });
+                if (receiptResult.success) {
+                  console.log('Stripe webhook: Subscription receipt generated', {
+                    donationId: verificationResult.donationId,
+                    receiptNumber: receiptResult.receiptNumber,
+                  });
+                } else {
+                  console.error('Stripe webhook: Subscription receipt failed', {
+                    donationId: verificationResult.donationId,
+                    reason: receiptResult.message,
+                  });
+                }
               } catch (receiptError) {
-                console.error('Stripe webhook: Failed to generate receipt for subscription', {
+                console.error('Stripe webhook: Subscription receipt error', {
                   donationId: verificationResult.donationId,
-                  error: receiptError instanceof Error ? receiptError.message : 'Unknown error'
+                  error: receiptError instanceof Error ? receiptError.message : 'Unknown error',
                 });
               }
             }
@@ -909,10 +863,7 @@ export async function POST(request: Request) {
       }
 
       default:
-        // Other events are acknowledged but not processed
-
-        console.log("Unhandled Stripe webhook event type:", event.type);
-
+        // Unhandled event types are acknowledged but not processed
         break;
     }
   } catch (err) {

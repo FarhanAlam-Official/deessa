@@ -105,6 +105,14 @@ export async function generateReceiptDownloadUrl(
   baseUrl?: string,
 ): Promise<string> {
   const token = await generateReceiptToken(donationId, receiptNumber)
-  const siteUrl = baseUrl || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  
+  // Use provided baseUrl, or fall back to environment variables
+  // NEXT_PUBLIC_APP_URL is preferred as it's specifically for API/backend URLs
+  // NEXT_PUBLIC_SITE_URL is the fallback for frontend URLs
+  const siteUrl = baseUrl || 
+                  process.env.NEXT_PUBLIC_APP_URL || 
+                  process.env.NEXT_PUBLIC_SITE_URL || 
+                  "http://localhost:3000"
+  
   return `${siteUrl}/api/receipts/download?token=${token}`
 }
