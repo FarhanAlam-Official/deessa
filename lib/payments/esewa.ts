@@ -4,6 +4,7 @@ import crypto from "crypto"
 import type { PaymentMode } from "./config"
 import { validateAmount, logPaymentEvent } from "./security"
 import { EsewaError } from "./errors"
+import { getAppBaseUrl } from "@/lib/utils"
 
 export interface EsewaInitResult {
   redirectUrl: string
@@ -49,7 +50,7 @@ export async function startEsewaPayment(
   const isSandbox = merchantId === "EPAYTEST" || process.env.ESEWA_BASE_URL?.includes("rc-epay")
   const baseUrl = process.env.ESEWA_BASE_URL || (isSandbox ? "https://rc-epay.esewa.com.np" : "https://epay.esewa.com.np")
   
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  const siteUrl = getAppBaseUrl()
   const successUrl = process.env.ESEWA_SUCCESS_URL || `${siteUrl}/api/payments/esewa/success`
   const failureUrl = process.env.ESEWA_FAILURE_URL || `${siteUrl}/api/payments/esewa/failure`
 

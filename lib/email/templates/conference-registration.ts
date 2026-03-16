@@ -3,6 +3,8 @@
  * Sent immediately on successful registration (status: pending)
  */
 
+import { getAppBaseUrl } from '@/lib/utils'
+
 function escapeHtml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
@@ -31,6 +33,7 @@ export function ConferenceRegistrationTemplate(props: ConferenceRegistrationTemp
   const safeAttendanceMode = escapeHtml(attendanceMode || "—")
   const safeRole = escapeHtml(role || "Attendee")
   const safeWorkshopList = escapeHtml(workshopList)
+  const siteUrl = getAppBaseUrl()
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -168,7 +171,7 @@ export function ConferenceRegistrationTemplate(props: ConferenceRegistrationTemp
                   <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
                     <tr>
                       <td align="center">
-                        <a href="${process.env.NEXT_PUBLIC_SITE_URL}/conference"
+                        <a href="${siteUrl}/conference"
                            style="display:inline-block;background:#3FABDE;color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:12px;padding:14px 36px;letter-spacing:0.3px;">
                           View Conference Details →
                         </a>
@@ -191,7 +194,7 @@ export function ConferenceRegistrationTemplate(props: ConferenceRegistrationTemp
               <p style="margin:0 0 4px;font-size:12px;color:#94A3B8;">DEESSA Foundation — Empowering Communities Across Nepal</p>
               <p style="margin:0;font-size:11px;color:#CBD5E1;">
                 You're receiving this because you registered at
-                <a href="${process.env.NEXT_PUBLIC_SITE_URL}" style="color:#3FABDE;">deessafoundation.org.np</a>
+                <a href="${siteUrl}" style="color:#3FABDE;">deessafoundation.org.np</a>
               </p>
             </td>
           </tr>

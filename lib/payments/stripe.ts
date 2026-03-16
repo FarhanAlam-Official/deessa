@@ -6,6 +6,8 @@ import type { PaymentMode } from "./config"
 
 import type Stripe from "stripe"
 
+import { getAppBaseUrl } from "@/lib/utils"
+
 
 
 export interface StripeCheckoutResult {
@@ -285,7 +287,7 @@ export async function startStripeCheckout(
 
   try {
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+    const baseUrl = getAppBaseUrl()
 
     const overrideSuccessUrl = getSafeOverrideUrl(donation.successUrl, baseUrl)
     const overrideCancelUrl = getSafeOverrideUrl(donation.cancelUrl, baseUrl)
