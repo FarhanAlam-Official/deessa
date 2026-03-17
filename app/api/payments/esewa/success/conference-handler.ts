@@ -76,7 +76,6 @@ export async function handleConferenceVerification(
   transaction_uuid: string,
   responseData: any,
   url: URL,
-  mode: string,
   isMock: boolean
 ): Promise<NextResponse | null> {
   const {
@@ -143,11 +142,11 @@ export async function handleConferenceVerification(
     )
   }
 
-  // HMAC signature verification (required in live mode; skip for mock)
-  if (!isMock && mode === "live") {
+  // HMAC signature verification (required; skip for isMock)
+  if (!isMock) {
     const secretKey = process.env.ESEWA_SECRET_KEY
     if (!secretKey) {
-      logPaymentEvent("eSewa success - missing ESEWA_SECRET_KEY in live mode", {}, "error")
+      logPaymentEvent("eSewa success - missing ESEWA_SECRET_KEY", {}, "error")
       return NextResponse.json({ error: "Server misconfigured" }, { status: 500 })
     }
     

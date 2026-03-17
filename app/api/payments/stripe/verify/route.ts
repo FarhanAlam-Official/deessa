@@ -3,7 +3,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
-import { getPaymentMode } from "@/lib/payments/config"
 import { verifyStripeSession } from "@/lib/payments/stripe"
 import { generateReceiptForDonation } from "@/lib/actions/donation-receipt"
 import { checkRateLimit, getClientIP } from "@/lib/rate-limit"
@@ -67,8 +66,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Invalid session_id" }, { status: 400 })
     }
 
-    const mode = getPaymentMode()
-    const verificationResult = await verifyStripeSession(sessionId, mode)
+    const verificationResult = await verifyStripeSession(sessionId)
 
     if (!verificationResult.success) {
       return NextResponse.json(
@@ -99,9 +97,7 @@ export async function GET(request: Request) {
 
         // Check if payment was completed
         // In Stripe, a session is considered complete when payment_status is "paid"
-        const isPaymentComplete =
-          session?.payment_status === "paid" ||
-          (mode === "mock" && session?.id)
+        const isPaymentComplete = session?.payment_status === "paid"
 
         if (isPaymentComplete) {
           const storedSessionId = (donation as any).stripe_session_id as string | null

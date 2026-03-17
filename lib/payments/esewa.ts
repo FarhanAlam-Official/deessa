@@ -1,7 +1,6 @@
 "use server"
 
 import crypto from "crypto"
-import type { PaymentMode } from "./config"
 import { validateAmount, logPaymentEvent } from "./security"
 import { EsewaError } from "./errors"
 import { getAppBaseUrl } from "@/lib/utils"
@@ -35,7 +34,6 @@ function generateSignature(message: string, secretKey: string): string {
  */
 export async function startEsewaPayment(
   donation: EsewaDonationContext,
-  mode: PaymentMode,
 ): Promise<EsewaInitResult> {
   // Validate inputs
   const amountValidation = validateAmount(donation.amount, "NPR")
@@ -58,23 +56,6 @@ export async function startEsewaPayment(
   // Use a full donation id binding to avoid prefix collisions in callbacks
   const transactionUuid = `${Date.now()}-${donation.id}`
   const referenceId = `esewa_${donation.id}`
-
-  if (mode === "mock") {
-    const mockUrl = `${successUrl}?transaction_code=MOCK123&status=COMPLETE&total_amount=${donation.amount}&transaction_uuid=${transactionUuid}&product_code=${merchantId}&mock=1`
-    
-    logPaymentEvent("eSewa payment initiated (mock)", {
-      donationId: donation.id,
-      amount: donation.amount,
-      transactionUuid,
-    })
-
-    return {
-      redirectUrl: mockUrl,
-      referenceId,
-      formData: {},
-      transactionUuid,
-    }
-  }
 
   // Validate merchant ID and secret key
   if (!merchantId || merchantId.trim().length === 0) {

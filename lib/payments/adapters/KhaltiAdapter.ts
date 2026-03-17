@@ -120,8 +120,6 @@ export class KhaltiAdapter extends BaseProviderAdapter {
     context?: VerificationContext
   ): Promise<VerificationResult> {
     try {
-      const mode = context?.mode || this.getPaymentMode()
-
       // Extract pidx from payload
       const pidx = this.extractPidx(payload)
       if (!pidx) {
@@ -131,13 +129,7 @@ export class KhaltiAdapter extends BaseProviderAdapter {
         )
       }
 
-      // In mock mode, skip API verification (development only)
-      if (mode === 'mock') {
-        console.warn('KhaltiAdapter: Running in mock mode - API verification bypassed')
-        return this.createMockVerificationResult(payload)
-      }
-
-      // Live mode: Perform server-side transaction lookup
+      // Perform server-side transaction lookup
       const lookupResponse = await this.lookupTransactionInternal(pidx)
 
       // Verify and normalize the response
@@ -339,42 +331,6 @@ export class KhaltiAdapter extends BaseProviderAdapter {
     }
   }
 
-  /**
-   * Create mock verification result for development
-   * 
-   * @param payload - Original payload
-   * @returns Mock verification result
-   */
-  private createMockVerificationResult(payload: unknown): VerificationResult {
-    const pidx = this.extractPidx(payload)
-    const donationId = this.extractDonationId(payload)
-
-    if (!pidx || !donationId) {
-      throw VerificationError.invalidPayload(
-        'khalti',
-        'Missing pidx or donation ID in mock mode'
-      )
-    }
-
-    // Extract amount if provided, otherwise use default
-    const payloadObj = payload as Record<string, unknown>
-    const amount = typeof payloadObj.amount === 'number' 
-      ? payloadObj.amount 
-      : 100 // Default mock amount
-
-    return {
-      success: true,
-      donationId,
-      transactionId: pidx,
-      amount,
-      currency: 'NPR',
-      status: 'paid',
-      metadata: {
-        pidx,
-        mock: true,
-      },
-    }
-  }
 
   /**
    * Extract metadata from Khalti payload
@@ -391,7 +347,7 @@ export class KhaltiAdapter extends BaseProviderAdapter {
     return {
       provider: 'khalti',
       transactionId: transactionId || pidx || '',
-      eventId: pidx, // Use pidx as event ID for idempotency
+      eventId: pidx ?? undefined, // Use pidx as event ID for idempotency
       timestamp: new Date(),
       rawPayload: payload,
     }
@@ -545,21 +501,6 @@ export class KhaltiAdapter extends BaseProviderAdapter {
     }
   }
 
-  /**
-   * Get payment mode from environment
-   */
-  private getPaymentMode(): 'live' | 'mock' {
-    const mode = process.env.PAYMENT_MODE
-    
-    // Guardrail: never allow mock mode in production
-    if (process.env.NODE_ENV === 'production' && mode !== 'live') {
-      throw new Error(
-        'PAYMENT_MODE must be "live" in production. Refusing to run with mock mode.'
-      )
-    }
-
-    return mode === 'live' ? 'live' : 'mock'
-  }
 }
 
 /**

@@ -2,7 +2,6 @@
 
 import { NextResponse } from "next/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
-import { getPaymentMode } from "@/lib/payments/config"
 import {
   logPaymentEvent,
   maskSensitiveData,
@@ -32,7 +31,6 @@ import { checkRateLimit, getClientIP } from "@/lib/rate-limit"
  * 7. Redirect to success page
  */
 export async function GET(request: Request) {
-  const mode = getPaymentMode()
   const url = new URL(request.url)
 
   // 1. Apply distributed rate limiting (20 requests per minute per IP for callbacks)
@@ -161,10 +159,9 @@ export async function GET(request: Request) {
       transaction_uuid,
       responseData,
       url,
-      mode,
       isMock
     )
-    
+
     if (conferenceResult) {
       return conferenceResult
     }
@@ -198,7 +195,6 @@ export async function GET(request: Request) {
     let verificationResult
     try {
       verificationResult = await esewaAdapter.verify(responseData, {
-        mode: isMock ? 'mock' : mode,
         query: { data: encodedData || undefined },
       })
     } catch (verifyError) {

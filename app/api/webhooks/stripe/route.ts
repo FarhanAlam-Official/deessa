@@ -4,8 +4,6 @@ import { NextResponse } from "next/server";
 
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 
-import { getPaymentMode } from "@/lib/payments/config";
-
 import { generateReceiptForDonation } from "@/lib/actions/donation-receipt";
 
 import { sendConferenceConfirmationEmail } from "@/lib/email/conference-mailer";
@@ -387,8 +385,6 @@ async function confirmConferenceRegistrationFromWebhook(
  */
 
 export async function POST(request: Request) {
-  const mode = getPaymentMode();
-
   const signature = request.headers.get("stripe-signature");
 
   let event: Stripe.Event;
@@ -396,45 +392,39 @@ export async function POST(request: Request) {
   try {
     const body = await request.text();
 
-    if (mode === "mock") {
-      // In mock mode we trust local test payloads and skip signature verification.
+    const secret = process.env.STRIPE_WEBHOOK_SECRET;
 
-      event = JSON.parse(body) as Stripe.Event;
-    } else {
-      const secret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!secret) {
+      console.error("STRIPE_WEBHOOK_SECRET is not configured");
 
-      if (!secret) {
-        console.error("STRIPE_WEBHOOK_SECRET is not configured");
+      return NextResponse.json(
+        { error: "Webhook not configured" },
+        { status: 500 }
+      );
+    }
 
-        return NextResponse.json(
-          { error: "Webhook not configured" },
-          { status: 500 }
-        );
-      }
+    if (!signature) {
+      return NextResponse.json(
+        { error: "Missing Stripe-Signature header" },
+        { status: 400 }
+      );
+    }
 
-      if (!signature) {
-        return NextResponse.json(
-          { error: "Missing Stripe-Signature header" },
-          { status: 400 }
-        );
-      }
+    const Stripe = (await import("stripe")).default;
 
-      const Stripe = (await import("stripe")).default;
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+      apiVersion: "2024-06-20",
+    });
 
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-        apiVersion: "2024-06-20",
-      });
+    try {
+      event = stripe.webhooks.constructEvent(body, signature, secret);
+    } catch (err) {
+      console.error("Stripe webhook signature verification failed:", err);
 
-      try {
-        event = stripe.webhooks.constructEvent(body, signature, secret);
-      } catch (err) {
-        console.error("Stripe webhook signature verification failed:", err);
-
-        return NextResponse.json(
-          { error: "Invalid signature" },
-          { status: 400 }
-        );
-      }
+      return NextResponse.json(
+        { error: "Invalid signature" },
+        { status: 400 }
+      );
     }
   } catch (err) {
     console.error("Stripe webhook parsing error:", err);

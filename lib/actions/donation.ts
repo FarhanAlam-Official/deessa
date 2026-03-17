@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { createClient as createServiceClient } from "@supabase/supabase-js"
-import { getPaymentMode, getPaymentSettings, getSupportedProviders, type PaymentProvider } from "@/lib/payments/config"
+import { getPaymentSettings, getSupportedProviders, type PaymentProvider } from "@/lib/payments/config"
 import { startStripeCheckout } from "@/lib/payments/stripe"
 import { startKhaltiPayment } from "@/lib/payments/khalti"
 import { startEsewaPayment } from "@/lib/payments/esewa"
@@ -59,8 +59,6 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
       input.provider = fallbackProvider
     }
 
-    const mode = getPaymentMode()
-
     // Determine currency: Stripe uses USD by default, local gateways use NPR
     const currency = input.provider === "stripe" ? settings.defaultCurrency || "USD" : ("NPR" as const)
 
@@ -96,17 +94,14 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
     let providerUpdate: Record<string, unknown> = {}
 
     if (input.provider === "stripe") {
-      const result = await startStripeCheckout(
-        {
-          id: donation.id,
-          amount: Number(donation.amount),
-          currency,
-          donorName: input.donorName,
-          donorEmail: input.donorEmail,
-          isMonthly: input.isMonthly,
-        },
-        mode,
-      )
+      const result = await startStripeCheckout({
+        id: donation.id,
+        amount: Number(donation.amount),
+        currency,
+        donorName: input.donorName,
+        donorEmail: input.donorEmail,
+        isMonthly: input.isMonthly,
+      })
       redirectUrl = result.redirectUrl
       transactionId = result.sessionId
       providerRef = result.sessionId
@@ -115,17 +110,14 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
         stripe_session_id: result.sessionId,
       }
     } else if (input.provider === "khalti") {
-      const result = await startKhaltiPayment(
-        {
-          id: donation.id,
-          amount: Number(donation.amount),
-          currency,
-          donorName: input.donorName,
-          donorEmail: input.donorEmail,
-          donorPhone: input.donorPhone,
-        },
-        mode,
-      )
+      const result = await startKhaltiPayment({
+        id: donation.id,
+        amount: Number(donation.amount),
+        currency,
+        donorName: input.donorName,
+        donorEmail: input.donorEmail,
+        donorPhone: input.donorPhone,
+      })
       redirectUrl = result.redirectUrl
       transactionId = result.pidx
       providerRef = result.pidx
@@ -134,14 +126,11 @@ export async function startDonation(input: StartDonationInput): Promise<StartDon
         khalti_pidx: result.pidx,
       }
     } else if (input.provider === "esewa") {
-      const result = await startEsewaPayment(
-        {
-          id: donation.id,
-          amount: Number(donation.amount),
-          currency,
-        },
-        mode,
-      )
+      const result = await startEsewaPayment({
+        id: donation.id,
+        amount: Number(donation.amount),
+        currency,
+      })
       redirectUrl = result.redirectUrl
       transactionId = result.referenceId
       providerRef = result.transactionUuid
@@ -224,4 +213,3 @@ export async function submitDonation(data: DonationFormData) {
     provider: "stripe",
   })
 }
-

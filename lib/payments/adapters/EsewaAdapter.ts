@@ -125,21 +125,13 @@ export class EsewaAdapter extends BaseProviderAdapter {
     context?: VerificationContext
   ): Promise<VerificationResult> {
     try {
-      const mode = context?.mode || this.getPaymentMode()
-
       // Parse the callback payload
       const callbackData = this.parseCallbackPayload(payload, context)
 
       // Validate required fields
       this.validateCallbackData(callbackData)
 
-      // In mock mode, skip signature verification (development only)
-      if (mode === 'mock') {
-        console.warn('EsewaAdapter: Running in mock mode - signature verification bypassed')
-        return this.createMockVerificationResult(callbackData)
-      }
-
-      // Live mode: Verify HMAC signature
+      // Verify HMAC signature
       this.verifySignature(callbackData)
 
       // Perform server-side transaction status lookup
@@ -499,43 +491,6 @@ export class EsewaAdapter extends BaseProviderAdapter {
     }
   }
 
-  /**
-   * Create mock verification result for development
-   * 
-   * @param callbackData - Original callback data
-   * @returns Mock verification result
-   */
-  private createMockVerificationResult(
-    callbackData: EsewaCallbackPayload
-  ): VerificationResult {
-    const donationId = this.extractDonationId(callbackData.transaction_uuid)
-    
-    if (!donationId) {
-      throw VerificationError.invalidPayload(
-        'esewa',
-        'Cannot extract donation ID from transaction_uuid in mock mode'
-      )
-    }
-
-    const amount = parseFloat(callbackData.total_amount.toString())
-    const status = this.mapEsewaStatus(callbackData.status)
-
-    return {
-      success: callbackData.status === 'COMPLETE',
-      donationId,
-      transactionId: callbackData.transaction_uuid,
-      amount,
-      currency: 'NPR',
-      status,
-      metadata: {
-        transactionCode: callbackData.transaction_code,
-        transactionUuid: callbackData.transaction_uuid,
-        esewaStatus: callbackData.status,
-        mock: true,
-      },
-      error: callbackData.status === 'COMPLETE' ? undefined : this.getStatusErrorMessage(callbackData.status),
-    }
-  }
 
   /**
    * Extract metadata from eSewa payload
@@ -680,21 +635,6 @@ export class EsewaAdapter extends BaseProviderAdapter {
     }
   }
 
-  /**
-   * Get payment mode from environment
-   */
-  private getPaymentMode(): 'live' | 'mock' {
-    const mode = process.env.PAYMENT_MODE
-    
-    // Guardrail: never allow mock mode in production
-    if (process.env.NODE_ENV === 'production' && mode !== 'live') {
-      throw new Error(
-        'PAYMENT_MODE must be "live" in production. Refusing to run with mock mode.'
-      )
-    }
-
-    return mode === 'live' ? 'live' : 'mock'
-  }
 }
 
 /**
