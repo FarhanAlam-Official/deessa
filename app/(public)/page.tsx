@@ -35,7 +35,7 @@ const heroSlides: HeroSlide[] = [
   {
     image:
       "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&w=1920&q=85",
-    title: "Empowering 10,000+ Lives ΓÇö and Counting",
+    title: "Empowering 10,000+ Lives and Counting",
     subtitle:
       "From classrooms to clinics, your support reaches the communities that need it most.",
     cta: "See Our Impact",
@@ -44,7 +44,7 @@ const heroSlides: HeroSlide[] = [
   {
     image:
       "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1920&q=85",
-    title: "Volunteer With Us ΓÇö Stand With Nepal",
+    title: "Volunteer With Us - Stand With Nepal",
     subtitle:
       "Join our community of changemakers and see your effort transform villages firsthand.",
     cta: "Get Involved",
