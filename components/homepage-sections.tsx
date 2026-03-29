@@ -666,6 +666,35 @@ export function PodcastSection() {
   )
 }
 
+/** Section 10b: Testimonials */
+export function TestimonialsSection() {
+  return (
+    <section className="py-16 md:py-24 bg-muted relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ScrollReveal animation="fade-up">
+          <div className="text-center mb-12">
+            <span className="text-primary font-bold tracking-widest uppercase text-sm mb-4 block">Testimonials</span>
+            <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">
+              Voices of Impact
+            </h2>
+          </div>
+        </ScrollReveal>
+        <ScrollReveal animation="fade-up" delay={150}>
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+            <Image
+              src="/testimonials.png"
+              alt="Testimonials from community members"
+              width={1200}
+              height={400}
+              className="w-full h-auto object-contain bg-background"
+            />
+          </div>
+        </ScrollReveal>
+      </div>
+    </section>
+  )
+}
+
 /** Section 10: Partners & Sponsors */
 export function PartnersSection() {
   return (
