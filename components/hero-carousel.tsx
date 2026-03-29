@@ -6,7 +6,6 @@ import Link from "next/link"
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { FloatingParticles, WordByWordReveal } from "@/components/scroll-animations"
 
 export interface HeroSlide {
   image: string
@@ -121,25 +120,22 @@ export function HeroCarousel({ slides, interval = 6000 }: HeroCarouselProps) {
           <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/50 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
 
-          {/* Floating particles */}
-          <FloatingParticles count={15} className="z-[5]" />
-
           {/* Content */}
           <div className="relative z-10 h-full flex items-center">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
               <div className="max-w-2xl">
                 <h1
-                  className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white leading-[1.08] tracking-tight mb-6 text-balance font-comic"
+                  className={cn(
+                    "text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white leading-[1.08] tracking-tight mb-6 text-balance",
+                    "transition-all duration-700",
+                    i === current ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+                  )}
                 >
-                  <WordByWordReveal
-                    text={slide.title}
-                    active={i === current}
-                    staggerMs={80}
-                  />
+                  {slide.title}
                 </h1>
                 <p
                   className={cn(
-                    "text-lg sm:text-xl text-white/85 leading-relaxed mb-8 max-w-lg font-marissa",
+                    "text-lg sm:text-xl text-white/85 leading-relaxed mb-8 max-w-lg",
                     "transition-all duration-700 delay-200",
                     i === current ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
                   )}

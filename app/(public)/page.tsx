@@ -1,9 +1,7 @@
 ﻿import { SecretKeyListener } from "@/components/secret-key-listener"
 import { HeroCarousel } from "@/components/hero-carousel"
 import type { HeroSlide } from "@/components/hero-carousel"
-import { HomeFAQs } from "@/components/home-faqs"
 import { HomeAccessibilityButton } from "@/components/home-accessibility-button"
-import { HomeTestimonialsSlider } from "@/components/home-testimonials-slider"
 import {
   OurStorySection,
   MissionVisionSection,
@@ -15,6 +13,7 @@ import {
   JoinMovementSection,
   PodcastSection,
   PartnersSection,
+  TestimonialsSection,
   WhereWeWorkSection,
   ShopSection,
   ContactSection,
@@ -94,8 +93,8 @@ export default async function HomePage() {
       {/* ΓöÇΓöÇ 6b. ADVOCACY & RECOGNITION ΓöÇΓöÇ */}
       <AdvocacySection />
 
-      {/* ΓöÇΓöÇ 7. TESTIMONIALS SLIDER ΓöÇΓöÇ */}
-      <HomeTestimonialsSlider />
+      {/* ΓöÇΓöÇ 7. TESTIMONIALS ΓöÇΓöÇ */}
+      <TestimonialsSection />
 
       {/* ΓöÇΓöÇ 8. JOIN THE MOVEMENT ΓöÇΓöÇ */}
       <JoinMovementSection />
@@ -109,10 +108,7 @@ export default async function HomePage() {
       {/* ΓöÇΓöÇ 11. WHERE WE WORK ΓöÇΓöÇ */}
       <WhereWeWorkSection />
 
-      {/* ΓöÇΓöÇ 12. FAQs ΓöÇΓöÇ */}
-      <HomeFAQs />
-
-      {/* ΓöÇΓöÇ 13. SHOP OUR STORE ΓöÇΓöÇ */}
+      {/* ΓöÇΓöÇ 12. SHOP OUR STORE ΓöÇΓöÇ */}
       <ShopSection />
 
       {/* ΓöÇΓöÇ 14. CONTACT / VISIT OFFICE ΓöÇΓöÇ */}

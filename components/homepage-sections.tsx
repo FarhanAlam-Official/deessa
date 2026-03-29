@@ -717,28 +717,93 @@ export function PodcastSection() {
 
 /** Section 10b: Testimonials */
 export function TestimonialsSection() {
+  const testimonials = [
+    {
+      name: "Sita Sharma",
+      role: "Parent, Kathmandu",
+      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80",
+      quote: "Deessa Foundation changed my daughter's life. She now attends school regularly and dreams of becoming a teacher. The scholarship program gave us hope when we had none.",
+      rating: 5,
+    },
+    {
+      name: "Ram Bahadur Thapa",
+      role: "Village Elder, Gorkha",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
+      quote: "The health camp organized by Deessa brought medical care to our remote village for the first time in years. Over 200 families received treatment. We are forever grateful.",
+      rating: 5,
+    },
+    {
+      name: "Maya Gurung",
+      role: "Volunteer, Pokhara",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80",
+      quote: "Volunteering with Deessa has been the most rewarding experience of my life. Seeing the smiles on children's faces when they receive books and supplies is priceless.",
+      rating: 5,
+    },
+  ]
+
   return (
     <section className="py-16 md:py-24 bg-muted relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal animation="fade-up">
           <div className="text-center mb-12">
             <span className="text-primary font-bold tracking-widest uppercase text-sm mb-4 block">Testimonials</span>
-            <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight mb-4">
               Voices of Impact
             </h2>
+            <p className="text-foreground/60 text-lg max-w-2xl mx-auto">
+              Hear from the people whose lives have been touched by our work
+            </p>
           </div>
         </ScrollReveal>
-        <ScrollReveal animation="fade-up" delay={150}>
-          <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-            <Image
-              src="/testimonials.png"
-              alt="Testimonials from community members"
-              width={1200}
-              height={400}
-              className="w-full h-auto object-contain bg-background"
-            />
-          </div>
-        </ScrollReveal>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {testimonials.map((testimonial, idx) => (
+            <ScrollReveal key={testimonial.name} animation="fade-up" delay={idx * 150}>
+              <div className="bg-background rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
+                {/* Quote Icon */}
+                <div className="text-primary/20 mb-4">
+                  <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
+                  </svg>
+                </div>
+
+                {/* Quote Text */}
+                <p className="text-foreground/80 leading-relaxed mb-6 flex-grow italic">
+                  "{testimonial.quote}"
+                </p>
+
+                {/* Rating Stars */}
+                <div className="flex gap-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <svg
+                      key={i}
+                      className="w-5 h-5 text-yellow-500 fill-current"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                    </svg>
+                  ))}
+                </div>
+
+                {/* Author Info */}
+                <div className="flex items-center gap-4 pt-4 border-t border-border">
+                  <div className="relative w-14 h-14 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-primary/20">
+                    <Image
+                      src={testimonial.image}
+                      alt={testimonial.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-foreground">{testimonial.name}</h4>
+                    <p className="text-sm text-foreground/60">{testimonial.role}</p>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+          ))}
+        </div>
       </div>
     </section>
   )
