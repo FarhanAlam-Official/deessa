@@ -127,6 +127,55 @@ const partnerLogos = [
 
 /* ──────────────────  ENHANCED SECTIONS  ────────────────── */
 
+/** Section 1: Hero / Landing Page */
+export function HeroSection() {
+  return (
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-background">
+      {/* Background Image with Overlay */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/educationHealthShelterFreedom.png"
+          alt="Children learning in a classroom"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent" />
+      </div>
+
+      {/* Content - Left Aligned */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="max-w-2xl">
+          <ScrollReveal animation="fade-up">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight mb-6 text-white">
+              Building Schools,<br />
+              <span className="text-primary">Building Futures</span>
+            </h1>
+          </ScrollReveal>
+
+          <ScrollReveal animation="fade-up" delay={150}>
+            <p className="text-lg md:text-xl text-white/80 mb-8 leading-relaxed max-w-lg">
+              Safe schools built with inspiring classrooms, where every child discovers a generation of potential.
+            </p>
+          </ScrollReveal>
+
+          <ScrollReveal animation="fade-up" delay={300}>
+            <Button
+              asChild
+              size="lg"
+              className="rounded-full h-12 px-8 bg-primary hover:bg-primary/90 text-white font-bold shadow-lg"
+            >
+              <Link href="/programs">
+                Explore Programs
+              </Link>
+            </Button>
+          </ScrollReveal>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 /** Section 2: Our Story */
 export function OurStorySection() {
   return (
@@ -258,7 +307,7 @@ export function EducationQuoteSection() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-transform duration-500">
               <Image
-                src="/deesa-resources/education%20quote%20by%20deessa.jpeg"
+                src="/educationHealthShelterFreedom.png"
                 alt="Open Doors to Education for All — Deessa Foundation"
                 width={600}
                 height={600}
@@ -486,7 +535,7 @@ export function AdvocacySection() {
             <div className="group relative rounded-3xl overflow-hidden bg-background border border-border shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
               <div className="relative h-72 overflow-hidden">
                 <Image
-                  src="/deesa-resources/sustainableDevelopment%20Award%20to%20youths.jpeg"
+                  src="/deesa-resources/changeMaker1.jpeg"
                   alt="Sustainable Development Youth Award — Nepal Youth Convention"
                   fill
                   className="object-cover object-top group-hover:scale-105 transition-transform duration-700"
@@ -517,7 +566,7 @@ export function AdvocacySection() {
             <div className="group relative rounded-3xl overflow-hidden bg-background border border-border shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
               <div className="relative h-72 overflow-hidden">
                 <Image
-                  src="/deesa-resources/CEOofSDGonAutism.jpeg"
+                  src="/deesa-resources/changeMaker2.jpeg"
                   alt="Pradeep Kumar Lamichhane — Autism Awareness Month advocacy"
                   fill
                   className="object-cover object-top group-hover:scale-105 transition-transform duration-700"
