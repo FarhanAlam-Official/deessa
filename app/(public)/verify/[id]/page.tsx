@@ -150,7 +150,7 @@ function PageShell({ children, variant = "default" }: { children: React.ReactNod
       <footer className="relative border-t border-gray-200 bg-[rgb(248,249,250)] py-6">
         <div className="max-w-2xl mx-auto px-4 text-center space-y-3">
           <p className="text-xs text-[rgb(108,117,125)]">
-            &copy; {new Date().getFullYear()} Deessa Foundation Audit &amp; Compliance Team
+            &copy; {new Date().getFullYear()} Deessa Foundation Audit & Compliance Team
           </p>
           <div className="flex items-center justify-center gap-5 text-xs">
             <Link href="/privacy" className="text-[rgb(63,171,222)] hover:underline">Privacy Policy</Link>
@@ -509,7 +509,7 @@ export default async function VerificationPage({ params }: VerificationPageProps
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
-              Valid &amp; Recorded
+              Valid & Recorded
             </span>
           </div>
 

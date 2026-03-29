@@ -35,7 +35,7 @@ export default async function ImpactPage() {
           />
           <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto">
             <span className="bg-primary/90 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
-              Transparency & Results
+              Transparency <span className="font-sans">&</span> Results
             </span>
             <h1 className="text-white text-4xl md:text-5xl font-black leading-tight tracking-tight mb-4">
               Measuring What Matters
@@ -118,7 +118,7 @@ export default async function ImpactPage() {
       <Section className="bg-surface" id="reports">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Transparency Reports & Documents</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Transparency Reports <span className="font-sans">&</span> Documents</h2>
             <p className="text-foreground-muted">
               Download our annual reports, organizational documents, and detailed breakdowns of finances and impact.
             </p>

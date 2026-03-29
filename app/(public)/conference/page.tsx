@@ -188,7 +188,7 @@ export default async function ConferencePage() {
             {/* Venue & Contact */}
             <div className="flex flex-col gap-6">
               <div>
-                <h2 className="text-2xl font-bold text-foreground">Venue &amp; Contact</h2>
+                <h2 className="text-2xl font-bold text-foreground">Venue & Contact</h2>
                 <p className="text-sm text-foreground-muted">Everything you need to find us.</p>
               </div>
               <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-sm">

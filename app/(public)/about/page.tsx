@@ -41,7 +41,7 @@ export default async function AboutPage() {
           />
           <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto">
             <span className="bg-primary/90 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
-              Since 2015
+              Transparency & Results
             </span>
             <h1 className="text-white text-4xl md:text-6xl font-black leading-tight tracking-tight mb-6">
               Our Story, Your Impact.
@@ -123,7 +123,7 @@ export default async function AboutPage() {
       <Section className="bg-surface" id="journey">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">Our Journey</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">Transparency Reports & Documents</h2>
             <p className="text-foreground-muted mt-2">Milestones that defined our path.</p>
           </div>
           <div className="relative">
@@ -166,100 +166,130 @@ export default async function AboutPage() {
       {/* Team Section - Now uses database data */}
       <Section className="bg-background" id="team">
         <div className="text-center mb-16">
+          <span className="text-primary font-bold tracking-wider uppercase text-xs mb-3 block">Our People</span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground">Meet the Changemakers</h2>
-          <p className="text-foreground-muted mt-2 max-w-2xl mx-auto">
+          <p className="text-foreground-muted mt-3 max-w-2xl mx-auto">
             Our diverse team of passionate individuals working tirelessly on the ground and behind the scenes.
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {teamMembers.length > 0 ? (
-            teamMembers.map((member) => (
-              <TeamMemberCard
-                key={member.id}
-                name={member.name}
-                role={member.role}
-                bio={member.bio || ""}
-                image={member.image || ""}
-              />
-            ))
-          ) : (
-            <div className="col-span-4 text-center py-12 text-foreground-muted">
-              <p>Team information coming soon.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {[ 
+            { 
+              name: "Bikram Thapa", 
+              role: "Program Director", 
+              bio: "Leading education initiatives across rural Nepal.",
+              image: "/deesa-resources/changeMaker1.jpeg"
+            },
+            { 
+              name: "Rejina Gharti Magar", 
+              role: "Community Lead", 
+              bio: "Building sustainable communities through grassroots engagement.",
+              image: "/deesa-resources/changeMaker2.jpeg"
+            },
+            { 
+              name: "Deepak Bashyal", 
+              role: "Health Coordinator", 
+              bio: "Bringing healthcare access to remote villages.",
+              image: "/deesa-resources/changeMaker3.jpeg"
+            },
+          ].map((member, index) => (
+            <div key={index} className="group">
+              <div className="bg-surface rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300">
+                <div className="aspect-square relative overflow-hidden">
+                  <img 
+                    src={member.image} 
+                    alt={member.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                    <h3 className="font-bold text-lg">{member.name}</h3>
+                    <p className="text-white/80 text-sm">{member.role}</p>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <p className="text-foreground-muted text-sm">{member.bio}</p>
+                </div>
+              </div>
             </div>
-          )}
+          ))}
         </div>
       </Section>
 
       {/* Partners & Reports Section */}
-      <Section className="bg-surface border-t border-border" id="partners">
-        <div className="flex flex-col lg:flex-row gap-16">
+      <Section className="bg-gradient-to-b from-surface via-surface to-background" id="partners">
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
+          {/* Partners Section */}
           <div className="lg:w-1/2">
-            <h2 className="text-2xl font-bold text-foreground mb-8">Our Partners & Supporters</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+            <div className="mb-8">
+              <span className="text-primary font-bold tracking-wider uppercase text-xs mb-2 block">Collaboration</span>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">Our Partners & Supporters</h2>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {[
-                { Icon: Handshake, color: 'blue', from: 'from-blue-50', to: 'to-blue-100', hoverBorder: 'hover:border-blue-400', hoverShadow: 'hover:shadow-blue-500/20', hoverGradient: 'group-hover:from-blue-500/5 group-hover:to-blue-500/10', hoverIcon: 'group-hover:text-blue-600' },
-                { Icon: Globe, color: 'green', from: 'from-green-50', to: 'to-green-100', hoverBorder: 'hover:border-green-400', hoverShadow: 'hover:shadow-green-500/20', hoverGradient: 'group-hover:from-green-500/5 group-hover:to-green-500/10', hoverIcon: 'group-hover:text-green-600' },
-                { Icon: GraduationCap, color: 'purple', from: 'from-purple-50', to: 'to-purple-100', hoverBorder: 'hover:border-purple-400', hoverShadow: 'hover:shadow-purple-500/20', hoverGradient: 'group-hover:from-purple-500/5 group-hover:to-purple-500/10', hoverIcon: 'group-hover:text-purple-600' },
-                { Icon: HeartPulse, color: 'rose', from: 'from-rose-50', to: 'to-rose-100', hoverBorder: 'hover:border-rose-400', hoverShadow: 'hover:shadow-rose-500/20', hoverGradient: 'group-hover:from-rose-500/5 group-hover:to-rose-500/10', hoverIcon: 'group-hover:text-rose-600' },
-                { Icon: Droplet, color: 'cyan', from: 'from-cyan-50', to: 'to-cyan-100', hoverBorder: 'hover:border-cyan-400', hoverShadow: 'hover:shadow-cyan-500/20', hoverGradient: 'group-hover:from-cyan-500/5 group-hover:to-cyan-500/10', hoverIcon: 'group-hover:text-cyan-600' },
-                { Icon: Trees, color: 'emerald', from: 'from-emerald-50', to: 'to-emerald-100', hoverBorder: 'hover:border-emerald-400', hoverShadow: 'hover:shadow-emerald-500/20', hoverGradient: 'group-hover:from-emerald-500/5 group-hover:to-emerald-500/10', hoverIcon: 'group-hover:text-emerald-600' },
+                { Icon: Handshake, label: 'Partnerships', color: 'blue', bg: 'bg-blue-50', iconColor: 'text-blue-500', border: 'border-blue-100' },
+                { Icon: Globe, label: 'Global NGOs', color: 'green', bg: 'bg-green-50', iconColor: 'text-green-500', border: 'border-green-100' },
+                { Icon: GraduationCap, label: 'Education', color: 'purple', bg: 'bg-purple-50', iconColor: 'text-purple-500', border: 'border-purple-100' },
+                { Icon: HeartPulse, label: 'Healthcare', color: 'rose', bg: 'bg-rose-50', iconColor: 'text-rose-500', border: 'border-rose-100' },
+                { Icon: Droplet, label: 'Water', color: 'cyan', bg: 'bg-cyan-50', iconColor: 'text-cyan-500', border: 'border-cyan-100' },
+                { Icon: Trees, label: 'Environment', color: 'emerald', bg: 'bg-emerald-50', iconColor: 'text-emerald-500', border: 'border-emerald-100' },
               ].map((partner, index) => {
-                const { Icon, from, to, hoverBorder, hoverShadow, hoverGradient, hoverIcon } = partner;
+                const { Icon, label, bg, iconColor, border } = partner;
                 return (
                   <div
                     key={index}
-                    className={`group relative h-28 bg-gradient-to-br ${from} ${to} dark:from-background dark:to-surface rounded-2xl flex items-center justify-center border-2 border-border/50 ${hoverBorder} transition-all duration-300 cursor-pointer overflow-hidden shadow-sm hover:shadow-xl ${hoverShadow} hover:-translate-y-1`}
+                    className={`group relative bg-white rounded-xl border ${border} p-5 flex flex-col items-center justify-center gap-3 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer`}
                   >
-                    {/* Background gradient effect on hover */}
-                    <div className={`absolute inset-0 bg-gradient-to-br from-transparent to-transparent ${hoverGradient} transition-all duration-300`} />
-                    
-                    {/* Icon with animation */}
-                    <Icon className={`relative size-12 text-foreground-muted/60 ${hoverIcon} transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`} />
-                    
-                    {/* Subtle shine effect */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                      <div className="absolute -inset-full top-0 block h-full w-1/2 transform -skew-x-12 bg-gradient-to-r from-transparent to-white/10 group-hover:animate-[shimmer_1.5s_ease-in-out]" />
+                    <div className={`w-12 h-12 ${bg} rounded-xl flex items-center justify-center ${iconColor} transition-transform duration-300 group-hover:scale-110`}>
+                      <Icon className="size-6" />
                     </div>
+                    <span className="text-xs font-medium text-foreground-muted uppercase tracking-wide">{label}</span>
                   </div>
                 );
               })}
             </div>
           </div>
+
+          {/* Reports Section */}
           <div className="lg:w-1/2" id="reports">
-            <h2 className="text-2xl font-bold text-foreground mb-8">Transparency & Reports</h2>
-            <div className="flex flex-col gap-4">
+            <div className="mb-8">
+              <span className="text-primary font-bold tracking-wider uppercase text-xs mb-2 block">Transparency</span>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">Transparency & Reports</h2>
+            </div>
+            <div className="flex flex-col gap-3">
               {[
-                { title: "Annual Report 2023", size: "2.4 MB" },
-                { title: "Financial Statement 2023", size: "1.1 MB" },
-                { title: "Impact Assessment Q4 2023", size: "890 KB" },
+                { title: "Annual Report 2023", size: "2.4 MB", year: "2023" },
+                { title: "Financial Statement 2023", size: "1.1 MB", year: "2023" },
+                { title: "Impact Assessment Q4 2023", size: "890 KB", year: "2023" },
               ].map((report) => (
                 <div
                   key={report.title}
-                  className="flex items-center p-4 bg-background rounded-xl border border-border hover:shadow-md transition-shadow"
+                  className="group flex items-center p-4 bg-white rounded-xl border border-border hover:border-primary/30 hover:shadow-md transition-all duration-300 cursor-pointer"
                 >
-                  <div className="bg-red-100 p-3 rounded-lg text-primary mr-4">
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary mr-4 transition-colors group-hover:bg-primary group-hover:text-white">
                     <FileText className="size-5" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-foreground">{report.title}</h3>
-                    <p className="text-sm text-foreground-muted">PDF • {report.size}</p>
+                    <h3 className="font-semibold text-foreground text-sm">{report.title}</h3>
+                    <p className="text-xs text-foreground-muted">PDF • {report.size}</p>
                   </div>
-                  <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/10">
-                    <Download className="size-5" />
-                  </Button>
+                  <div className="w-8 h-8 rounded-full bg-surface flex items-center justify-center text-foreground-muted group-hover:bg-primary group-hover:text-white transition-all">
+                    <Download className="size-4" />
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
       </Section>
+
       {/* Resources & Documentation */}
-      <Section className="bg-background">
+      <Section className="bg-gradient-to-b from-background via-surface/50 to-background">
         <div className="text-center mb-12">
-          <h2 className="text-primary font-bold tracking-wide uppercase text-sm mb-3">Resources</h2>
-          <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <span className="text-primary font-bold tracking-wider uppercase text-xs mb-3 block">Resources</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Official Documents & Materials
-          </h3>
+          </h2>
           <p className="text-foreground-muted text-lg max-w-2xl mx-auto">
             Access our organizational documents, brand guidelines, and registration certificates.
           </p>
