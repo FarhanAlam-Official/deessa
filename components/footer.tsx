@@ -437,21 +437,6 @@ export function Footer() {
             </ul>
           </div>
         </div>
-
-        {/* Trust Strip - Registered & Recognized By */}
-        <div className="border-t border-gray-800/30 pt-12 pb-8">
-          <div className="text-center mb-6">
-            <p className="text-gray-500 text-xs uppercase tracking-wider mb-4">Registered & Recognized By</p>
-            <div className="flex items-center justify-center gap-8 flex-wrap opacity-40">
-              <div className="text-gray-600 text-sm font-medium">Nepal Government</div>
-              <div className="text-gray-600 text-sm font-medium">SWC</div>
-              <div className="text-gray-600 text-sm font-medium">UBC</div>
-            </div>
-          </div>
-          <p className="text-gray-600 text-xs text-center max-w-3xl mx-auto leading-relaxed">
-            Deessa Foundation is a registered non-governmental organization in Nepal (Reg. No. XXXXX), affiliated with the Social Welfare Council.
-          </p>
-        </div>
       </div>
 
       {/* Bottom Bar */}
