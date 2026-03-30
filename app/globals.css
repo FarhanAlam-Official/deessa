@@ -1,11 +1,10 @@
-/* Import Comic Neue from Google Fonts for body text */
+/* Import Comic Neue from Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&display=swap');
 
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Local font face for Marissa Font
-   Using the actual font file: MarissaFont-Regular.ttf in /public/fonts/ */
+/* Local font face for Marissa Font */
 @font-face {
   font-family: "Marissa Font";
   src: local("Marissa"), local("MarissaFont"), local("Marissa Font"),
@@ -13,7 +12,6 @@
   font-weight: 400;
   font-style: normal;
   font-display: swap;
-  /* Only apply Marissa to letters (A-Z, a-z), numbers and & will fall back to Comic Neue */
   unicode-range: U+0041-005A, U+0061-007A;
 }
 
@@ -24,93 +22,64 @@
   font-weight: 700;
   font-style: normal;
   font-display: swap;
-  /* Only apply Marissa to letters (A-Z, a-z), numbers and & will fall back to Comic Neue */
   unicode-range: U+0041-005A, U+0061-007A;
 }
 
-/* Apply Comic Neue font to body and all general text */
-body, p, span, a, li, td, th, label, input, textarea, button, div {
-  font-family: "Comic Neue", cursive, sans-serif;
-}
-
-/* Apply Marissa Font to ALL headings and titles site-wide - Comic Neue for numbers and & */
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Marissa Font", "Comic Neue", ui-serif, Georgia, 'Times New Roman', serif !important;
-  font-weight: 700;
-}
-
-/* Also apply Marissa to common heading/title class patterns */
-.heading,
-.title {
-  font-family: "Marissa Font", "Comic Neue", ui-serif, Georgia, 'Times New Roman', serif !important;
-}
-
-/* Helper class for explicit Marissa usage */
-.font-marissa,
-.font-marissa * {
-  font-family: "Marissa Font", "Comic Neue", ui-serif, Georgia, 'Times New Roman', serif !important;
-}
-
-/* Helper class for explicit Comic Neue usage */
-.font-comic {
-  font-family: "Comic Neue", cursive, sans-serif !important;
-}
+/* ===========================================
+   DEESSA FOUNDATION - OCEAN BLUE THEME
+   =========================================== */
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* ================================
-     deessa FOUNDATION - OCEAN BLUE THEME
-  ================================= */
-  
   /* Primary Brand Colors */
   --brand-primary: 63 171 222;           /* #3FABDE - Ocean Blue */
   --brand-primary-dark: 11 95 138;       /* #0B5F8A - Deep Ocean */
   --primary-light: 232 246 252;          /* #E8F6FC - Light blue bg */
-  
+
   /* Pillar Accent Colors */
   --accent-empowerment: 214 51 108;      /* #D6336C - Women & Community */
   --accent-environment: 149 193 31;      /* #95C11F - Sustainability */
   --accent-education: 245 158 11;        /* #F59E0B - Learning */
-  
+
   /* Semantic Colors */
   --success: 22 163 74;                  /* #16A34A - green-600 */
   --warning: 245 158 11;                 /* #F59E0B - amber-500 */
   --danger: 220 38 38;                   /* #DC2626 - red-600 */
   --info: 37 99 235;                     /* #2563EB - blue-600 */
-  
+
   /* Neutrals */
   --bg-white: 255 255 255;
   --bg-soft: 248 249 250;
   --text-main: 33 37 41;
   --text-muted: 108 117 125;
-  
-  /* Core UI Tokens (converted to oklch for compatibility) */
+
+  /* Core UI Tokens */
   --background: oklch(0.98 0.005 20);
   --foreground: oklch(0.15 0.02 20);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.15 0.02 20);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0.02 20);
-  
+
   /* Primary - Ocean Blue */
   --primary: oklch(0.68 0.11 230);       /* Ocean Blue #3FABDE */
   --primary-foreground: oklch(1 0 0);
-  
+
   --secondary: oklch(0.97 0.005 20);
   --secondary-foreground: oklch(0.15 0.02 20);
   --muted: oklch(0.97 0.005 20);
   --muted-foreground: oklch(0.5 0.05 20);
   --accent: oklch(0.97 0.005 20);
   --accent-foreground: oklch(0.15 0.02 20);
-  
-  /* Destructive - keep red for errors */
-  --destructive: oklch(0.55 0.22 25);    /* Red for errors/danger */
+
+  /* Destructive */
+  --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(1 0 0);
-  
+
   --border: oklch(0.93 0.005 20);
   --input: oklch(0.93 0.005 20);
-  
+
   /* Ring - Ocean Blue */
   --ring: oklch(0.68 0.11 230);
   --radius: 0.75rem;
@@ -118,15 +87,15 @@ h1, h2, h3, h4, h5, h6 {
   /* Custom semantic tokens */
   --surface: oklch(1 0 0);
   --foreground-muted: oklch(0.5 0.05 20);
-  
-  /* Chart colors - updated with new theme */
+
+  /* Chart colors */
   --chart-1: oklch(0.68 0.11 230);       /* Ocean Blue */
   --chart-2: oklch(0.65 0.15 345);       /* Empowerment Pink */
   --chart-3: oklch(0.75 0.15 120);       /* Environment Green */
   --chart-4: oklch(0.75 0.15 75);        /* Education Amber */
   --chart-5: oklch(0.55 0.22 25);        /* Accent Red */
-  
-  /* Sidebar - Ocean Blue theme */
+
+  /* Sidebar */
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.68 0.11 230);     /* Ocean Blue */
@@ -138,46 +107,35 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .dark {
-  /* Dark mode adjustments */
   --background: oklch(0.18 0.02 20);
   --foreground: oklch(0.98 0.005 20);
   --card: oklch(0.22 0.02 20);
   --card-foreground: oklch(0.98 0.005 20);
   --popover: oklch(0.22 0.02 20);
   --popover-foreground: oklch(0.98 0.005 20);
-  
-  /* Primary - slightly adjusted for dark mode */
-  --primary: oklch(0.65 0.10 230);       /* Slightly darker ocean blue */
+  --primary: oklch(0.65 0.10 230);
   --primary-foreground: oklch(1 0 0);
-  
   --secondary: oklch(0.25 0.02 20);
   --secondary-foreground: oklch(0.98 0.005 20);
   --muted: oklch(0.25 0.02 20);
   --muted-foreground: oklch(0.7 0.02 20);
   --accent: oklch(0.25 0.02 20);
   --accent-foreground: oklch(0.98 0.005 20);
-  
-  /* Destructive stays red */
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(1 0 0);
-  
   --border: oklch(0.3 0.02 20);
   --input: oklch(0.3 0.02 20);
   --ring: oklch(0.65 0.10 230);
-
   --surface: oklch(0.22 0.02 20);
   --foreground-muted: oklch(0.6 0.02 20);
-  
-  /* Chart colors for dark mode */
-  --chart-1: oklch(0.65 0.10 230);       /* Ocean Blue */
-  --chart-2: oklch(0.62 0.14 345);       /* Empowerment Pink */
-  --chart-3: oklch(0.72 0.14 120);       /* Environment Green */
-  --chart-4: oklch(0.72 0.14 75);        /* Education Amber */
-  --chart-5: oklch(0.55 0.22 25);        /* Accent Red */
-  
+  --chart-1: oklch(0.65 0.10 230);
+  --chart-2: oklch(0.62 0.14 345);
+  --chart-3: oklch(0.72 0.14 120);
+  --chart-4: oklch(0.72 0.14 75);
+  --chart-5: oklch(0.55 0.22 25);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.65 0.10 230);       /* Ocean Blue */
+  --sidebar-primary: oklch(0.65 0.10 230);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
@@ -186,9 +144,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @theme inline {
-  /* Comic Neue for body text, Marissa for headings */
   --font-sans: "Comic Neue", cursive, sans-serif;
-  --font-heading: "Marissa Font", ui-serif, Georgia, serif;
+  --font-heading: "Marissa Font", "Comic Neue", ui-serif, Georgia, serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -236,8 +193,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 @layer base {
@@ -249,87 +206,32 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Custom utility classes */
-.editorial-shadow {
-  box-shadow: 20px 20px 0px 0px rgba(63, 171, 222, 0.1);
+/* Apply Comic Neue font to body and all general text */
+body, p, span, a, li, td, th, label, input, textarea, button, div {
+  font-family: "Comic Neue", cursive, sans-serif;
 }
 
-/* Brand color utilities */
-.bg-brand-primary {
-  background-color: rgb(var(--brand-primary));
+/* Apply Marissa Font to ALL headings and titles site-wide */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Marissa Font", "Comic Neue", ui-serif, Georgia, 'Times New Roman', serif !important;
+  font-weight: 700;
 }
 
-.bg-brand-primary-dark {
-  background-color: rgb(var(--brand-primary-dark));
+/* Also apply Marissa to common heading/title class patterns */
+.heading,
+.title {
+  font-family: "Marissa Font", "Comic Neue", ui-serif, Georgia, 'Times New Roman', serif !important;
 }
 
-.text-brand-primary {
-  color: rgb(var(--brand-primary));
+/* Helper class for explicit Marissa usage */
+.font-marissa,
+.font-marissa * {
+  font-family: "Marissa Font", "Comic Neue", ui-serif, Georgia, 'Times New Roman', serif !important;
 }
 
-.text-brand-primary-dark {
-  color: rgb(var(--brand-primary-dark));
-}
-
-.border-brand-primary {
-  border-color: rgb(var(--brand-primary));
-}
-
-/* Pillar accent utilities */
-.bg-empowerment {
-  background-color: rgb(var(--accent-empowerment));
-}
-
-.bg-environment {
-  background-color: rgb(var(--accent-environment));
-}
-
-.bg-education {
-  background-color: rgb(var(--accent-education));
-}
-
-.text-empowerment {
-  color: rgb(var(--accent-empowerment));
-}
-
-.text-environment {
-  color: rgb(var(--accent-environment));
-}
-
-.text-education {
-  color: rgb(var(--accent-education));
-}
-
-/* Hover effects */
-.hover-ocean:hover {
-  background-color: rgb(var(--brand-primary-dark));
-}
-
-/* Gradient utilities */
-.gradient-ocean {
-  background: linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-primary-dark)) 100%);
-}
-
-.gradient-pillars {
-  background: linear-gradient(135deg, 
-    rgb(var(--accent-empowerment)) 0%, 
-    rgb(var(--accent-education)) 50%, 
-    rgb(var(--accent-environment)) 100%
-  );
-}
-
-/* Shimmer animation for tabs */
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.animate-shimmer {
-  animation: shimmer 2s infinite;
+/* Helper class for explicit Comic Neue usage */
+.font-comic {
+  font-family: "Comic Neue", cursive, sans-serif !important;
 }
 
 /* ===========================================
@@ -337,14 +239,12 @@ h1, h2, h3, h4, h5, h6 {
    =========================================== */
 
 /* Enhanced Focus Indicators */
-/* Ensure all interactive elements have visible focus indicators */
 *:focus-visible {
-  outline: 3px solid oklch(0.68 0.11 230); /* Ocean Blue */
+  outline: 3px solid oklch(0.68 0.11 230);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* Button focus indicators */
 button:focus-visible,
 [role="button"]:focus-visible {
   outline: 3px solid oklch(0.68 0.11 230);
@@ -352,7 +252,6 @@ button:focus-visible,
   box-shadow: 0 0 0 4px oklch(0.68 0.11 230 / 0.2);
 }
 
-/* Link focus indicators */
 a:focus-visible {
   outline: 3px solid oklch(0.68 0.11 230);
   outline-offset: 2px;
@@ -360,7 +259,6 @@ a:focus-visible {
   text-decoration-thickness: 2px;
 }
 
-/* Input and textarea focus indicators */
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
@@ -370,39 +268,7 @@ select:focus-visible {
   box-shadow: 0 0 0 3px oklch(0.68 0.11 230 / 0.2);
 }
 
-/* Card and interactive container focus */
-[tabindex]:focus-visible {
-  outline: 3px solid oklch(0.68 0.11 230);
-  outline-offset: 2px;
-}
-
-/* Dark mode focus indicators */
-.dark *:focus-visible {
-  outline-color: oklch(0.75 0.12 230); /* Brighter blue for dark mode */
-}
-
-.dark button:focus-visible,
-.dark [role="button"]:focus-visible {
-  outline-color: oklch(0.75 0.12 230);
-  box-shadow: 0 0 0 4px oklch(0.75 0.12 230 / 0.3);
-}
-
-.dark input:focus-visible,
-.dark textarea:focus-visible,
-.dark select:focus-visible {
-  outline-color: oklch(0.75 0.12 230);
-  border-color: oklch(0.75 0.12 230);
-  box-shadow: 0 0 0 3px oklch(0.75 0.12 230 / 0.3);
-}
-
-/* High contrast mode focus indicators */
-body.high-contrast *:focus-visible {
-  outline: 4px solid rgb(0, 0, 0);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 6px rgb(255, 255, 0);
-}
-
-/* Skip to main content link (for keyboard navigation) */
+/* Skip to main content link */
 .skip-to-main {
   position: absolute;
   left: -9999px;
@@ -462,7 +328,6 @@ body.high-contrast {
   --text-muted: 33 37 41;
   --bg-white: 255 255 255;
   --bg-soft: 255 255 255;
-  --border: 0 0 0;
 }
 
 body.high-contrast * {
@@ -483,7 +348,9 @@ body.high-contrast img {
   filter: contrast(1.2);
 }
 
-/* ──────────────────  HOMEPAGE ANIMATIONS  ────────────────── */
+/* ===========================================
+   HOMEPAGE ANIMATIONS
+   =========================================== */
 
 @keyframes fade-up {
   from {
@@ -537,6 +404,38 @@ body.high-contrast img {
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes kenburns {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes scroll-bounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+}
+
+@keyframes cta-ripple {
+  0% {
+    box-shadow: 0 0 0 0 rgba(63, 171, 222, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(63, 171, 222, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(63, 171, 222, 0);
   }
 }
 
@@ -672,6 +571,18 @@ body.high-contrast img {
   animation: scale-in 0.6s ease-out forwards;
 }
 
+.animate-kenburns {
+  animation: kenburns 20s ease-out forwards;
+}
+
+.animate-scroll-bounce {
+  animation: scroll-bounce 2s ease-in-out infinite;
+}
+
+.animate-cta-ripple {
+  animation: cta-ripple 2s ease-in-out infinite;
+}
+
 .animate-sound-wave {
   animation: sound-wave 2s ease-out infinite;
 }
@@ -738,6 +649,75 @@ body.high-contrast img {
 .hover-lift:hover {
   transform: translateY(-8px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Editorial shadow */
+.editorial-shadow {
+  box-shadow: 20px 20px 0px 0px rgba(63, 171, 222, 0.1);
+}
+
+/* Brand color utilities */
+.bg-brand-primary {
+  background-color: rgb(var(--brand-primary));
+}
+
+.bg-brand-primary-dark {
+  background-color: rgb(var(--brand-primary-dark));
+}
+
+.text-brand-primary {
+  color: rgb(var(--brand-primary));
+}
+
+.text-brand-primary-dark {
+  color: rgb(var(--brand-primary-dark));
+}
+
+.border-brand-primary {
+  border-color: rgb(var(--brand-primary));
+}
+
+/* Pillar accent utilities */
+.bg-empowerment {
+  background-color: rgb(var(--accent-empowerment));
+}
+
+.bg-environment {
+  background-color: rgb(var(--accent-environment));
+}
+
+.bg-education {
+  background-color: rgb(var(--accent-education));
+}
+
+.text-empowerment {
+  color: rgb(var(--accent-empowerment));
+}
+
+.text-environment {
+  color: rgb(var(--accent-environment));
+}
+
+.text-education {
+  color: rgb(var(--accent-education));
+}
+
+/* Hover effects */
+.hover-ocean:hover {
+  background-color: rgb(var(--brand-primary-dark));
+}
+
+/* Gradient utilities */
+.gradient-ocean {
+  background: linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-primary-dark)) 100%);
+}
+
+.gradient-pillars {
+  background: linear-gradient(135deg,
+    rgb(var(--accent-empowerment)) 0%,
+    rgb(var(--accent-education)) 50%,
+    rgb(var(--accent-environment)) 100%
+  );
 }
 
 /* Accent border colors */
