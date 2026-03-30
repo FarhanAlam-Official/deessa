@@ -82,7 +82,7 @@ export function Step4Review({ data, onEdit, onSubmit, onBack, isSubmitting, erro
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       {/* Heading */}
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Review &amp; Submit</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Review <span className="font-normal">&</span> Submit</h1>
         <p className="text-sm text-foreground-muted">
           Please review your details carefully before final submission.
         </p>
@@ -127,7 +127,7 @@ export function Step4Review({ data, onEdit, onSubmit, onBack, isSubmitting, erro
 
         {/* Consent Section */}
         <div className="bg-primary/5 p-6">
-          <h2 className="mb-4 text-base font-bold text-foreground">Consent &amp; Privacy</h2>
+          <h2 className="mb-4 text-base font-bold text-foreground">Consent <span className="font-normal">&</span> Privacy</h2>
           <div className="space-y-4">
             <label className="flex cursor-pointer items-start gap-3">
               <input

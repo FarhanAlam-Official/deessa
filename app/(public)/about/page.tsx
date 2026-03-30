@@ -123,7 +123,7 @@ export default async function AboutPage() {
       <Section className="bg-surface" id="journey">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">Transparency Reports & Documents</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">Transparency Reports <span className="font-normal">&</span> Documents</h2>
             <p className="text-foreground-muted mt-2">Milestones that defined our path.</p>
           </div>
           <div className="relative">
@@ -223,7 +223,7 @@ export default async function AboutPage() {
           <div className="lg:w-1/2">
             <div className="mb-8">
               <span className="text-primary font-bold tracking-wider uppercase text-xs mb-2 block">Collaboration</span>
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground">Our Partners & Supporters</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">Our Partners <span className="font-normal">&</span> Supporters</h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {[
@@ -254,7 +254,7 @@ export default async function AboutPage() {
           <div className="lg:w-1/2" id="reports">
             <div className="mb-8">
               <span className="text-primary font-bold tracking-wider uppercase text-xs mb-2 block">Transparency</span>
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground">Transparency & Reports</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">Transparency <span className="font-normal">&</span> Reports</h2>
             </div>
             <div className="flex flex-col gap-3">
               {[

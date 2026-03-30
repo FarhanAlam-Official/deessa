@@ -118,7 +118,7 @@ export default async function ImpactPage() {
       <Section className="bg-surface" id="reports">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Transparency Reports <span className="font-sans">&</span> Documents</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Transparency Reports <span className="font-normal">&</span> Documents</h2>
             <p className="text-foreground-muted">
               Download our annual reports, organizational documents, and detailed breakdowns of finances and impact.
             </p>

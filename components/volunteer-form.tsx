@@ -206,7 +206,7 @@ export function VolunteerForm({ isOpen, onClose, roleTitle }: VolunteerFormProps
 
               {/* Skills */}
               <div>
-                <h3 className="font-bold text-foreground mb-3">Skills & Expertise *</h3>
+                <h3 className="font-bold text-foreground mb-3">Skills <span className="font-normal">&</span> Expertise *</h3>
                 <div className="grid grid-cols-2 gap-2">
                   {skillOptions.map((skill) => (
                     <label key={skill} className="flex items-center gap-2 cursor-pointer">

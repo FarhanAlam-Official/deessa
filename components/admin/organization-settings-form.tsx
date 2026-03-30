@@ -168,7 +168,7 @@ export function OrganizationSettingsForm({ initialData }: OrganizationSettingsFo
 
       {/* Registration Numbers */}
       <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <h3 className="font-semibold text-blue-900">Tax & Registration Details</h3>
+        <h3 className="font-semibold text-blue-900">Tax <span className="font-normal">&</span> Registration Details</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>

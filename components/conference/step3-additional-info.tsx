@@ -50,7 +50,7 @@ export function Step3AdditionalInfo({ data, onChange, onNext, onBack }: Step3Pro
       {/* Heading */}
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Additional Info &amp; Accessibility
+          Additional Info <span className="font-normal">&</span> Accessibility
         </h1>
         <p className="text-sm text-foreground-muted">
           Almost there! Just a few more details to make your experience perfect.

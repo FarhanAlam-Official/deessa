@@ -132,7 +132,7 @@ export default async function AlertsPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Alerts & Notifications</h1>
+        <h1 className="text-3xl font-bold mb-2">Alerts <span className="font-normal">&</span> Notifications</h1>
         <p className="text-muted-foreground">
           Monitor and manage system alerts
         </p>

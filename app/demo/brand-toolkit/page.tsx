@@ -659,7 +659,7 @@ export default function BrandToolkitDemo() {
         {/* Spacing & Layout */}
         <section id="spacing">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-2">Spacing & Layout</h2>
+            <h2 className="text-2xl font-bold mb-2">Spacing <span className="font-normal">&</span> Layout</h2>
             <p className="text-muted-foreground">Consistent spacing using Tailwind's spacing scale</p>
           </div>
 

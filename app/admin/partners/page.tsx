@@ -32,7 +32,7 @@ export default async function PartnersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Partners & Sponsors</h1>
+          <h1 className="text-2xl font-bold">Partners <span className="font-normal">&</span> Sponsors</h1>
           <p className="text-muted-foreground">Manage your organization&apos;s partners, donors, and sponsors</p>
         </div>
         <Button asChild>
