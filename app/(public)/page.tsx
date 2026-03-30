@@ -1,26 +1,20 @@
-﻿import { SecretKeyListener } from "@/components/secret-key-listener"
+import { SecretKeyListener } from "@/components/secret-key-listener"
 import { HeroCarousel } from "@/components/hero-carousel"
 import type { HeroSlide } from "@/components/hero-carousel"
 import { HomeAccessibilityButton } from "@/components/home-accessibility-button"
 import {
   OurStorySection,
   MissionVisionSection,
-  EducationQuoteSection,
-  ExploreWorkSection,
-  CorePillarsSection,
+  ImpactStatsBar,
+  ProgramsSection,
   TimelineSection,
-  AdvocacySection,
-  JoinMovementSection,
-  PodcastSection,
-  PartnersSection,
   TestimonialsSection,
-  WhereWeWorkSection,
-  ShopSection,
+  PartnersSection,
   ContactSection,
   GlobalEnhancements,
 } from "@/components/homepage-sections"
 
-/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  STATIC DATA  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+/* ──────────────────  STATIC DATA  ────────────────── */
 
 const heroSlides: HeroSlide[] = [
   {
@@ -28,7 +22,7 @@ const heroSlides: HeroSlide[] = [
       "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1920&q=85",
     title: "Hope for Every Child in Nepal",
     subtitle:
-      "A society where everyone is understood, celebrated, and empowered.",
+      "A society where everyone is understood, celebrated, and empowered. Join us in creating lasting change for children with autism and their families.",
     cta: "Start Donating",
     ctaHref: "/donate",
   },
@@ -37,7 +31,7 @@ const heroSlides: HeroSlide[] = [
       "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&w=1920&q=85",
     title: "Empowering 10,000+ Lives and Counting",
     subtitle:
-      "From classrooms to clinics, your support reaches the communities that need it most.",
+      "From classrooms to clinics, your support reaches the communities that need it most. Together, we build a more inclusive Nepal.",
     cta: "See Our Impact",
     ctaHref: "/impact",
   },
@@ -46,7 +40,7 @@ const heroSlides: HeroSlide[] = [
       "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1920&q=85",
     title: "Volunteer With Us - Stand With Nepal",
     subtitle:
-      "Join our community of changemakers and see your effort transform villages firsthand.",
+      "Join our community of changemakers and see your effort transform villages firsthand. Your skills can change lives.",
     cta: "Get Involved",
     ctaHref: "/get-involved",
   },
@@ -55,13 +49,13 @@ const heroSlides: HeroSlide[] = [
       "https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=1920&q=85",
     title: "Building Schools, Building Futures",
     subtitle:
-      "50+ schools built and counting. Every classroom we build unlocks a generation of potential.",
+      "50+ schools built and counting. Every classroom we build unlocks a generation of potential. Education is the key to lasting change.",
     cta: "Explore Programs",
     ctaHref: "/programs",
   },
 ]
 
-/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  PAGE  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+/* ──────────────────  PAGE  ────────────────── */
 
 export default async function HomePage() {
   return (
@@ -69,52 +63,34 @@ export default async function HomePage() {
       {/* Accessibility Button - fixed on right side */}
       <HomeAccessibilityButton />
 
-      {/* ΓöÇΓöÇ 1. HERO BANNER CAROUSEL ΓöÇΓöÇ */}
+      {/* 1. HERO BANNER CAROUSEL */}
       <HeroCarousel slides={heroSlides} interval={6000} />
 
-      {/* ΓöÇΓöÇ 2. OUR STORY ΓöÇΓöÇ */}
+      {/* 2. IMPACT STATS BAR - NEW */}
+      <ImpactStatsBar />
+
+      {/* 3. OUR STORY */}
       <OurStorySection />
 
-      {/* ΓöÇΓöÇ 3. MISSION, VISION, OBJECTIVES ΓöÇΓöÇ */}
+      {/* 4. MISSION, VISION, OBJECTIVES */}
       <MissionVisionSection />
 
-      {/* ΓöÇΓöÇ 3b. EDUCATION QUOTE HIGHLIGHT ΓöÇΓöÇ */}
-      <EducationQuoteSection />
+      {/* 5. PROGRAMS (Consolidated Core Pillars + Explore Work) */}
+      <ProgramsSection />
 
-      {/* ΓöÇΓöÇ 4. EXPLORE OUR WORK ΓöÇΓöÇ */}
-      <ExploreWorkSection />
-
-      {/* ΓöÇΓöÇ 5. CORE PILLARS ΓöÇΓöÇ */}
-      <CorePillarsSection />
-
-      {/* ΓöÇΓöÇ 6. TIMELINE ΓöÇΓöÇ */}
+      {/* 6. TIMELINE */}
       <TimelineSection />
 
-      {/* ΓöÇΓöÇ 6b. ADVOCACY & RECOGNITION ΓöÇΓöÇ */}
-      <AdvocacySection />
-
-      {/* ΓöÇΓöÇ 7. TESTIMONIALS ΓöÇΓöÇ */}
+      {/* 7. TESTIMONIALS */}
       <TestimonialsSection />
 
-      {/* ΓöÇΓöÇ 8. JOIN THE MOVEMENT ΓöÇΓöÇ */}
-      <JoinMovementSection />
-
-      {/* ΓöÇΓöÇ 9. FEATURED PODCAST ΓöÇΓöÇ */}
-      <PodcastSection />
-
-      {/* ΓöÇΓöÇ 10. PARTNERS & SPONSORS ΓöÇΓöÇ */}
+      {/* 8. PARTNERS & SPONSORS */}
       <PartnersSection />
 
-      {/* ΓöÇΓöÇ 11. WHERE WE WORK ΓöÇΓöÇ */}
-      <WhereWeWorkSection />
-
-      {/* ΓöÇΓöÇ 12. SHOP OUR STORE ΓöÇΓöÇ */}
-      <ShopSection />
-
-      {/* ΓöÇΓöÇ 14. CONTACT / VISIT OFFICE ΓöÇΓöÇ */}
+      {/* 9. CONTACT / VISIT OFFICE */}
       <ContactSection />
 
-      {/* ΓöÇΓöÇ GLOBAL ENHANCEMENTS ΓöÇΓöÇ */}
+      {/* GLOBAL ENHANCEMENTS */}
       <GlobalEnhancements />
     </SecretKeyListener>
   )

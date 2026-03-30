@@ -47,12 +47,12 @@ export function Navbar() {
   }, [])
 
   return (
-    <header 
+    <header
       className={cn(
         "sticky top-0 z-50 w-full transition-all duration-300",
-        scrolled 
-          ? "bg-white/95 dark:bg-slate-950/95 backdrop-blur-md shadow-md border-b border-slate-200 dark:border-slate-800" 
-          : "bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm border-b border-slate-200/50 dark:border-slate-800/50"
+        scrolled
+          ? "bg-white/95 dark:bg-slate-950/95 backdrop-blur-md shadow-sm border-b border-slate-200 dark:border-slate-800"
+          : "bg-white/90 dark:bg-slate-950/90 backdrop-blur-sm border-b border-slate-200/50 dark:border-slate-800/50"
       )}
     >
       {/* Main Navigation */}
