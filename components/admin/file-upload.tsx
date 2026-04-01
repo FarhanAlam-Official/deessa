@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Upload, X, Loader2, Image as ImageIcon, ExternalLink } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+import { notifications } from "@/lib/notifications"
 
 interface FileUploadProps {
   bucket: string
@@ -91,12 +92,49 @@ export function FileUpload({
     }
   }
 
-  const handleRemove = () => {
+  const getStoragePathFromPublicUrl = (url: string): string | null => {
+    if (!url) return null
+    const marker = `/storage/v1/object/public/${bucket}/`
+    const index = url.indexOf(marker)
+
+    if (index === -1) return null
+
+    const encodedPath = url.slice(index + marker.length)
+    if (!encodedPath) return null
+
+    return decodeURIComponent(encodedPath)
+  }
+
+  const handleRemove = async () => {
+    const currentPreview = preview
+
     setPreview(null)
     onUpload("")
     setError(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
+    }
+
+    notifications.showSuccess({
+      title: "Image removed",
+      description: "Image was removed from the form.",
+    })
+
+    if (!currentPreview) return
+
+    // Attempt storage cleanup only for files hosted in this bucket.
+    const path = getStoragePathFromPublicUrl(currentPreview)
+    if (!path) return
+
+    const supabase = createClient()
+    const { error: removeError } = await supabase.storage.from(bucket).remove([path])
+
+    if (removeError) {
+      console.warn("Storage cleanup warning:", removeError.message)
+      notifications.showWarning({
+        title: "Storage cleanup warning",
+        description: "Image removed from form, but storage cleanup failed.",
+      })
     }
   }
 
