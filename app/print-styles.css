@@ -1,0 +1,337 @@
+/* Print Styles for Stories */
+
+@media print {
+  /* Hide navigation, headers, footers, and sidebars */
+  header,
+  nav,
+  footer,
+  aside,
+  .no-print,
+  button,
+  [role="navigation"],
+  [role="banner"],
+  [role="contentinfo"] {
+    display: none !important;
+  }
+
+  /* Show story metadata and content */
+  .story-metadata {
+    display: block !important;
+  }
+
+  /* Show rich text editor content */
+  .story-rich,
+  .tiptap,
+  .ProseMirror,
+  .story-editor-wrapper,
+  .prose {
+    display: block !important;
+  }
+
+  /* Admin-specific: Hide all cards except the one with editor */
+  form > div {
+    display: none !important;
+  }
+
+  /* Show print header */
+  form > .print-header {
+    display: block !important;
+  }
+
+  /* Show the card that contains story metadata */
+  form > div:has(.story-metadata) {
+    display: block !important;
+    background: white !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  /* Show the card that contains the editor */
+  form > div:has(.story-editor-wrapper) {
+    display: block !important;
+    background: white !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  /* Show all children of the editor card */
+  form > div:has(.story-editor-wrapper) * {
+    display: block !important;
+  }
+
+  /* Hide the card header */
+  form > div:has(.story-editor-wrapper) > div:first-child {
+    display: none !important;
+  }
+
+  /* Hide toolbar and footer in editor */
+  .story-editor-wrapper > div:first-child,
+  .story-editor-wrapper > div:last-child {
+    display: none !important;
+  }
+
+  /* Show the editor content */
+  .story-editor-wrapper .ProseMirror {
+    display: block !important;
+    border: none !important;
+    padding: 0 !important;
+    min-height: auto !important;
+  }
+
+  /* Show only the editor content area */
+  form {
+    background: white !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Reset page margins */
+  @page {
+    margin: 1.5cm;
+    size: A4;
+  }
+
+  /* Body styles */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.6;
+  }
+
+  /* Story title */
+  h1 {
+    font-size: 24pt;
+    font-weight: bold;
+    margin-bottom: 0.5cm;
+    color: black !important;
+    page-break-after: avoid;
+  }
+
+  /* Story metadata */
+  .story-metadata {
+    font-size: 10pt;
+    color: #666 !important;
+    margin-bottom: 1cm;
+    padding-bottom: 0.5cm;
+    border-bottom: 1px solid #ddd;
+  }
+
+  /* Story content */
+  article {
+    background: white !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Content typography */
+  .story-rich p,
+  .tiptap p,
+  .ProseMirror p {
+    margin-bottom: 0.4cm;
+    orphans: 3;
+    widows: 3;
+  }
+
+  .story-rich h2,
+  .tiptap h2,
+  .ProseMirror h2 {
+    font-size: 18pt;
+    font-weight: bold;
+    margin-top: 0.8cm;
+    margin-bottom: 0.4cm;
+    page-break-after: avoid;
+  }
+
+  .story-rich h3,
+  .tiptap h3,
+  .ProseMirror h3 {
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 0.6cm;
+    margin-bottom: 0.3cm;
+    page-break-after: avoid;
+  }
+
+  .story-rich h4,
+  .tiptap h4,
+  .ProseMirror h4 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-top: 0.5cm;
+    margin-bottom: 0.3cm;
+    page-break-after: avoid;
+  }
+
+  /* Lists */
+  .story-rich ul,
+  .story-rich ol,
+  .tiptap ul,
+  .tiptap ol,
+  .ProseMirror ul,
+  .ProseMirror ol {
+    margin-bottom: 0.4cm;
+    padding-left: 1cm;
+  }
+
+  .story-rich li,
+  .tiptap li,
+  .ProseMirror li {
+    margin-bottom: 0.2cm;
+  }
+
+  /* Blockquotes */
+  .story-rich blockquote,
+  .tiptap blockquote,
+  .ProseMirror blockquote {
+    margin: 0.5cm 0;
+    padding-left: 0.5cm;
+    border-left: 3px solid #ddd;
+    font-style: italic;
+    page-break-inside: avoid;
+  }
+
+  /* Images */
+  .story-rich img,
+  .tiptap img,
+  .ProseMirror img {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid;
+    margin: 0.5cm 0;
+  }
+
+  .story-rich figure,
+  .tiptap figure,
+  .ProseMirror figure {
+    page-break-inside: avoid;
+    margin: 0.5cm 0;
+  }
+
+  .story-rich figcaption,
+  .tiptap figcaption,
+  .ProseMirror figcaption {
+    font-size: 10pt;
+    color: #666 !important;
+    font-style: italic;
+    margin-top: 0.2cm;
+  }
+
+  /* Layout blocks */
+  .story-rich .two-column-layout,
+  .tiptap .two-column-layout,
+  .ProseMirror .two-column-layout {
+    display: block !important;
+    page-break-inside: avoid;
+  }
+
+  .story-rich .column-left,
+  .story-rich .column-right,
+  .tiptap .column-left,
+  .tiptap .column-right,
+  .ProseMirror .column-left,
+  .ProseMirror .column-right {
+    width: 100% !important;
+    margin-bottom: 0.4cm;
+  }
+
+  .story-rich .callout,
+  .tiptap .callout,
+  .ProseMirror .callout {
+    border: 1px solid #ddd;
+    padding: 0.4cm;
+    margin: 0.5cm 0;
+    page-break-inside: avoid;
+  }
+
+  .story-rich .highlight-quote,
+  .tiptap .highlight-quote,
+  .ProseMirror .highlight-quote {
+    border-left: 4px solid #000;
+    padding-left: 0.5cm;
+    margin: 0.5cm 0;
+    page-break-inside: avoid;
+  }
+
+  /* Hide videos (can't print them) */
+  .story-rich iframe,
+  .story-rich .video-embed,
+  .tiptap iframe,
+  .tiptap .video-embed,
+  .ProseMirror iframe,
+  .ProseMirror .video-embed {
+    display: none !important;
+  }
+
+  /* Links - show URL after link text */
+  .story-rich a[href^="http"]:after,
+  .tiptap a[href^="http"]:after,
+  .ProseMirror a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666;
+  }
+
+  /* Prevent page breaks in the middle of elements */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+
+  p, li, blockquote {
+    page-break-inside: avoid;
+  }
+
+  /* Print header with logo and URL */
+  .print-header {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 1cm;
+    padding-bottom: 0.5cm;
+    border-bottom: 2px solid #000;
+  }
+
+  .print-header .logo {
+    font-size: 18pt;
+    font-weight: bold;
+    color: #000 !important;
+  }
+
+  .print-header .url {
+    font-size: 9pt;
+    color: #666 !important;
+    margin-top: 0.2cm;
+  }
+
+  /* Draft watermark for unpublished stories */
+  .draft-watermark {
+    display: block !important;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    font-size: 120pt;
+    font-weight: bold;
+    color: rgba(239, 68, 68, 0.1);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* Print footer with page numbers */
+  .print-footer {
+    display: block !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 9pt;
+    color: #666 !important;
+    padding-top: 0.3cm;
+    border-top: 1px solid #ddd;
+  }
+}
