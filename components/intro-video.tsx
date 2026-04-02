@@ -133,17 +133,34 @@ export function IntroVideo() {
     setTimeout(() => {
       // Calculate navbar logo position
       const navbarLogo = document.querySelector('[data-navbar-logo]') as HTMLElement
+      const navbarLogoTarget = document.querySelector('[data-navbar-logo-target]') as HTMLElement
       const navbarLogoImg = navbarLogo?.querySelector('img') as HTMLImageElement
       
       if (navbarLogo && logoRef.current) {
-        // Get the actual rendered size of navbar logo image
-        const navbarImgRect = navbarLogoImg?.getBoundingClientRect() || navbarLogo.getBoundingClientRect()
-        const navbarRect = navbarLogo.getBoundingClientRect()
+        const navbarRect = navbarLogoImg?.getBoundingClientRect() || navbarLogoTarget?.getBoundingClientRect() || navbarLogo.getBoundingClientRect()
         const logoRect = logoRef.current.getBoundingClientRect()
+        const navbarStyle = navbarLogoImg ? window.getComputedStyle(navbarLogoImg) : null
+
+        const paddingLeft = navbarStyle ? Number.parseFloat(navbarStyle.paddingLeft) || 0 : 0
+        const paddingRight = navbarStyle ? Number.parseFloat(navbarStyle.paddingRight) || 0 : 0
+        const paddingTop = navbarStyle ? Number.parseFloat(navbarStyle.paddingTop) || 0 : 0
+        const paddingBottom = navbarStyle ? Number.parseFloat(navbarStyle.paddingBottom) || 0 : 0
+
+        const renderedScale = navbarLogoImg && navbarLogoImg.offsetWidth > 0
+          ? navbarRect.width / navbarLogoImg.offsetWidth
+          : 1
+
+        const renderedPaddingLeft = paddingLeft * renderedScale
+        const renderedPaddingRight = paddingRight * renderedScale
+        const renderedPaddingTop = paddingTop * renderedScale
+        const renderedPaddingBottom = paddingBottom * renderedScale
+
+        const visibleTargetWidth = Math.max(0, navbarRect.width - renderedPaddingLeft - renderedPaddingRight)
+        const visibleTargetHeight = Math.max(0, navbarRect.height - renderedPaddingTop - renderedPaddingBottom)
         
-        // Calculate exact positions - align centers
-        const navbarCenterX = navbarRect.left + navbarRect.width / 2
-        const navbarCenterY = navbarRect.top + navbarRect.height / 2
+        // Calculate the visible image center, not the padded wrapper center.
+        const navbarCenterX = navbarRect.left + renderedPaddingLeft + visibleTargetWidth / 2
+        const navbarCenterY = navbarRect.top + renderedPaddingTop + visibleTargetHeight / 2
         const logoCenterX = logoRect.left + logoRect.width / 2
         const logoCenterY = logoRect.top + logoRect.height / 2
         
@@ -151,13 +168,13 @@ export function IntroVideo() {
         const deltaX = navbarCenterX - logoCenterX
         const deltaY = navbarCenterY - logoCenterY
         
-        // Calculate scale based on actual navbar logo image size
-        const targetWidth = navbarImgRect.width || 48
-        const targetHeight = navbarImgRect.height || 48
+        // Calculate scale based on the visible logo graphic size inside the padded box.
+        const targetWidth = visibleTargetWidth || navbarRect.width || 48
+        const targetHeight = visibleTargetHeight || navbarRect.height || 48
         const currentWidth = logoRect.width
         const currentHeight = logoRect.height
         
-        // Scale to match navbar logo size exactly
+        // Scale to match the visible navbar logo graphic, not the padded container.
         const scaleX = targetWidth / currentWidth
         const scaleY = targetHeight / currentHeight
         // Use the smaller scale to maintain aspect ratio

@@ -192,7 +192,7 @@ export function Navbar() {
                 )}
               >
                 <div data-navbar-logo className="relative shrink-0">
-                  <div className="relative flex h-16 w-16 items-center p-1 justify-center sm:h-[72px] sm:w-[72px]">
+                  <div data-navbar-logo-target className="relative flex h-16 w-16 items-center p-1 justify-center sm:h-[72px] sm:w-[72px]">
                     <Image
                       src="/logo.png"
                       alt="Deesha Foundation"
