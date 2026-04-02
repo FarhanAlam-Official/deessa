@@ -9,10 +9,12 @@
 ## Overview
 
 ### Feature 1 — Stamp & Digital Signature on PDF
+
 Place an official stamp PNG and an authorized signatory's digital signature PNG on every
 donation receipt PDF, positioned in the footer above the signatory line.
 
 ### Feature 2 — Receipt Verification System
+
 - Each receipt gets a permanent `verification_id` (UUID) stored in the DB
 - Printed on the PDF both as human-readable text and as a QR code
 - Public page `/verify/[id]` lets anyone (donor, employer, tax officer) confirm validity
@@ -22,29 +24,32 @@ donation receipt PDF, positioned in the footer above the signatory line.
 
 ## Current Architecture (must not break)
 
-| File | Role |
-|---|---|
-| `lib/receipts/generator.ts` | `OrganizationDetails` interface, `getOrganizationDetails()`, `generateReceiptNumber()` |
-| `lib/receipts/receipt-document.tsx` | React PDF component — `ReceiptPDFData`, `ReceiptPDFOrganization`, `ReceiptDocument` |
-| `lib/receipts/pdf-renderer.ts` | `renderReceiptToPDF(data)` → `Buffer` |
-| `lib/receipts/service.ts` | `generateAndStoreReceipt()` — generates HTML + PDF, uploads to storage |
-| `lib/actions/donation-receipt.ts` | Server action that calls `generateAndStoreReceipt()` |
-| `app/api/receipts/download/route.ts` | Token-auth download — serves `.pdf` from storage or generates on-the-fly |
-| `app/api/receipts/resend/route.ts` | Resend receipt email |
-| `components/receipt-preview.tsx` | Success page inline PDF preview via blob URL iframe |
-| `components/admin/organization-settings-form.tsx` | Admin UI to edit org settings stored in `site_settings` table |
-| `scripts/payments-v2/*.sql` | DB migrations, numbered 020–028 |
+| File                                              | Role                                                                                   |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `lib/receipts/generator.ts`                       | `OrganizationDetails` interface, `getOrganizationDetails()`, `generateReceiptNumber()` |
+| `lib/receipts/receipt-document.tsx`               | React PDF component — `ReceiptPDFData`, `ReceiptPDFOrganization`, `ReceiptDocument`    |
+| `lib/receipts/pdf-renderer.ts`                    | `renderReceiptToPDF(data)` → `Buffer`                                                  |
+| `lib/receipts/service.ts`                         | `generateAndStoreReceipt()` — generates HTML + PDF, uploads to storage                 |
+| `lib/actions/donation-receipt.ts`                 | Server action that calls `generateAndStoreReceipt()`                                   |
+| `app/api/receipts/download/route.ts`              | Token-auth download — serves `.pdf` from storage or generates on-the-fly               |
+| `app/api/receipts/resend/route.ts`                | Resend receipt email                                                                   |
+| `components/receipt-preview.tsx`                  | Success page inline PDF preview via blob URL iframe                                    |
+| `components/admin/organization-settings-form.tsx` | Admin UI to edit org settings stored in `site_settings` table                          |
+| `scripts/payments-v2/*.sql`                       | DB migrations, numbered 020–028                                                        |
 
 ### DB: `site_settings` table
+
 Key `organization_details` holds a JSONB blob matching `OrganizationDetails`.  
 All new org fields must be **optional (`?`)** in the interface — existing DB records must
 deserialize without error.
 
 ### DB: `donations` table
+
 Already has: `receipt_number`, `receipt_url`, `receipt_generated_at`, `confirmed_at`.  
 Needs: `verification_id UUID` — added via new migration `029`.
 
 ### Storage: `receipts` bucket
+
 Files: `{donationId}-{receiptNumber}.html` and `{donationId}-{receiptNumber}.pdf`  
 New stamp/signature images stored in a **separate public bucket** `receipt-assets`
 (or in the existing `public` bucket) so `@react-pdf/renderer` can fetch them as
@@ -56,20 +61,22 @@ New stamp/signature images stored in a **separate public bucket** `receipt-asset
 
 ### What changes
 
-| File | Change |
-|---|---|
-| `lib/receipts/generator.ts` | Add `stamp_url?: string` and `signature_url?: string` to `OrganizationDetails` |
-| `lib/receipts/receipt-document.tsx` | Add `stamp_url?` and `signature_url?` to `ReceiptPDFOrganization`; render both in footer |
-| `components/admin/organization-settings-form.tsx` | Add two new URL inputs in Authorized Signatory card |
+| File                                              | Change                                                                                   |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `lib/receipts/generator.ts`                       | Add `stamp_url?: string` and `signature_url?: string` to `OrganizationDetails`           |
+| `lib/receipts/receipt-document.tsx`               | Add `stamp_url?` and `signature_url?` to `ReceiptPDFOrganization`; render both in footer |
+| `components/admin/organization-settings-form.tsx` | Add two new URL inputs in Authorized Signatory card                                      |
 
 ### What does NOT change
-- `service.ts` — `orgDetails` is passed as-is; new fields flow through automatically  
-- `pdf-renderer.ts` — no changes  
-- `download/route.ts` — no changes  
-- DB — no migration needed (fields live in the JSONB `site_settings` value)  
+
+- `service.ts` — `orgDetails` is passed as-is; new fields flow through automatically
+- `pdf-renderer.ts` — no changes
+- `download/route.ts` — no changes
+- DB — no migration needed (fields live in the JSONB `site_settings` value)
 - All existing receipts — missing fields = no image rendered (guarded with `if (org.stamp_url)`)
 
 ### PDF Layout
+
 ```
 Footer row:
   LEFT:  [signature PNG, ~120×40px]          RIGHT: [stamp PNG, ~80×80px, slight overlap]
@@ -80,8 +87,10 @@ Footer row:
 ```
 
 ### Stamp image constraint
-`@react-pdf/renderer` `<Image>` requires absolute `https://` URL or base64.  
-- If `stamp_url` / `signature_url` start with `/` or are relative → skip rendering, log warning  
+
+`@react-pdf/renderer` `<Image>` requires absolute `https://` URL or base64.
+
+- If `stamp_url` / `signature_url` start with `/` or are relative → skip rendering, log warning
 - Admin UI: show a small live preview (same pattern as `logo_url` already does)
 
 ---
@@ -114,16 +123,22 @@ Run as: `029-add-verification-id-to-donations.sql`
 
 ### 2b — QR Code generation
 
-Install: `pnpm add qrcode`  (types: `pnpm add -D @types/qrcode`)  
+Install: `pnpm add qrcode` (types: `pnpm add -D @types/qrcode`)  
 New file: `lib/receipts/qr.ts`
 
 ```ts
-import QRCode from "qrcode"
+import QRCode from "qrcode";
 
-export async function verificationQRBase64(verificationId: string): Promise<string> {
-  const url = `${process.env.NEXT_PUBLIC_APP_URL}/verify/${verificationId}`
+export async function verificationQRBase64(
+  verificationId: string,
+): Promise<string> {
+  const url = `${process.env.NEXT_PUBLIC_APP_URL}/verify/${verificationId}`;
   // Returns "data:image/png;base64,..." — usable directly in @react-pdf/renderer <Image>
-  return QRCode.toDataURL(url, { width: 80, margin: 1, color: { dark: "#111827", light: "#ffffff" } })
+  return QRCode.toDataURL(url, {
+    width: 80,
+    margin: 1,
+    color: { dark: "#111827", light: "#ffffff" },
+  });
 }
 ```
 
@@ -137,8 +152,8 @@ export async function verificationQRBase64(verificationId: string): Promise<stri
      .from("donations")
      .select("verification_id")
      .eq("id", donationId)
-     .single()
-   const verificationId = donationRow?.verification_id as string
+     .single();
+   const verificationId = donationRow?.verification_id as string;
    ```
 2. Generate QR base64: `const qrBase64 = await verificationQRBase64(verificationId)`
 3. Pass both into `ReceiptPDFData`
@@ -146,6 +161,7 @@ export async function verificationQRBase64(verificationId: string): Promise<stri
 **`ReceiptPDFData` (in `receipt-document.tsx`)**
 
 Add two new optional fields:
+
 ```ts
 verificationId?: string
 verificationQR?: string   // base64 data URL
@@ -154,9 +170,11 @@ verificationQR?: string   // base64 data URL
 **`download/route.ts` on-the-fly fallback**
 
 Query also includes `verification_id`:
+
 ```ts
 .select("donor_name, ..., verification_id")
 ```
+
 Generate QR on-the-fly the same way.
 
 ### 2d — PDF layout additions
@@ -189,6 +207,7 @@ DB query:
 ```
 
 **Display:**
+
 ```
 ┌────────────────────────────────────────┐
 │  ✅  VALID RECEIPT                      │
@@ -272,13 +291,13 @@ NOT touched:
 
 ## Risk Register
 
-| Risk | Likelihood | Mitigation |
-|---|---|---|
-| Stamp/signature PNG is a private Supabase URL | Medium | Admin UI note + `https://` guard in PDF renderer skips silently |
-| QR generation adds latency to webhook | Low | `qrcode` is sync-capable; ~15ms typical |
-| `verification_id` NULL on very old donations | Low | `DEFAULT gen_random_uuid()` + backfill UPDATE in migration |
-| Verify page exposes donor data | Low | Name masking + only show completed+receipted donations |
-| Brute-force UUID enumeration | Negligible | 122 bits entropy = ~5×10³⁶ combinations; rate limit is extra guard |
+| Risk                                          | Likelihood | Mitigation                                                         |
+| --------------------------------------------- | ---------- | ------------------------------------------------------------------ |
+| Stamp/signature PNG is a private Supabase URL | Medium     | Admin UI note + `https://` guard in PDF renderer skips silently    |
+| QR generation adds latency to webhook         | Low        | `qrcode` is sync-capable; ~15ms typical                            |
+| `verification_id` NULL on very old donations  | Low        | `DEFAULT gen_random_uuid()` + backfill UPDATE in migration         |
+| Verify page exposes donor data                | Low        | Name masking + only show completed+receipted donations             |
+| Brute-force UUID enumeration                  | Negligible | 122 bits entropy = ~5×10³⁶ combinations; rate limit is extra guard |
 
 ---
 

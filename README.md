@@ -65,16 +65,16 @@ Our approach is community-driven, ensuring sustainable change that comes from wi
 
 ## 🛠 Tech Stack
 
-| Category | Technology |
-|----------|------------|
-| **Frontend** | [Next.js 14](https://nextjs.org/) with App Router |
-| **Backend** | [Supabase](https://supabase.com/) (Database, Auth, Storage) |
-| **Styling** | [Tailwind CSS](https://tailwindcss.com/) with custom design system |
-| **UI Components** | [shadcn/ui](https://ui.shadcn.com/) built on [Radix UI](https://www.radix-ui.com/) |
-| **Forms** | [React Hook Form](https://react-hook-form.com/) with [Zod](https://zod.dev/) validation |
-| **Payments** | Stripe, Khalti, eSewa |
-| **Deployment** | Vercel |
-| **Analytics** | Vercel Analytics |
+| Category          | Technology                                                                              |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| **Frontend**      | [Next.js 14](https://nextjs.org/) with App Router                                       |
+| **Backend**       | [Supabase](https://supabase.com/) (Database, Auth, Storage)                             |
+| **Styling**       | [Tailwind CSS](https://tailwindcss.com/) with custom design system                      |
+| **UI Components** | [shadcn/ui](https://ui.shadcn.com/) built on [Radix UI](https://www.radix-ui.com/)      |
+| **Forms**         | [React Hook Form](https://react-hook-form.com/) with [Zod](https://zod.dev/) validation |
+| **Payments**      | Stripe, Khalti, eSewa                                                                   |
+| **Deployment**    | Vercel                                                                                  |
+| **Analytics**     | Vercel Analytics                                                                        |
 
 ### Key Dependencies
 
@@ -108,7 +108,7 @@ pnpm install
 ```
 
 1. **Environment Setup:**
-Create a `.env.local` file in the root directory:
+   Create a `.env.local` file in the root directory:
 
 ```env
 # Supabase Configuration
@@ -129,7 +129,7 @@ PAYMENT_MODE=mock # or 'live' for production
 ```
 
 1. **Database Setup:**
-Run the SQL scripts in the `scripts/` directory in order:
+   Run the SQL scripts in the `scripts/` directory in order:
 
 - `001-create-tables.sql`
 - `002-admin-schema.sql`
@@ -190,12 +190,12 @@ scripts/
 
 The admin panel implements a robust role-based access control system:
 
-| Role | Permissions |
-|------|-------------|
+| Role            | Permissions                                           |
+| --------------- | ----------------------------------------------------- |
 | **Super Admin** | Full access to all features including user management |
-| **Admin** | Manage content, view submissions, configure settings |
-| **Editor** | Create and edit content (projects, events, stories) |
-| **Finance** | View and manage donations and financial reports |
+| **Admin**       | Manage content, view submissions, configure settings  |
+| **Editor**      | Create and edit content (projects, events, stories)   |
+| **Finance**     | View and manage donations and financial reports       |
 
 Authentication is handled through Supabase Auth with additional admin user records stored in the database.
 
@@ -221,6 +221,7 @@ The payment system has been refactored to provide production-grade security and 
 - **Comprehensive Monitoring:** Detailed logging and alerting for payment issues
 
 For detailed architecture documentation, see:
+
 - [Design Document](docs/payments-v2/DESIGN.md)
 - [Implementation Tasks](docs/payments-v2/TASKS.md)
 - [API Documentation](docs/api/PAYMENTS_V2.md)
@@ -232,14 +233,17 @@ For detailed architecture documentation, see:
 All payment credentials and API keys must be rotated quarterly for security. We provide comprehensive tools and documentation:
 
 **Documentation:**
+
 - [Credential Rotation Guide](docs/operations/CREDENTIAL_ROTATION_GUIDE.md) - Detailed step-by-step procedures
 - [Rotation Checklist](docs/operations/CREDENTIAL_ROTATION_CHECKLIST.md) - Quick reference checklist
 
 **Automation Scripts:**
+
 - `scripts/generate-secrets.ps1` / `.sh` - Generate all required secrets
 - `scripts/test-credentials.ps1` / `.sh` - Validate credential configuration
 
 **Quick Start:**
+
 ```bash
 # Generate new secrets
 .\scripts\generate-secrets.ps1
@@ -259,13 +263,13 @@ All payment credentials and API keys must be rotated quarterly for security. We 
 
 ### Credential Rotation Schedule
 
-| Credential | Rotation Frequency | Last Rotated |
-|-----------|-------------------|--------------|
-| Stripe Webhook Secret | Quarterly | - |
-| Khalti Secret Key | Quarterly | - |
-| eSewa Secret Key | Quarterly | - |
-| Receipt Token Secret | Quarterly | - |
-| CRON Secret | Quarterly | - |
+| Credential            | Rotation Frequency | Last Rotated |
+| --------------------- | ------------------ | ------------ |
+| Stripe Webhook Secret | Quarterly          | -            |
+| Khalti Secret Key     | Quarterly          | -            |
+| eSewa Secret Key      | Quarterly          | -            |
+| Receipt Token Secret  | Quarterly          | -            |
+| CRON Secret           | Quarterly          | -            |
 
 **Next Rotation Due:** [Set after first rotation]
 
