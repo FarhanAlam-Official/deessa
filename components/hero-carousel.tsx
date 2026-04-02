@@ -21,6 +21,11 @@ interface HeroCarouselProps {
   interval?: number
 }
 
+const NEWS_TICKER_ITEMS = [
+  "New sustainability initiative launched",
+  "Grant awarded for community project",
+]
+
 export function HeroCarousel({ slides, interval = 6000 }: HeroCarouselProps) {
   const [current, setCurrent] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
@@ -58,6 +63,21 @@ export function HeroCarousel({ slides, interval = 6000 }: HeroCarouselProps) {
     goTo((current - 1 + slides.length) % slides.length, "prev")
   }, [current, slides.length, goTo])
 
+  const getSlidePositionClass = (index: number) => {
+    if (index === current) return "translate-x-0 opacity-100 z-20"
+
+    const previousIndex = (current - 1 + slides.length) % slides.length
+    const nextIndex = (current + 1) % slides.length
+
+    if (direction === "next") {
+      if (index === previousIndex) return "-translate-x-full opacity-100 z-10"
+      return "translate-x-full opacity-0 z-0"
+    }
+
+    if (index === nextIndex) return "translate-x-full opacity-100 z-10"
+    return "-translate-x-full opacity-0 z-0"
+  }
+
   // Auto-advance
   useEffect(() => {
     if (isPaused || prefersReducedMotion) return
@@ -87,7 +107,7 @@ export function HeroCarousel({ slides, interval = 6000 }: HeroCarouselProps) {
       onMouseLeave={() => setIsPaused(false)}
       onFocus={() => setIsPaused(true)}
       onBlur={() => setIsPaused(false)}
-      className="relative w-full h-[500px] sm:h-[550px] lg:h-[600px] overflow-hidden bg-slate-900"
+      className="relative w-full h-[100svh] min-h-[620px] overflow-hidden bg-slate-900"
     >
       {/* Slides */}
       {slides.map((slide, i) => (
@@ -98,8 +118,8 @@ export function HeroCarousel({ slides, interval = 6000 }: HeroCarouselProps) {
           aria-label={`${i + 1} of ${slides.length}: ${slide.title}`}
           aria-hidden={i !== current}
           className={cn(
-            "absolute inset-0 transition-opacity duration-500 ease-in-out",
-            i === current ? "opacity-100 z-10" : "opacity-0 z-0",
+            "absolute inset-0 transition-all duration-700 ease-in-out will-change-transform",
+            getSlidePositionClass(i),
           )}
         >
           {/* Background image with subtle zoom */}
@@ -235,6 +255,39 @@ export function HeroCarousel({ slides, interval = 6000 }: HeroCarouselProps) {
           </div>
         </div>
       )}
+
+      {/* News ticker overlay (transparent, slight opacity) */}
+      <div className="absolute top-4 left-0 right-0 z-20 px-3 sm:px-4 lg:px-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex items-center gap-4 rounded-2xl px-4 py-2.5 text-white">
+            <span className="shrink-0 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white/90 sm:text-xs">
+              LATEST UPDATES
+            </span>
+            <div className="min-w-0 flex-1 overflow-x-auto scrollbar-hide lg:overflow-hidden">
+              <div className="hidden gap-8 lg:flex lg:py-0.5 nav-news-marquee-track">
+                {[...NEWS_TICKER_ITEMS, ...NEWS_TICKER_ITEMS].map((text, idx) => (
+                  <span key={`${text}-${idx}`} className="flex shrink-0 items-center gap-8 whitespace-nowrap text-sm text-white/90">
+                    <span>{text}</span>
+                    <span className="text-white/35" aria-hidden>
+                      |
+                    </span>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-4 lg:hidden">
+                {NEWS_TICKER_ITEMS.map((text) => (
+                  <span key={text} className="shrink-0 whitespace-nowrap text-sm text-white/90">
+                    {text}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="hidden shrink-0 text-white/50 lg:block" aria-hidden>
+              ...
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Bottom controls: dots + pause */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">

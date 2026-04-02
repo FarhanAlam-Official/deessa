@@ -237,7 +237,7 @@ export function ProgramsSection() {
   ]
 
   return (
-    <section className="py-20 md:py-28 bg-foreground text-white relative overflow-hidden">
+    <section id="what-we-do" className="py-20 md:py-28 bg-foreground text-white relative overflow-hidden scroll-mt-24">
       <div
         className="absolute inset-0 opacity-[0.07]"
         style={{

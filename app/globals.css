@@ -197,6 +197,28 @@
   scrollbar-width: none;
 }
 
+/* Navbar news ticker — seamless horizontal marquee (desktop) */
+@keyframes nav-news-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.nav-news-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: nav-news-marquee 32s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-news-marquee-track {
+    animation: none;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
