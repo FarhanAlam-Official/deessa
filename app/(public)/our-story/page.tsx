@@ -15,21 +15,21 @@ const challengeCards = [
     title: "Limited Access",
     description:
       "Specialized care and diagnostic tools were often hundreds of miles away or locked behind endless waiting lists.",
-    accent: "text-[#0060ae]",
+    accent: "text-primary",
   },
   {
     icon: Wallet,
     title: "High Costs",
     description:
       "The financial burden of consistent therapy and inclusive education puts quality support out of reach for many.",
-    accent: "text-[#8236c6]",
+    accent: "text-empowerment",
   },
   {
     icon: UserRoundX,
     title: "Social Misconceptions",
     description:
       "Dealing with stigma and lack of understanding from society was often harder than the diagnosis itself.",
-    accent: "text-[#795a00]",
+    accent: "text-chart-4",
   },
 ]
 
@@ -38,22 +38,22 @@ const timelineItems = [
     year: "2021: The Realization",
     text: "The seed of deessa was planted during late-night discussions about the lack of accessible resources in Nepal's remote regions.",
     icon: Lightbulb,
-    color: "bg-[#0060ae]",
-    textColor: "text-[#0060ae]",
+    color: "bg-primary",
+    textColor: "text-primary",
   },
   {
     year: "2022: Building Community",
     text: "We began connecting with specialists and parents, realizing that a unified platform for advocacy was essential.",
     icon: HandHeart,
-    color: "bg-[#8236c6]",
-    textColor: "text-[#8236c6]",
+    color: "bg-empowerment",
+    textColor: "text-empowerment",
   },
   {
     year: "2023: Official Launch",
     text: "deessa Foundation was officially established, focusing on education, health equity, and social inclusion.",
     icon: Rocket,
-    color: "bg-[#795a00]",
-    textColor: "text-[#795a00]",
+    color: "bg-chart-4",
+    textColor: "text-chart-4",
   },
 ]
 
@@ -63,27 +63,27 @@ const impact = [
     from: "From confusion",
     to: "to clarity",
     text: "Empowering families with knowledge and clear diagnostic paths.",
-    color: "text-[#0060ae]",
+    color: "text-primary",
   },
   {
     icon: Heart,
     from: "From stigma",
     to: "to acceptance",
     text: "Promoting awareness and celebrating every unique ability.",
-    color: "text-[#8236c6]",
+    color: "text-empowerment",
   },
   {
     icon: HandHeart,
     from: "From isolation",
     to: "to support",
     text: "Building networks of support so no family walks alone.",
-    color: "text-[#795a00]",
+    color: "text-chart-4",
   },
 ]
 
 export default function OurStoryPage() {
   return (
-    <main className="bg-[#faf9f8] text-[#303333]">
+    <main className="bg-background text-foreground">
       <section className="relative flex min-h-[82svh] items-center justify-center overflow-hidden px-6 pb-24 pt-20 md:px-8">
         <div className="absolute inset-0">
           <Image
@@ -93,19 +93,19 @@ export default function OurStoryPage() {
             className="object-cover opacity-15 mix-blend-multiply"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#faf9f8] via-transparent to-[#faf9f8]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-5xl text-center">
-          <span className="inline-block rounded-full bg-[#f0dbff] px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#7324b8] sm:text-sm">
+          <span className="inline-block rounded-full bg-primary/12 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary sm:text-sm">
             Our Origins
           </span>
-          <h1 className="mt-6 text-4xl font-extrabold leading-tight tracking-tight text-[#002a52] sm:text-6xl md:text-7xl">
+          <h1 className="mt-6 text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-6xl md:text-7xl">
             The Story Behind
             <br />
             deessa Foundation
           </h1>
-          <p className="mx-auto mt-7 max-w-3xl text-lg leading-relaxed text-[#5d605f] md:text-2xl">
+          <p className="text-foreground-muted mx-auto mt-7 max-w-3xl text-lg leading-relaxed md:text-2xl">
             From personal struggles to a mission of inclusion and hope.
             <br className="hidden md:block" />
             Discover the heart of our journey.
@@ -113,11 +113,11 @@ export default function OurStoryPage() {
         </div>
       </section>
 
-      <section id="about" className="bg-white px-6 py-24 md:px-8">
+      <section id="about" className="bg-surface px-6 py-24 md:px-8">
         <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2">
           <div className="order-2 lg:order-1">
             <div className="relative">
-              <div className="absolute -inset-3 -rotate-2 rounded-3xl bg-[#f9cc61]/20" aria-hidden />
+              <div className="absolute -inset-3 -rotate-2 rounded-3xl bg-chart-4/20" aria-hidden />
               <Image
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJXx8c8UwNt7LMcnZjeUcX3fiHF3kwS7Gq7zT-1FsnaGctC36Qn5Dd9I6mZpE41cWf_SdvBD_Y21oFEi0_RWaXcA4jaguOrWviJaCITse3FNl6Cbtie7hVxRoJZEE8U0nqWoMbrdKdVaDD-Dvf6o2NGZSIunDnP2C78pKPQX9Kqs248JnyI8pYI6lvh2BhE793AmHE0hPMMlimCcX4gbJt9zSJE2zrx3QRMDVZyiNfHzd_R5kDKeps-f8pp_BIEG38lDZEcZCoZSM"
                 alt="Two sisters smiling in a garden"
@@ -130,34 +130,34 @@ export default function OurStoryPage() {
 
           <div className="order-1 space-y-7 lg:order-2">
             <h2 className="text-3xl font-bold leading-tight sm:text-4xl">The Sisters who Sparked a Movement</h2>
-            <div className="space-y-5 text-base leading-relaxed text-[#5d605f] sm:text-lg">
+            <div className="text-foreground-muted space-y-5 text-base leading-relaxed sm:text-lg">
               <p>
                 Our journey began in the most personal of ways through the lives of our daughters,
-                <span className="font-bold text-[#0060ae]"> Deetya and Marissa</span>. Watching them navigate a world that was not always built for their unique needs opened our eyes to the gaps in support systems many families face.
+                <span className="font-bold text-primary"> Deetya and Marissa</span>. Watching them navigate a world that was not always built for their unique needs opened our eyes to the gaps in support systems many families face.
               </p>
               <p>
                 They are the heartbeat of this foundation. Their resilience taught us that every child deserves a path forward that celebrates their potential rather than focusing on limitations.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-2xl bg-[#f3f4f3] p-6">
-                <p className="text-3xl font-bold text-[#0060ae]">D</p>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#787b7a]">Deetya</p>
+              <div className="rounded-2xl bg-muted p-6">
+                <p className="text-3xl font-bold text-primary">D</p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Deetya</p>
               </div>
-              <div className="rounded-2xl bg-[#f3f4f3] p-6">
-                <p className="text-3xl font-bold text-[#8236c6]">M</p>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#787b7a]">Marissa</p>
+              <div className="rounded-2xl bg-muted p-6">
+                <p className="text-3xl font-bold text-empowerment">M</p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Marissa</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-[#f3f4f3] px-6 py-24 md:px-8">
+      <section className="bg-muted px-6 py-24 md:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="mb-14 max-w-2xl">
             <h2 className="text-3xl font-bold sm:text-4xl">Facing the Invisible Walls</h2>
-            <p className="mt-4 text-[#5d605f]">
+            <p className="text-foreground-muted mt-4">
               We encountered obstacles that felt insurmountable at first, reflecting the struggles of thousands of families.
             </p>
           </div>
@@ -166,16 +166,16 @@ export default function OurStoryPage() {
             {challengeCards.map((card) => {
               const Icon = card.icon
               return (
-                <article key={card.title} className="rounded-3xl bg-white p-8 transition-transform duration-300 hover:-translate-y-1">
+                <article key={card.title} className="bg-surface rounded-3xl p-8 transition-transform duration-300 hover:-translate-y-1">
                   <Icon className={`mb-5 size-8 ${card.accent}`} aria-hidden />
                   <h3 className="text-xl font-bold">{card.title}</h3>
-                  <p className="mt-3 leading-relaxed text-[#5d605f]">{card.description}</p>
+                  <p className="text-foreground-muted mt-3 leading-relaxed">{card.description}</p>
                 </article>
               )
             })}
           </div>
 
-          <blockquote className="relative mt-16 overflow-hidden rounded-3xl bg-[#0060ae] px-7 py-10 text-center text-white sm:px-10 sm:py-12">
+          <blockquote className="bg-brand-primary relative mt-16 overflow-hidden rounded-3xl px-7 py-10 text-center text-white sm:px-10 sm:py-12">
             <p className="mx-auto max-w-4xl text-2xl italic leading-tight sm:text-3xl md:text-4xl">
               “Many told us we were overthinking, but we knew deep down that our daughters and every child like them deserved better.”
             </p>
@@ -183,7 +183,7 @@ export default function OurStoryPage() {
         </div>
       </section>
 
-      <section className="bg-white px-6 py-28 text-center md:px-8">
+      <section className="bg-surface px-6 py-28 text-center md:px-8">
         <div className="mx-auto max-w-5xl">
           <h2 className="text-4xl font-extrabold leading-tight sm:text-5xl md:text-6xl">
             “If this was difficult for us,
@@ -192,16 +192,16 @@ export default function OurStoryPage() {
             <br />
             for families in rural Nepal?”
           </h2>
-          <div className="mx-auto mt-10 h-1 w-24 rounded-full bg-[#f9cc61]" />
+          <div className="bg-chart-4 mx-auto mt-10 h-1 w-24 rounded-full" />
         </div>
       </section>
 
-      <section className="bg-[#f3f4f3] px-6 py-24 md:px-8">
+      <section className="bg-muted px-6 py-24 md:px-8">
         <div className="mx-auto max-w-7xl">
           <h2 className="text-center text-3xl font-bold sm:text-4xl">The Birth of a Vision</h2>
 
           <div className="relative mx-auto mt-16 max-w-5xl space-y-9">
-            <div className="absolute bottom-0 left-8 top-0 w-px bg-[#b0b2b1]/70 md:left-1/2 md:-translate-x-1/2" />
+            <div className="bg-border absolute bottom-0 left-8 top-0 w-px md:left-1/2 md:-translate-x-1/2" />
 
             {timelineItems.map((item, index) => {
               const Icon = item.icon
@@ -218,8 +218,8 @@ export default function OurStoryPage() {
 
                   <div className={`mt-3 w-full md:mt-0 md:w-1/2 ${isEven ? "md:pl-12" : "md:order-1 md:pr-12"}`}>
                     <p className={`mb-2 text-lg font-bold md:hidden ${item.textColor}`}>{item.year}</p>
-                    <div className={`rounded-3xl bg-white p-6 ${isEven ? "text-left" : "text-left md:text-right"}`}>
-                      <p className="text-[#5d605f]">{item.text}</p>
+                    <div className={`bg-surface rounded-3xl p-6 ${isEven ? "text-left" : "text-left md:text-right"}`}>
+                      <p className="text-foreground-muted">{item.text}</p>
                     </div>
                   </div>
                 </div>
@@ -229,33 +229,33 @@ export default function OurStoryPage() {
         </div>
       </section>
 
-      <section className="overflow-hidden bg-white px-6 py-28 md:px-8">
+      <section className="overflow-hidden bg-surface px-6 py-28 md:px-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-14 lg:flex-row lg:gap-16">
           <div className="flex-1 space-y-7">
             <h2 className="text-3xl font-bold sm:text-4xl">More Than a Name</h2>
-            <p className="text-lg leading-relaxed text-[#5d605f]">
-              The name <span className="font-bold text-[#0060ae]">deessa</span> was born from the hearts of our daughters.
+            <p className="text-foreground-muted text-lg leading-relaxed">
+              The name <span className="font-bold text-primary">deessa</span> was born from the hearts of our daughters.
               It merges their identities while pointing toward our shared goal.
             </p>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-3xl border border-[#59a0f8]/20 p-7 text-center">
-                <p className="text-5xl font-extrabold text-[#0060ae]">dee</p>
-                <p className="mt-2 text-xs uppercase tracking-[0.2em] text-[#787b7a]">Deetya</p>
+              <div className="border-primary/25 rounded-3xl border p-7 text-center">
+                <p className="text-5xl font-extrabold text-primary">dee</p>
+                <p className="text-muted-foreground mt-2 text-xs uppercase tracking-[0.2em]">Deetya</p>
               </div>
-              <div className="rounded-3xl border border-[#e7c9ff]/40 p-7 text-center">
-                <p className="text-5xl font-extrabold text-[#8236c6]">ssa</p>
-                <p className="mt-2 text-xs uppercase tracking-[0.2em] text-[#787b7a]">Marissa</p>
+              <div className="border-empowerment/35 rounded-3xl border p-7 text-center">
+                <p className="text-5xl font-extrabold text-empowerment">ssa</p>
+                <p className="text-muted-foreground mt-2 text-xs uppercase tracking-[0.2em]">Marissa</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-5 rounded-3xl bg-[#edeeed] p-6">
-              <div className="inline-flex size-14 items-center justify-center rounded-full bg-[#59a0f8] text-[#002141]">
+            <div className="bg-muted flex items-center gap-5 rounded-3xl p-6">
+              <div className="bg-primary/25 text-primary inline-flex size-14 items-center justify-center rounded-full">
                 <Flag className="size-6" aria-hidden />
               </div>
               <div>
                 <p className="text-xl font-bold">Direction</p>
-                <p className="text-sm text-[#5d605f]">Meaning of “deessa” in Nepali context</p>
+                <p className="text-foreground-muted text-sm">Meaning of “deessa” in Nepali context</p>
               </div>
             </div>
           </div>
@@ -272,21 +272,21 @@ export default function OurStoryPage() {
         </div>
       </section>
 
-      <section id="mission" className="bg-[#f3f4f3] px-6 py-24 md:px-8">
+      <section id="mission" className="bg-muted px-6 py-24 md:px-8">
         <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-2 md:gap-10">
-          <article className="rounded-3xl border-t-8 border-[#0060ae] bg-white p-10 shadow-sm">
-            <Flag className="mb-5 size-9 text-[#0060ae]" aria-hidden />
+          <article className="bg-surface border-primary rounded-3xl border-t-8 p-10 shadow-sm">
+            <Flag className="text-primary mb-5 size-9" aria-hidden />
             <h2 className="text-3xl font-bold">Our Mission</h2>
-            <p className="mt-5 text-lg leading-relaxed text-[#5d605f]">
+            <p className="text-foreground-muted mt-5 text-lg leading-relaxed">
               To break down barriers for families navigating developmental and physical challenges by providing
               accessible healthcare, educational resources, and a community of unwavering support.
             </p>
           </article>
 
-          <article className="rounded-3xl border-t-8 border-[#8236c6] bg-white p-10 shadow-sm">
-            <Eye className="mb-5 size-9 text-[#8236c6]" aria-hidden />
+          <article className="bg-surface rounded-3xl border-t-8 border-[rgb(var(--accent-empowerment))] p-10 shadow-sm">
+            <Eye className="text-empowerment mb-5 size-9" aria-hidden />
             <h2 className="text-3xl font-bold">Our Vision</h2>
-            <p className="mt-5 text-lg leading-relaxed text-[#5d605f]">
+            <p className="text-foreground-muted mt-5 text-lg leading-relaxed">
               A world where every child, regardless of ability or location, is seen, heard, and given the resources
               to lead a life of dignity and purpose.
             </p>
@@ -294,7 +294,7 @@ export default function OurStoryPage() {
         </div>
       </section>
 
-      <section className="bg-white px-6 py-24 md:px-8">
+      <section className="bg-surface px-6 py-24 md:px-8">
         <div className="mx-auto max-w-7xl">
           <h2 className="text-center text-3xl font-bold sm:text-4xl">The Evolution of Impact</h2>
           <div className="mt-16 grid gap-12 md:grid-cols-3">
@@ -303,15 +303,15 @@ export default function OurStoryPage() {
               return (
                 <article key={item.from} className="group text-center">
                   <div className="relative mb-8 inline-block">
-                    <div className="inline-flex size-28 items-center justify-center rounded-full bg-[#e7e8e7] text-[#787b7a] transition-colors group-hover:bg-slate-100 sm:size-32">
+                    <div className="bg-muted text-muted-foreground inline-flex size-28 items-center justify-center rounded-full transition-colors group-hover:bg-accent sm:size-32">
                       <Icon className={`size-10 ${item.color}`} aria-hidden />
                     </div>
                     {index < impact.length - 1 && (
-                      <ArrowRight className="absolute -right-8 top-1/2 hidden size-7 -translate-y-1/2 text-[#b0b2b1] md:block" />
+                      <ArrowRight className="text-border absolute -right-8 top-1/2 hidden size-7 -translate-y-1/2 md:block" />
                     )}
                   </div>
                   <h3 className="text-xl font-bold">{item.from}</h3>
-                  <p className="mt-3 px-4 text-[#5d605f]">{item.text}</p>
+                  <p className="text-foreground-muted mt-3 px-4">{item.text}</p>
                   <p className={`mt-3 font-bold ${item.color}`}>{item.to}</p>
                 </article>
               )
@@ -321,7 +321,7 @@ export default function OurStoryPage() {
       </section>
 
       <section id="contact" className="mx-auto max-w-7xl px-6 py-24 md:px-8">
-        <div className="relative overflow-hidden rounded-3xl bg-[#002141] px-6 py-14 text-center sm:px-10 sm:py-20">
+        <div className="relative overflow-hidden rounded-3xl bg-brand-primary-dark px-6 py-14 text-center sm:px-10 sm:py-20">
           <div className="absolute inset-0 opacity-20">
             <Image
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuDObnZb9aDESJ36lgucVDoXG4ikhozQiTrqeLRtpIdSNRy5igPnNFD8ELZKcR9IRcU7oz6dSPbFoFlYSveJqlZRa_tdqqAreV_NQge-Ryajr-weagx4XprOHVZSMsYBWn3MWeLouBUb-iUHWpm10ckFMO0_yjDlZuBNGSMmKcBSGm4z2a_EwG0Ip0KcNJE4xjLdnQQ4ER7OxQL1HNNa3NULGLGU1elM726TzK_JM0jKLIM3dnDDN4ah09-mbldfWlA_4HYp2h38IWY"
@@ -343,14 +343,14 @@ export default function OurStoryPage() {
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 href="/get-involved"
-                className="inline-flex items-center rounded-full bg-[#0060ae] px-8 py-3 text-sm font-bold text-white transition hover:bg-[#005499]"
+                className="inline-flex items-center rounded-full bg-brand-primary px-8 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-dark"
               >
                 Join Us
                 <ArrowRight className="ml-2 size-4" aria-hidden />
               </Link>
               <Link
                 href="/donate"
-                className="rounded-full bg-white px-8 py-3 text-sm font-bold text-[#002141] transition hover:bg-[#faf9f8]"
+                className="rounded-full bg-white px-8 py-3 text-sm font-bold text-brand-primary-dark transition hover:bg-surface"
               >
                 Support Our Mission
               </Link>
