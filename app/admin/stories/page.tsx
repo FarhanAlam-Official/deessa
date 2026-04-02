@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Plus, Pencil, Eye, EyeOff, ExternalLink, Star } from "lucide-react"
+import DeleteStoryButton from "@/components/admin/delete-story-button"
 
 async function getStories() {
   const supabase = await createClient()
@@ -62,9 +63,9 @@ export default async function StoriesPage() {
                             className="h-10 w-10 rounded object-cover"
                           />
                         )}
-                        <div>
-                          <p className="font-medium">{story.title}</p>
-                          <p className="text-sm text-muted-foreground line-clamp-1">{story.excerpt}</p>
+                        <div className="max-w-[320px] lg:max-w-[420px]">
+                          <p className="font-medium line-clamp-1">{story.title}</p>
+                          <p className="mt-0.5 text-sm text-muted-foreground line-clamp-2 break-words">{story.excerpt}</p>
                         </div>
                       </div>
                     </TableCell>
@@ -106,6 +107,11 @@ export default async function StoriesPage() {
                             </Link>
                           </Button>
                         )}
+                        <DeleteStoryButton
+                          storyId={story.id}
+                          storyTitle={story.title}
+                          isPublished={story.is_published}
+                        />
                       </div>
                     </TableCell>
                   </TableRow>

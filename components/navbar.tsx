@@ -18,6 +18,7 @@ import {
   ClipboardList,
   LayoutGrid,
   Star,
+  Headphones,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -25,6 +26,7 @@ import { cn } from "@/lib/utils"
 const primaryNavLinks = [
   { href: "/", label: "Home", icon: Home },
   { href: "/about", label: "Who We Are", icon: Users },
+  { href: "/our-story", label: "Our Story", icon: FileText },
   { href: "/#what-we-do", label: "What We Do", icon: LayoutGrid },
   { href: "/programs", label: "Programs", icon: Briefcase },
   { href: "/impact", label: "Impact", icon: Award },
@@ -34,7 +36,7 @@ const primaryNavLinks = [
 
 const secondaryNavLinks = [
   { href: "/impact", label: "Impact", icon: Award },
-  { href: "/stories", label: "Stories", icon: FileText },
+  { href: "/podcasts", label: "Podcasts", icon: Headphones },
   { href: "/events", label: "Events", icon: Calendar },
   { href: "/contact", label: "Contact", icon: Mail },
 ] as const

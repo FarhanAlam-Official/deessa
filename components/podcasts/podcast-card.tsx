@@ -28,6 +28,12 @@ export function PodcastCard({
   const isPrimary = variant === "primary"
   const formatIcon = podcast.format === 'video' ? Video : Music
 
+  const openYouTube = (event: React.MouseEvent | React.KeyboardEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    window.open(`https://www.youtube.com/watch?v=${podcast.youtubeId}`, "_blank", "noopener,noreferrer")
+  }
+
   return (
     <Link
       href={`/podcasts/${podcast.slug}`}
@@ -152,19 +158,23 @@ export function PodcastCard({
             Watch Episode
           </div>
 
-          <a
-            href={`https://www.youtube.com/watch?v=${podcast.youtubeId}`}
-            target="_blank"
-            rel="noopener noreferrer"
+          <span
+            role="link"
+            tabIndex={0}
             className={cn(
               "flex items-center gap-1.5 text-text-muted transition-all duration-300 hover:text-red-600 hover:scale-105",
               isPrimary ? "text-sm" : "text-xs"
             )}
-            onClick={(e) => e.stopPropagation()}
+            onClick={openYouTube}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                openYouTube(event)
+              }
+            }}
           >
             <Youtube className="size-4" />
             <span className="font-medium">View on YouTube</span>
-          </a>
+          </span>
         </div>
       </div>
     </Link>

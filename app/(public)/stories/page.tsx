@@ -4,23 +4,22 @@ import Link from "next/link"
 import { ArrowRight, Clock, BookOpen } from "lucide-react"
 import { Section } from "@/components/ui/section"
 import { StoryCard } from "@/components/ui/story-card"
-import PodcastSection from "@/components/podcasts/podcast-section"
 import { getPublishedStories, getFeaturedStory } from "@/lib/data/stories"
-import { getLatestPodcasts } from "@/lib/data/podcasts"
 
 export const metadata: Metadata = {
-  title: "Stories & Podcast - Deessa Foundation",
-  description: "Read inspiring stories of impact and transformation, and explore our Living With Autism podcast series.",
+  title: "Stories - Deessa Foundation",
+  description: "Read inspiring stories of impact and transformation from our community.",
 }
 
 export default async function StoriesPage() {
-  const [allStories, featuredStory, podcasts] = await Promise.all([
+  const [allStories, featuredStory] = await Promise.all([
     getPublishedStories(),
     getFeaturedStory(),
-    getLatestPodcasts(6),
   ])
   
-  const remainingStories = allStories.filter((s) => s.id !== featuredStory?.id)
+  const regularStories = featuredStory
+    ? allStories.filter((story) => story.id !== featuredStory.id)
+    : allStories
 
   return (
     <>
@@ -35,23 +34,43 @@ export default async function StoriesPage() {
           />
           <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto">
             <span className="bg-primary/90 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
-              Stories & Podcast
+              Stories
             </span>
             <h1 className="text-white text-4xl md:text-5xl font-black leading-tight tracking-tight mb-4">
               Stories of Hope & Impact
             </h1>
             <p className="text-white/90 text-lg font-medium max-w-2xl leading-relaxed">
-              Discover real stories behind our work and explore our Living With Autism podcast series.
+              Discover real stories behind our work and the impact we create together.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Living With Autism Podcast Section */}
-      <PodcastSection podcasts={podcasts} />
+      <section className="bg-white py-10 md:py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <Link
+            href="/podcasts"
+            className="group block rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/5 to-sky-50 p-6 md:p-8 transition-all duration-300 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10"
+          >
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-primary/80">Listen Next</p>
+                <h2 className="mt-2 text-2xl md:text-3xl font-black text-foreground">Explore Our Podcast Episodes</h2>
+                <p className="mt-2 text-foreground-muted max-w-2xl">
+                  Visit the podcast page to watch and listen to the Living With Autism series.
+                </p>
+              </div>
+              <div className="inline-flex items-center gap-2 self-start rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-transform duration-300 group-hover:translate-x-1 md:self-center">
+                Go to Podcasts
+                <ArrowRight className="size-4" />
+              </div>
+            </div>
+          </Link>
+        </div>
+      </section>
 
       {/* Stories Grid - Only show if there are stories */}
-      {(remainingStories.length > 0 || featuredStory) && (
+      {(regularStories.length > 0 || featuredStory) && (
         <Section className="bg-gradient-to-b from-background to-muted/30">
           <div className="relative mb-12">
             {/* Background decoration */}
@@ -94,9 +113,31 @@ export default async function StoriesPage() {
               </div>
             </div>
           </div>
-          {remainingStories.length > 0 && (
+
+          {featuredStory && (
+            <div className="mb-10">
+              <h3 className="mb-4 text-xl font-bold text-foreground">Featured Story</h3>
+              <div className="max-w-xl">
+                <StoryCard
+                  title={featuredStory.title}
+                  excerpt={featuredStory.excerpt}
+                  image={featuredStory.image}
+                  category={featuredStory.category}
+                  date={
+                    featuredStory.published_at
+                      ? new Date(featuredStory.published_at).toLocaleDateString()
+                      : new Date(featuredStory.created_at).toLocaleDateString()
+                  }
+                  readTime={featuredStory.read_time || "5 min read"}
+                  href={`/stories/${featuredStory.slug}`}
+                />
+              </div>
+            </div>
+          )}
+
+          {regularStories.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {remainingStories.map((story) => (
+              {regularStories.map((story) => (
                 <StoryCard
                   key={story.id}
                   title={story.title}

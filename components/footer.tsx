@@ -9,6 +9,7 @@ import { NewsletterForm } from "@/components/newsletter-form"
 const footerLinks = {
   about: [
     { label: "Our Mission", href: "/about", icon: Target },
+    { label: "Our Story", href: "/our-story", icon: Heart },
     { label: "Our Team", href: "/about#team", icon: Users },
     { label: "Partners", href: "/about#partners", icon: HeartHandshake },
     { label: "Press & Media", href: "/press", icon: FileText },
