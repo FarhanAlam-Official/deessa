@@ -6,20 +6,17 @@ import { ArrowLeft, Clock3, CalendarDays, Sparkles, Tag, Share2, ArrowUpRight } 
 import { Section } from "@/components/ui/section"
 import { Button } from "@/components/ui/button"
 import { PrintButton } from "@/components/ui/print-button"
-import { getPublishedStories, getStoryBySlug, getPublishedStoriesStatic } from "@/lib/data/stories"
+import { getPublishedStories, getStoryBySlug } from "@/lib/data/stories"
 import { sanitizeStoryContent } from "@/lib/sanitize/story-content"
 import { processStoryContent } from "@/lib/utils/legacy-story"
 import "@/app/print-styles.css"
 
+// Story content changes frequently in CMS workflows; keep this route runtime-rendered
+// so new/updated slugs always resolve on Vercel without waiting for rebuilds.
+export const dynamic = "force-dynamic"
+
 interface PageProps {
   params: Promise<{ slug: string }>
-}
-
-export async function generateStaticParams() {
-  const stories = await getPublishedStoriesStatic()
-  return stories.map((story) => ({
-    slug: story.slug,
-  }))
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
