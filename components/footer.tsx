@@ -192,32 +192,21 @@ export function Footer() {
                 </p>
               </div>
 
-              {/* Platform icons */}
-              <div className="text-center">
-                <p className="text-gray-400 text-sm mb-3">Also find us on:</p>
-                <div className="flex items-center justify-center gap-4">
-                  <Link
-                    href="/podcasts"
-                    className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-gray-800/50 hover:border-primary/50 rounded-lg transition-all duration-300 group"
+              {/* Actionable Trust Builder */}
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <Heart className="size-5 text-rose-500" />
+                  <span className="font-marissa text-white text-xl">100% Transparent</span>
+                </div>
+                <p className="text-gray-400 text-sm max-w-sm mx-auto leading-relaxed">
+                  We believe in complete financial transparency. Every rupee you donate or track through our reports goes directly toward empowering rural communities in Nepal.
+                </p>
+                <div className="mt-5 flex justify-center">
+                  <Link 
+                    href="/impact" 
+                    className="text-xs font-semibold text-primary hover:text-primary-light uppercase tracking-wider underline underline-offset-4 decoration-primary/30 transition-all duration-300"
                   >
-                    <Music className="size-4 text-green-500 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs text-gray-400 group-hover:text-white">Spotify</span>
-                  </Link>
-                  <Link
-                    href="/podcasts"
-                    className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-gray-800/50 hover:border-primary/50 rounded-lg transition-all duration-300 group"
-                  >
-                    <Music className="size-4 text-purple-500 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs text-gray-400 group-hover:text-white">Apple</span>
-                  </Link>
-                  <Link
-                    href="https://www.youtube.com/@deessaFoundation"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-gray-800/50 hover:border-primary/50 rounded-lg transition-all duration-300 group"
-                  >
-                    <Video className="size-4 text-red-500 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs text-gray-400 group-hover:text-white">YouTube</span>
+                    Explore our financials
                   </Link>
                 </div>
               </div>
