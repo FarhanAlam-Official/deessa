@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, Brain, Eye, Flag, HandHeart, Heart, Lightbulb, Lock, Rocket, UserRoundX, Wallet } from "lucide-react"
+import { BrushStroke } from "@/components/ui/brush-stroke"
+import { AnimatedBrushQuote } from "./AnimatedBrushQuote"
 
 export const metadata: Metadata = {
   title: "Our Story - deessa Foundation",
@@ -175,11 +177,7 @@ export default function OurStoryPage() {
             })}
           </div>
 
-          <blockquote className="bg-brand-primary relative mt-16 overflow-hidden rounded-3xl px-7 py-10 text-center text-white sm:px-10 sm:py-12">
-            <p className="mx-auto max-w-4xl text-2xl italic leading-tight sm:text-3xl md:text-4xl">
-              “Many told us we were overthinking, but we knew deep down that our daughters and every child like them deserved better.”
-            </p>
-          </blockquote>
+          <AnimatedBrushQuote />
         </div>
       </section>
 
