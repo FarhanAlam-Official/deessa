@@ -71,6 +71,11 @@ const config = {
     '/dist/',
   ],
   
+  // Transform ignore patterns - allow jsdom to be transformed
+  transformIgnorePatterns: [
+    'node_modules/(?!(jsdom|@exodus/bytes|html-encoding-sniffer)/)',
+  ],
+  
   // Module file extensions
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   
