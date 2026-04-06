@@ -178,3 +178,25 @@ export async function deleteStory(id: string) {
   revalidatePath("/stories")
   redirect("/admin/stories")
 }
+
+export async function autosaveStory(storyId: string, content: string) {
+  const admin = await getCurrentAdmin()
+  if (!admin) return { error: "Unauthorized" }
+
+  const supabase = await createClient()
+
+  // Update only content and updated_at
+  const { error } = await supabase
+    .from("stories")
+    .update({
+      content,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", storyId)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  return { success: true }
+}
