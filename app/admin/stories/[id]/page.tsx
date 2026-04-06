@@ -25,7 +25,7 @@ export default async function EditStoryPage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center gap-4">
         <Link
           href="/admin/stories"
@@ -37,8 +37,8 @@ export default async function EditStoryPage({
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold">Edit Story</h1>
-        <p className="text-muted-foreground">Update {story.title}</p>
+        <h1 className="text-3xl font-bold tracking-tight">Edit Story</h1>
+        <p className="mt-1 text-muted-foreground">Update {story.title} in the expanded writing workspace.</p>
       </div>
 
       <StoryForm story={story} />
