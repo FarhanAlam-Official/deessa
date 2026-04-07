@@ -407,7 +407,11 @@ export default function PodcastForm({ podcast, mode }: PodcastFormProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="episode_number">Episode Number</Label>
+                  <Label htmlFor="episode_number" className="flex items-center gap-1">
+                    Episode Number
+                    <span className="text-red-500">*</span>
+                    <span className="text-xs text-text-muted font-normal">(Required for display)</span>
+                  </Label>
                   <Input
                     id="episode_number"
                     type="number"
@@ -415,7 +419,12 @@ export default function PodcastForm({ podcast, mode }: PodcastFormProps) {
                     onChange={(e) =>
                       setFormData({ ...formData, episode_number: e.target.value })
                     }
+                    placeholder="e.g., 7"
+                    required
                   />
+                  <p className="text-xs text-amber-600">
+                    Important: This number appears as "EP X" badge on podcast cards. Leave blank only for special episodes.
+                  </p>
                 </div>
 
                 <div className="space-y-2">
