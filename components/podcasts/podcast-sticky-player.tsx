@@ -80,8 +80,7 @@ export default function PodcastStickyPlayer({ podcast }: PodcastStickyPlayerProp
               {podcast.title}
             </h3>
             <p className="text-xs text-text-muted">
-              {podcast.episodeNumber && `Episode ${podcast.episodeNumber} • `}
-              {podcast.duration}
+              Episode {podcast.episodeNumber || 'New'} • {podcast.duration}
             </p>
           </div>
 

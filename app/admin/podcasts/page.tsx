@@ -80,11 +80,9 @@ export default async function AdminPodcastsPage() {
                           <div className="font-medium text-text-main line-clamp-1">
                             {podcast.title}
                           </div>
-                          {podcast.episode_number && (
-                            <div className="text-xs text-text-muted">
-                              Episode {podcast.episode_number}
-                            </div>
-                          )}
+                          <div className="text-xs text-text-muted">
+                            Episode {podcast.episode_number || 'Unnumbered'}
+                          </div>
                         </div>
                       </div>
                     </TableCell>

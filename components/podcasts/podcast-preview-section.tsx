@@ -55,14 +55,12 @@ export default function PodcastPreviewSection({ podcasts }: PodcastPreviewSectio
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   
-                  {/* Episode Badge */}
-                  {episode.episodeNumber && (
-                    <div className="absolute top-3 left-3 z-10">
-                      <span className="bg-brand-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider shadow-xl">
-                        EP {episode.episodeNumber}
-                      </span>
-                    </div>
-                  )}
+                  {/* Episode Badge - Always show */}
+                  <div className="absolute top-3 left-3 z-10">
+                    <span className="bg-brand-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider shadow-xl">
+                      EP {episode.episodeNumber || (podcasts.findIndex(e => e.id === episode.id) + 1)}
+                    </span>
+                  </div>
                   
                   {/* Duration */}
                   <div className="absolute top-3 right-3 z-10">

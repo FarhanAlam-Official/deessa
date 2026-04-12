@@ -48,14 +48,12 @@ export function PodcastCard({
     >
       {/* Thumbnail Container - Video Focused */}
       <div className="relative overflow-hidden aspect-video bg-gray-900">
-        {/* Episode Badge */}
-        {podcast.episodeNumber && (
-          <div className="absolute top-3 left-3 z-20">
-            <span className="bg-brand-primary text-white px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider shadow-lg">
-              EP {podcast.episodeNumber}
-            </span>
-          </div>
-        )}
+        {/* Episode Badge - Always show */}
+        <div className="absolute top-3 left-3 z-20">
+          <span className="bg-brand-primary text-white px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider shadow-lg">
+            EP {podcast.episodeNumber || 'New'}
+          </span>
+        </div>
 
         {/* Duration Badge - Top Right */}
         <div className="absolute top-3 right-3 z-20">
