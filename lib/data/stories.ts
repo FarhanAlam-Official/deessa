@@ -58,8 +58,23 @@ export async function getFeaturedStory() {
 
 export async function getStoryBySlug(slug: string) {
   const supabase = await createClient()
-  const { data, error } = await supabase.from("stories").select("*").eq("slug", slug).eq("is_published", true).single()
+  const normalizedSlug = decodeURIComponent(slug).trim().toLowerCase()
 
-  if (error) return null
+  // Use a bounded query + maybeSingle() so production data inconsistencies
+  // (such as duplicate slugs or case variance) do not hard-fail page rendering.
+  const { data, error } = await supabase
+    .from("stories")
+    .select("*")
+    .eq("is_published", true)
+    .ilike("slug", normalizedSlug)
+    .order("published_at", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    console.error("Error fetching story by slug:", { slug: normalizedSlug, error })
+    return null
+  }
+
   return data
 }

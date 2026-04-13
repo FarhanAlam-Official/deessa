@@ -14,6 +14,7 @@ import {
   CountUp,
   BackToTop,
 } from "@/components/scroll-animations"
+import { BrushStroke } from "@/components/ui/brush-stroke"
 
 /* ──────────────────  IMPACT STATS BAR  ────────────────── */
 
@@ -78,9 +79,21 @@ export function OurStorySection() {
           <ScrollReveal animation="fade-left" delay={200}>
             <div>
               <span className="text-primary font-bold tracking-widest uppercase text-sm mb-4 block">Our Story</span>
-              <h2 className="text-3xl md:text-5xl font-black text-foreground leading-tight tracking-tight mb-6">
-                How Deesha Started
-              </h2>
+              <div className="mx-auto w-full max-w-4xl">
+                <BrushStroke
+                  color="#6F3E96"
+                  animate={true}
+                  animationDuration={1.2}
+                  className="mx-auto"
+                  style={{ minHeight: 160 }}
+                >
+                  <div className="py-3 md:py-4 px-3 md:px-8">
+                    <h2 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tight mb-4 text-center">
+                      How Deesha Started
+                    </h2>
+                  </div>
+                </BrushStroke>
+              </div>
               <p className="text-lg text-foreground/70 leading-relaxed mb-6">
                 Born from a deep passion for social justice and a belief in the power of community, Deesha Foundation
                 was established in 2014 in Kathmandu, Nepal. What began as a small group of dedicated individuals
@@ -290,66 +303,226 @@ export function ProgramsSection() {
 /* ──────────────────  TIMELINE SECTION  ────────────────── */
 
 export function TimelineSection() {
-  const impactYears = [
-    { year: "2014", milestone: "Founded in Kathmandu", description: "Deessa Foundation was born from a passion to serve." },
-    { year: "2016", milestone: "First education program", description: "Launched scholarship programs reaching 200+ students." },
-    { year: "2018", milestone: "Health camps expanded", description: "Medical outreach to 50+ remote villages across Nepal." },
-    { year: "2020", milestone: "COVID-19 relief", description: "Emergency supplies distributed to 5,000+ families." },
-    { year: "2022", milestone: "10,000 lives impacted", description: "A decade of transformation across communities." },
-    { year: "2024", milestone: "New horizons", description: "Expanding programs into art, podcasting, and digital literacy." },
+  const milestones = [
+    {
+      year: "2014",
+      milestone: "Founded in Kathmandu",
+      description: "Deesha Foundation began with a simple commitment: serve communities that are often left behind.",
+      icon: MapPin,
+      badgeClass: "from-[rgb(var(--brand-primary))] to-[rgb(var(--brand-primary-dark))]",
+      yearClass: "bg-[rgb(var(--brand-primary))]",
+    },
+    {
+      year: "2016",
+      milestone: "First education program",
+      description: "Our scholarship initiative opened classroom doors for 200+ students with limited access to learning.",
+      icon: GraduationCap,
+      badgeClass: "from-[rgb(var(--accent-education))] to-amber-500",
+      yearClass: "bg-[rgb(var(--accent-education))]",
+    },
+    {
+      year: "2018",
+      milestone: "Health camps expanded",
+      description: "Medical outreach scaled to 50+ remote villages, bringing care closer to families who needed it most.",
+      icon: Stethoscope,
+      badgeClass: "from-[rgb(var(--accent-empowerment))] to-pink-500",
+      yearClass: "bg-[rgb(var(--accent-empowerment))]",
+    },
+    {
+      year: "2020",
+      milestone: "COVID-19 relief",
+      description: "Emergency food, hygiene kits, and support reached 5,000+ families during Nepal's most urgent months.",
+      icon: Heart,
+      badgeClass: "from-[rgb(var(--accent-environment))] to-lime-500",
+      yearClass: "bg-[rgb(var(--accent-environment))]",
+    },
+    {
+      year: "2022",
+      milestone: "10,000 lives impacted",
+      description: "A decade of trust, partnerships, and consistent fieldwork transformed lives across communities.",
+      icon: Globe,
+      badgeClass: "from-[#6F3E96] to-[#6F3E96]",
+      yearClass: "bg-[#6F3E96]",
+    },
+    {
+      year: "2024",
+      milestone: "New horizons",
+      description: "We are now expanding into art, podcasting, and digital literacy to shape future-ready communities.",
+      icon: BookOpen,
+      badgeClass: "from-[#F7C52B] to-[#F7C52B]",
+      yearClass: "bg-[#F7C52B]",
+    },
+  ]
+
+  const desktopPositions = [
+    { top: "10%", left: "61%", width: "35%" },
+    { top: "27%", left: "64%", width: "33%" },
+    { top: "43%", left: "40%", width: "44%" },
+    { top: "61%", left: "8%", width: "43%" },
+    { top: "75%", left: "55%", width: "41%" },
+    { top: "88%", left: "8%", width: "43%" },
   ]
 
   return (
-    <section className="py-20 md:py-28 bg-background relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          <div>
-            <ScrollReveal animation="fade-up">
-              <span className="text-primary font-bold tracking-widest uppercase text-sm mb-4 block">Our Journey</span>
-              <h2 className="text-3xl md:text-5xl font-black text-foreground leading-tight tracking-tight mb-6">
-                Together, We Are Changing Lives
-              </h2>
-              <p className="text-lg text-foreground/70 leading-relaxed mb-10">
-                Over the years, every milestone has been a step towards a better Nepal. Here&apos;s our journey of impact.
-              </p>
-            </ScrollReveal>
+    <section className="py-20 md:py-24 relative overflow-hidden bg-[linear-gradient(180deg,#f6f3ed_0%,#fbfaf7_100%)]">
+      <div className="absolute inset-0 pointer-events-none opacity-30" style={{ backgroundImage: "radial-gradient(circle, rgba(63,171,222,0.22) 2px, transparent 2px)", backgroundSize: "42px 42px" }} />
+      <div className="absolute -left-28 top-8 h-96 w-96 rounded-full bg-primary/15 blur-3xl" />
+      <div className="absolute right-0 bottom-0 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
 
-            <div className="relative ml-6">
-              <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary/15">
-                <div className="w-full rounded-full bg-primary animate-timeline-draw" />
-              </div>
-              <div className="space-y-8">
-                {impactYears.map((item, i) => (
-                  <ScrollReveal key={item.year} animation="fade-right" delay={i * 120}>
-                    <div className="relative pl-10">
-                      <div className="absolute left-0 top-1 -translate-x-[calc(50%-1.5px)] w-4 h-4 rounded-full bg-primary shadow-md shadow-primary/30 ring-4 ring-background z-10 hover:scale-125 transition-transform" />
-                      <span className="inline-block text-xs font-black text-white bg-primary rounded-full px-3 py-1 mb-2 shadow-sm font-comic-num">
-                        {item.year}
-                      </span>
-                      <h4 className="font-bold text-foreground text-lg leading-tight">
-                        {item.milestone}
-                      </h4>
-                      <p className="text-foreground/60 text-sm mt-1 font-normal">
-                        {item.description}
-                      </p>
-                    </div>
-                  </ScrollReveal>
-                ))}
-              </div>
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <ScrollReveal animation="fade-up">
+          <div className="max-w-3xl mx-auto text-center">
+            <span className="text-primary font-bold tracking-widest uppercase text-sm mb-4 block">Our Journey</span>
+            <div className="mx-auto w-full max-w-4xl">
+              <BrushStroke
+                color="#6F3E96"
+                animate={true}
+                animationDuration={1.2}
+                className="mx-auto"
+                style={{ minHeight: 150 }}
+              >
+                <div className="py-4 md:py-5 px-3 md:px-10 flex items-center justify-center">
+                  <h2 className="text-2xl sm:text-3xl md:text-[3.1rem] font-black text-white leading-none tracking-tight text-center whitespace-nowrap">
+                    Together, We Are Changing Lives
+                  </h2>
+                </div>
+              </BrushStroke>
             </div>
+            <p className="text-lg text-foreground/70 leading-relaxed">
+              Every year added a new layer of impact. From local beginnings to national outreach, these milestones trace how hope turned into measurable change.
+            </p>
           </div>
+        </ScrollReveal>
 
-          <ScrollReveal animation="scale-in" delay={200}>
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+        <div className="hidden lg:block mt-10 relative h-[1380px]">
+          <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1200 1380" fill="none" preserveAspectRatio="none" aria-hidden="true">
+            <path
+              d="M705 185 C 860 180, 885 300, 730 365 C 610 415, 630 560, 458 610 C 300 655, 225 760, 74 845 C 130 945, 430 965, 614 1020 C 745 1065, 395 1135, 74 1225"
+              stroke="#3FABDE"
+              strokeWidth="4"
+              strokeDasharray="8 10"
+              strokeLinecap="round"
+            />
+            <circle cx="730" cy="365" r="7" fill="#3FABDE" />
+            <circle cx="458" cy="610" r="7" fill="#3FABDE" />
+            <circle cx="74" cy="845" r="7" fill="#3FABDE" />
+            <circle cx="614" cy="1020" r="7" fill="#3FABDE" />
+            <circle cx="74" cy="1225" r="7" fill="#3FABDE" />
+          </svg>
+
+          <ScrollReveal animation="fade-right" delay={80}>
+            <article className="absolute left-0 top-0 w-[57%] rounded-[2rem] overflow-hidden border border-white/70 shadow-[0_38px_72px_-48px_rgba(15,23,42,0.7)]">
               <Image
                 src="/OurImpactThroughTheYear.png"
                 alt="Our Impact Through the Years"
-                width={700}
-                height={600}
-                className="w-full h-auto object-cover hover:scale-105 transition-transform duration-700"
+                width={760}
+                height={520}
+                className="h-[470px] w-full object-cover"
               />
-            </div>
+              <div className="absolute inset-0 bg-linear-to-t from-black/50 via-black/10 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-5">
+                <p className="text-[2.35rem] leading-none font-black text-white mb-3">11 Years of Impact</p>
+                <div className="grid grid-cols-3 gap-2.5">
+                  <div
+                    className="rounded-2xl p-3 text-white"
+                    style={{ background: "linear-gradient(90deg, rgb(var(--brand-primary-dark) / 0.95) 0%, rgb(var(--brand-primary) / 0.95) 100%)" }}
+                  >
+                    <p className="text-[1.85rem] font-black font-comic-num leading-none">10,000+</p>
+                    <p className="text-xs mt-1 uppercase tracking-wide text-white/90">Lives Transformed</p>
+                  </div>
+                  <div
+                    className="rounded-2xl p-3 text-white"
+                    style={{ background: "linear-gradient(90deg, rgb(var(--accent-education) / 0.95) 0%, rgb(245 158 11 / 0.95) 100%)" }}
+                  >
+                    <p className="text-[1.85rem] font-black font-comic-num leading-none">50+</p>
+                    <p className="text-xs mt-1 uppercase tracking-wide text-white/90">Villages Reached</p>
+                  </div>
+                  <div
+                    className="rounded-2xl p-3 text-white"
+                    style={{ background: "linear-gradient(90deg, rgb(var(--accent-environment) / 0.95) 0%, rgb(132 204 22 / 0.95) 100%)" }}
+                  >
+                    <p className="text-[1.85rem] font-black font-comic-num leading-none">200+</p>
+                    <p className="text-xs mt-1 uppercase tracking-wide text-white/90">Students Supported</p>
+                  </div>
+                </div>
+              </div>
+            </article>
           </ScrollReveal>
+
+          {milestones.map((item, i) => {
+            const IconComp = item.icon
+
+            return (
+              <ScrollReveal key={item.year} animation={i % 2 === 0 ? "fade-left" : "fade-right"} delay={140 + i * 80}>
+                <article
+                  className="absolute rounded-[1.8rem] bg-white/95 backdrop-blur border border-white/90 p-4 shadow-[0_24px_46px_-34px_rgba(15,23,42,0.68)]"
+                  style={desktopPositions[i]}
+                >
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className={`size-14 rounded-full bg-gradient-to-br ${item.badgeClass} text-white shadow-lg ring-4 ring-white flex items-center justify-center`}>
+                      <IconComp className="size-6" />
+                    </div>
+
+                    <span className={`inline-flex items-center rounded-full ${item.yearClass} text-white text-sm font-black px-4 py-1.5 font-comic-num shadow-sm`}>
+                      {item.year}
+                    </span>
+                  </div>
+
+                  <h4 className="text-[1.65rem] leading-[1.08] font-black text-slate-800 mb-1.5">
+                    {item.milestone}
+                  </h4>
+                  <p className="text-[1rem] leading-7 text-slate-600">
+                    {item.description}
+                  </p>
+                </article>
+              </ScrollReveal>
+            )
+          })}
+        </div>
+
+        <div className="lg:hidden mt-10 relative pl-7 space-y-4">
+          <div className="absolute left-[9px] top-0 bottom-0 w-[3px] rounded-full bg-primary/20" />
+
+          <ScrollReveal animation="fade-up">
+            <article className="rounded-3xl overflow-hidden border border-primary/15 bg-white shadow-lg">
+              <div className="relative h-[260px]">
+                <Image
+                  src="/OurImpactThroughTheYear.png"
+                  alt="Our Impact Through the Years"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-linear-to-t from-black/55 via-black/20 to-transparent" />
+                <p className="absolute left-4 bottom-3 text-3xl font-black text-white">11 Years of Impact</p>
+              </div>
+            </article>
+          </ScrollReveal>
+
+          {milestones.map((item, i) => {
+            const IconComp = item.icon
+
+            return (
+              <ScrollReveal key={item.year} animation="fade-up" delay={i * 80}>
+                <article className="relative rounded-2xl border border-primary/15 bg-white/95 p-4 shadow-[0_16px_32px_-26px_rgba(15,23,42,0.6)]">
+                  <span className={`absolute -left-9 top-6 size-7 rounded-full ${item.yearClass} ring-4 ring-white`} />
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <div className={`size-9 rounded-full bg-gradient-to-br ${item.badgeClass} text-white flex items-center justify-center`}>
+                      <IconComp className="size-4" />
+                    </div>
+                    <span className={`inline-flex items-center rounded-full ${item.yearClass} text-white text-xs font-black px-3 py-1 font-comic-num`}>
+                      {item.year}
+                    </span>
+                  </div>
+                  <h4 className="font-black text-foreground text-lg leading-tight">
+                    {item.milestone}
+                  </h4>
+                  <p className="text-sm leading-relaxed text-foreground/70 mt-1.5">
+                    {item.description}
+                  </p>
+                </article>
+              </ScrollReveal>
+            )
+          })}
         </div>
       </div>
     </section>
@@ -451,41 +624,41 @@ export function TestimonialsSection() {
 
 // Partner Logo Components as SVGs
 const WorldVisionLogo = () => (
-  <svg viewBox="0 0 120 50" className="h-10 w-auto" fill="currentColor">
+  <svg viewBox="0 0 120 50" className="h-12 md:h-14 w-auto" fill="currentColor">
     <circle cx="15" cy="25" r="8" className="text-blue-600" />
     <text x="28" y="30" className="text-xs font-bold" fill="currentColor">World Vision</text>
   </svg>
 )
 
 const SaaltLogo = () => (
-  <svg viewBox="0 0 80 50" className="h-10 w-auto" fill="currentColor">
+  <svg viewBox="0 0 80 50" className="h-12 md:h-14 w-auto" fill="currentColor">
     <text x="5" y="30" className="text-xl font-bold lowercase" fill="#2D5F3F">saalt</text>
   </svg>
 )
 
 const ActionAidLogo = () => (
-  <svg viewBox="0 0 110 50" className="h-10 w-auto">
+  <svg viewBox="0 0 110 50" className="h-12 md:h-14 w-auto">
     <circle cx="15" cy="25" r="10" fill="#E63946" />
     <text x="30" y="30" className="text-xs font-bold" fill="currentColor">ActionAid</text>
   </svg>
 )
 
 const RealMedicineLogo = () => (
-  <svg viewBox="0 0 180 50" className="h-10 w-auto">
+  <svg viewBox="0 0 180 50" className="h-12 md:h-14 w-auto">
     <rect x="5" y="15" width="18" height="18" rx="3" fill="#8B4513" />
     <text x="28" y="30" className="text-[10px] font-bold" fill="currentColor">Real Medicine Foundation</text>
   </svg>
 )
 
 const PedalHealthLogo = () => (
-  <svg viewBox="0 0 120 50" className="h-10 w-auto">
+  <svg viewBox="0 0 120 50" className="h-12 md:h-14 w-auto">
     <path d="M15 25 L22 18 L22 32 Z" fill="#4CAF50" />
     <text x="28" y="30" className="text-xs font-bold" fill="currentColor">PedalHealth</text>
   </svg>
 )
 
 const WorldBicycleLogo = () => (
-  <svg viewBox="0 0 160 50" className="h-10 w-auto">
+  <svg viewBox="0 0 160 50" className="h-12 md:h-14 w-auto">
     <circle cx="12" cy="30" r="7" stroke="#FF6B35" strokeWidth="2" fill="none" />
     <circle cx="28" cy="30" r="7" stroke="#FF6B35" strokeWidth="2" fill="none" />
     <text x="40" y="30" className="text-[10px] font-bold" fill="currentColor">World Bicycle Relief</text>
@@ -493,14 +666,14 @@ const WorldBicycleLogo = () => (
 )
 
 const UBCLogo = () => (
-  <svg viewBox="0 0 80 50" className="h-12 w-auto">
+  <svg viewBox="0 0 80 50" className="h-14 md:h-16 w-auto">
     <rect x="10" y="10" width="35" height="30" rx="2" fill="#003366" />
     <text x="18" y="30" className="text-base font-bold" fill="white">UBC</text>
   </svg>
 )
 
 const BuildingEqualityLogo = () => (
-  <svg viewBox="0 0 180 50" className="h-10 w-auto">
+  <svg viewBox="0 0 180 50" className="h-12 md:h-14 w-auto">
     <rect x="5" y="15" width="12" height="18" fill="#6A4C93" />
     <rect x="19" y="12" width="12" height="21" fill="#6A4C93" />
     <text x="36" y="30" className="text-[10px] font-bold" fill="currentColor">Building Equality</text>
@@ -508,14 +681,14 @@ const BuildingEqualityLogo = () => (
 )
 
 const LSSLogo = () => (
-  <svg viewBox="0 0 80 50" className="h-12 w-auto">
+  <svg viewBox="0 0 80 50" className="h-14 md:h-16 w-auto">
     <rect x="10" y="10" width="38" height="28" rx="3" fill="#2E7D32" />
     <text x="18" y="30" className="text-base font-bold" fill="white">LSS</text>
   </svg>
 )
 
 const RedCrossLogo = () => (
-  <svg viewBox="0 0 100 50" className="h-10 w-auto">
+  <svg viewBox="0 0 100 50" className="h-12 md:h-14 w-auto">
     <rect x="15" y="15" width="7" height="18" fill="#E63946" />
     <rect x="11" y="19" width="15" height="7" fill="#E63946" />
     <text x="30" y="30" className="text-xs font-bold" fill="currentColor">Red Cross</text>
@@ -523,7 +696,7 @@ const RedCrossLogo = () => (
 )
 
 const UNICEFLogo = () => (
-  <svg viewBox="0 0 90 50" className="h-10 w-auto">
+  <svg viewBox="0 0 90 50" className="h-12 md:h-14 w-auto">
     <circle cx="15" cy="20" r="9" fill="#00AEEF" />
     <path d="M11 25 L15 29 L19 25" stroke="white" strokeWidth="2" fill="none" />
     <text x="8" y="43" className="text-[10px] font-bold" fill="currentColor">UNICEF</text>
@@ -531,35 +704,35 @@ const UNICEFLogo = () => (
 )
 
 const WorldBankLogo = () => (
-  <svg viewBox="0 0 110 50" className="h-10 w-auto">
+  <svg viewBox="0 0 110 50" className="h-12 md:h-14 w-auto">
     <circle cx="15" cy="25" r="10" fill="#009FDA" />
     <text x="30" y="30" className="text-xs font-bold" fill="currentColor">World Bank</text>
   </svg>
 )
 
 const SaveChildrenLogo = () => (
-  <svg viewBox="0 0 140 50" className="h-10 w-auto">
+  <svg viewBox="0 0 140 50" className="h-12 md:h-14 w-auto">
     <circle cx="15" cy="25" r="9" fill="#E2231A" />
     <text x="28" y="30" className="text-xs font-bold" fill="currentColor">Save the Children</text>
   </svg>
 )
 
 const OxfamLogo = () => (
-  <svg viewBox="0 0 90 50" className="h-10 w-auto">
+  <svg viewBox="0 0 90 50" className="h-12 md:h-14 w-auto">
     <circle cx="15" cy="25" r="9" fill="#61A534" />
     <text x="28" y="30" className="text-xs font-bold" fill="currentColor">Oxfam</text>
   </svg>
 )
 
 const RotaryLogo = () => (
-  <svg viewBox="0 0 150 50" className="h-10 w-auto">
+  <svg viewBox="0 0 150 50" className="h-12 md:h-14 w-auto">
     <circle cx="15" cy="25" r="9" fill="#17458F" />
     <text x="28" y="30" className="text-xs font-bold" fill="currentColor">Rotary International</text>
   </svg>
 )
 
 const CareInternationalLogo = () => (
-  <svg viewBox="0 0 140 50" className="h-10 w-auto">
+  <svg viewBox="0 0 140 50" className="h-12 md:h-14 w-auto">
     <rect x="5" y="15" width="18" height="18" rx="3" fill="#0066A6" />
     <text x="28" y="30" className="text-xs font-bold" fill="currentColor">Care International</text>
   </svg>
@@ -586,10 +759,14 @@ export function PartnersSection() {
   ]
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-background via-primary/5 to-background border-y border-border overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+    <section className="relative overflow-hidden py-16 md:py-24 bg-[linear-gradient(180deg,#fffaf4_0%,#f7fbff_100%)]">
+      <div className="absolute inset-0 pointer-events-none opacity-55" style={{ backgroundImage: "radial-gradient(circle, rgba(63,171,222,0.08) 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
+      <div className="absolute -left-24 top-10 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+      <div className="absolute right-0 bottom-0 h-96 w-96 rounded-full bg-[#F7C52B]/10 blur-3xl" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 relative z-10">
         <ScrollReveal animation="fade-up">
-          <div className="text-center">
+          <div className="text-center max-w-3xl mx-auto">
             <span className="text-primary font-bold tracking-widest uppercase text-sm mb-4 block">Our Network</span>
             <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight mb-6">
               Partners <span className="font-normal">&</span> Sponsors
@@ -604,23 +781,27 @@ export function PartnersSection() {
         </ScrollReveal>
       </div>
 
-      <div className="relative">
-        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-        
-        <div className="flex items-center gap-12 animate-marquee py-6" style={{ width: "max-content" }}>
+      <div className="relative mx-auto max-w-[1600px] px-0 sm:px-0 lg:px-0">
+        <div className="relative overflow-hidden py-6 md:py-8">
+          <div className="absolute left-0 top-0 h-full w-24 bg-gradient-to-r from-[#fffaf4] to-transparent pointer-events-none z-10" />
+          <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-[#f7fbff] to-transparent pointer-events-none z-10" />
+
+          <div className="flex items-center gap-12 animate-marquee py-3 md:gap-16" style={{ width: "max-content" }}>
           {[...partners, ...partners, ...partners].map((partner, i) => {
             const LogoComponent = partner.Component
             return (
               <div
                 key={`partner-${i}`}
-                className="flex-none flex items-center justify-center px-8 py-6 rounded-2xl bg-white border border-border/50 shadow-md hover:shadow-xl hover:scale-110 transition-all duration-300 min-w-[160px]"
+                className="group flex-none flex items-center justify-center px-2 py-1 transition-transform duration-300 hover:scale-[1.06]"
                 title={partner.name}
               >
-                <LogoComponent />
+                <div className="flex items-center justify-center text-slate-800/95 transition-opacity duration-300 group-hover:opacity-100 opacity-90">
+                  <LogoComponent />
+                </div>
               </div>
             )
           })}
+          </div>
         </div>
       </div>
     </section>
