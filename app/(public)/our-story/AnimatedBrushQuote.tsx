@@ -18,7 +18,6 @@ export function AnimatedBrushQuote() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          minHeight: 152,
           width: "100%",
         }}
       >
@@ -26,7 +25,7 @@ export function AnimatedBrushQuote() {
           color="#0B5F8A"
           animate={inView}
           animationDuration={1.2}
-          style={{ width: "100%", minHeight: 200, maxWidth: 900 }}
+          style={{ width: "100%", minHeight: 'auto', maxWidth: 900, height: 'auto' }}
         >
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -36,7 +35,6 @@ export function AnimatedBrushQuote() {
               position: "relative",
               zIndex: 2,
               textAlign: "center",
-              padding: "0 24px",
             }}
           >
             <h3
