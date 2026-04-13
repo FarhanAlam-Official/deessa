@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowLeft, Clock3, CalendarDays, Sparkles, Tag, Share2, ArrowUpRight } from "lucide-react"
+import { ArrowLeft, ArrowRight, Clock3, CalendarDays, Sparkles, Tag, Share2, ArrowUpRight, Copy, Facebook, Linkedin } from "lucide-react"
 import { Section } from "@/components/ui/section"
 import { Button } from "@/components/ui/button"
 import { PrintButton } from "@/components/ui/print-button"
@@ -41,7 +41,15 @@ export default async function StoryDetailPage({ params }: PageProps) {
     notFound()
   }
 
-  const relatedStories = allStories.filter((item) => item.slug !== story.slug).slice(0, 3)
+  // Smart related stories: prioritize same category, then any other stories
+  const otherStories = allStories.filter((item) => item.slug !== story.slug)
+  const sameCategoryStories = otherStories.filter((item) => item.category === story.category).slice(0, 3)
+  const relatedStories = sameCategoryStories.length >= 3 ? sameCategoryStories : [...sameCategoryStories, ...otherStories.filter((item) => item.category !== story.category)].slice(0, 3)
+
+  // Previous/next navigation
+  const storyIndex = allStories.findIndex((item) => item.id === story.id)
+  const prevStory = storyIndex > 0 ? allStories[storyIndex - 1] : null
+  const nextStory = storyIndex < allStories.length - 1 ? allStories[storyIndex + 1] : null
 
   const publishedDate = story.published_at
     ? new Date(story.published_at).toLocaleDateString("en-US", {
@@ -71,6 +79,11 @@ export default async function StoryDetailPage({ params }: PageProps) {
         </div>
 
         <div className="relative mx-auto max-w-6xl px-4 pb-14 pt-10 sm:px-6 lg:px-8 lg:pb-20 lg:pt-14">
+          <div className="mb-6 flex items-center gap-2 text-sm text-white/70">
+            <Link href="/stories" className="hover:text-white transition">Stories</Link>
+            <span>/</span>
+            <span className="line-clamp-1 text-white/90">{story.category}</span>
+          </div>
           <Link
             href="/stories"
             className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold tracking-wide text-white/90 backdrop-blur transition hover:bg-white/15"
@@ -126,7 +139,7 @@ export default async function StoryDetailPage({ params }: PageProps) {
             {story.content ? (
               <div className="overflow-x-auto">
                 <div
-                  className="tiptap story-rich text-[1.05rem] leading-8 text-slate-700"
+                  className="tiptap story-rich prose prose-lg max-w-none text-[1.1rem] leading-8 text-slate-700 [&_h2]:mt-8 [&_h2]:mb-4 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_h3]:mt-6 [&_h3]:mb-3 [&_h3]:text-lg [&_h3]:font-semibold [&_p]:mb-5 [&_blockquote]:border-l-4 [&_blockquote]:border-cyan-400 [&_blockquote]:pl-5 [&_blockquote]:italic [&_blockquote]:text-slate-600 [&_ul]:ml-6 [&_ul]:mb-4 [&_ol]:ml-6 [&_ol]:mb-4"
                   dangerouslySetInnerHTML={{ 
                     __html: sanitizeStoryContent(processStoryContent(story.content), story.id) 
                   }}
@@ -174,20 +187,26 @@ export default async function StoryDetailPage({ params }: PageProps) {
               )}
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-slate-500">Share</h3>
-                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1">
+                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-slate-500">Share Story</h3>
+                <div className="mt-3 flex flex-col gap-2">
                   <PrintButton variant="outline" className="justify-start bg-transparent" />
                   <Button asChild variant="outline" className="justify-start bg-transparent">
                     <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(story.title)}&url=${encodeURIComponent(`https://deessafoundation.org/stories/${story.slug}`)}`} target="_blank" rel="noreferrer">
                       <Share2 className="mr-2 size-4" />
-                      Share
+                      Twitter
                     </a>
                   </Button>
                   <Button asChild variant="outline" className="justify-start bg-transparent">
-                    <Link href="/stories">
-                      Explore
-                      <ArrowUpRight className="ml-2 size-4" />
-                    </Link>
+                    <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://deessafoundation.org/stories/${story.slug}`)}`} target="_blank" rel="noreferrer">
+                      <Facebook className="mr-2 size-4" />
+                      Facebook
+                    </a>
+                  </Button>
+                  <Button asChild variant="outline" className="justify-start bg-transparent">
+                    <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://deessafoundation.org/stories/${story.slug}`)}`} target="_blank" rel="noreferrer">
+                      <Linkedin className="mr-2 size-4" />
+                      LinkedIn
+                    </a>
                   </Button>
                 </div>
               </div>
@@ -207,15 +226,51 @@ export default async function StoryDetailPage({ params }: PageProps) {
         </div>
       </Section>
 
+      {/* Previous/Next Navigation */}
+      <Section className="bg-white py-10 no-print">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {prevStory ? (
+              <Link
+                href={`/stories/${prevStory.slug}`}
+                className="group flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-cyan-300 hover:shadow-md"
+              >
+                <ArrowLeft className="mt-1 size-5 shrink-0 text-slate-400 transition group-hover:text-cyan-600" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Previous Story</p>
+                  <h3 className="mt-1 line-clamp-2 font-semibold text-slate-900 transition group-hover:text-cyan-600">{prevStory.title}</h3>
+                </div>
+              </Link>
+            ) : (
+              <div />  
+            )}
+            {nextStory ? (
+              <Link
+                href={`/stories/${nextStory.slug}`}
+                className="group flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-cyan-300 hover:shadow-md sm:text-right"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Next Story</p>
+                  <h3 className="mt-1 line-clamp-2 font-semibold text-slate-900 transition group-hover:text-cyan-600">{nextStory.title}</h3>
+                </div>
+                <ArrowRight className="mt-1 size-5 shrink-0 text-slate-400 transition group-hover:text-cyan-600" />
+              </Link>
+            ) : (
+              <div />
+            )}
+          </div>
+        </div>
+      </Section>
+
       {relatedStories.length > 0 && (
-        <Section className="bg-slate-950 py-14 text-white">
+        <Section className="bg-[linear-gradient(180deg,#f8fcff_0%,#eef8ff_100%)] py-14 text-slate-900">
           <div className="mx-auto max-w-6xl">
             <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-300">Continue Reading</p>
-                <h2 className="mt-2 text-3xl">More Stories You May Like</h2>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-600">Continue Reading</p>
+                <h2 className="mt-2 text-3xl">More {story.category} Stories</h2>
               </div>
-              <Button asChild variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white">
+              <Button asChild variant="outline" className="border-slate-300 bg-white/70 text-slate-800 hover:bg-white hover:text-cyan-700">
                 <Link href="/stories">All Stories</Link>
               </Button>
             </div>
@@ -225,7 +280,7 @@ export default async function StoryDetailPage({ params }: PageProps) {
                 <Link
                   key={item.id}
                   href={`/stories/${item.slug}`}
-                  className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition duration-300 hover:-translate-y-1 hover:border-cyan-300/60 hover:bg-white/[0.06]"
+                  className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-cyan-300 hover:shadow-md"
                 >
                   <div className="relative aspect-[16/10] overflow-hidden">
                     <Image
@@ -234,14 +289,14 @@ export default async function StoryDetailPage({ params }: PageProps) {
                       fill
                       className="object-cover transition duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent" />
-                    <span className="absolute left-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-cyan-100">
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
+                    <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-cyan-700 backdrop-blur">
                       {item.category}
                     </span>
                   </div>
                   <div className="p-4">
-                    <h3 className="line-clamp-2 text-lg leading-snug text-white">{item.title}</h3>
-                    <p className="mt-2 line-clamp-2 text-sm text-slate-300">{item.excerpt}</p>
+                    <h3 className="line-clamp-2 text-lg leading-snug text-slate-900 transition group-hover:text-cyan-700">{item.title}</h3>
+                    <p className="mt-2 line-clamp-2 text-sm text-slate-600">{item.excerpt}</p>
                   </div>
                 </Link>
               ))}

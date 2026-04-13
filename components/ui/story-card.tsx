@@ -16,33 +16,37 @@ interface StoryCardProps {
 
 export function StoryCard({ title, excerpt, image, category, date, readTime, href, className }: StoryCardProps) {
   return (
-    <Link href={href} className={cn("group flex flex-col gap-4", className)}>
-      <div className="relative w-full aspect-[4/3] overflow-hidden rounded-2xl shadow-sm">
-        <div className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-bold text-primary uppercase tracking-wider shadow-sm">
-          {category}
+    <Link href={href} className={cn("group block h-full", className)}>
+      <article className="flex h-full flex-col overflow-hidden rounded-[1.75rem] bg-white/90 shadow-[0_18px_52px_-35px_rgba(15,23,42,0.38)] transition-transform duration-300 hover:-translate-y-1">
+        <div className="relative aspect-[4/3] overflow-hidden">
+          <Image
+            src={image || "/placeholder.svg"}
+            alt={title}
+            fill
+            sizes="(min-width: 1024px) 30vw, 100vw"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,7,18,0.03)_0%,rgba(3,7,18,0.08)_45%,rgba(3,7,18,0.72)_100%)]" />
+          <div className="absolute left-4 top-4 rounded-full bg-white/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary backdrop-blur">
+            {category}
+          </div>
+          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90">
+            <span className="rounded-full bg-white/15 px-3 py-1 backdrop-blur">{date}</span>
+            <span className="rounded-full bg-white/15 px-3 py-1 backdrop-blur">{readTime}</span>
+          </div>
         </div>
-        <Image
-          src={image || "/placeholder.svg"}
-          alt={title}
-          fill
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-3 text-xs font-medium text-foreground-muted uppercase tracking-wide">
-          <span>{date}</span>
-          <span className="size-1 rounded-full bg-gray-300" />
-          <span>{readTime}</span>
+
+        <div className="flex flex-1 flex-col p-6">
+          <h3 className="text-xl font-semibold leading-tight text-slate-950 transition-colors duration-300 group-hover:text-primary">
+            {title}
+          </h3>
+          <p className="mt-3 line-clamp-3 text-sm leading-7 text-slate-600">{excerpt}</p>
+          <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+            Read story
+            <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </div>
         </div>
-        <h3 className="text-xl font-bold leading-tight text-foreground group-hover:text-primary transition-colors">
-          {title}
-        </h3>
-        <p className="text-foreground-muted text-base leading-relaxed line-clamp-2">{excerpt}</p>
-        <div className="mt-2 flex items-center gap-1 text-sm font-bold text-primary">
-          Read Story
-          <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-        </div>
-      </div>
+      </article>
     </Link>
   )
 }
