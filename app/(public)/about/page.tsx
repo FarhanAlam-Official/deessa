@@ -127,35 +127,50 @@ export default async function AboutPage() {
             <p className="text-foreground-muted mt-2">Milestones that defined our path.</p>
           </div>
           <div className="relative">
-            <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-border transform md:-translate-x-1/2" />
+            <div className="absolute left-[14px] md:left-1/2 top-0 bottom-0 w-0.5 bg-border transform md:-translate-x-1/2" />
             {timeline.map((item, index) => (
               <div
                 key={item.year}
-                className="relative flex items-center justify-between mb-12"
+                className="relative mb-12"
               >
-                {/* Left side content (even indexes: 0, 2, 4...) */}
-                <div className={`w-5/12 ${index % 2 === 0 ? "text-right pr-8" : ""}`}>
-                  {index % 2 === 0 && (
-                    <>
-                      <h3 className="text-2xl font-bold text-primary">{item.year}</h3>
-                      <h4 className="text-xl font-bold text-foreground mt-1">{item.title}</h4>
-                      <p className="text-foreground-muted mt-2">{item.description}</p>
-                    </>
-                  )}
+                {/* Mobile layout: stacked left-aligned */}
+                <div className="flex items-start gap-6 md:hidden">
+                  {/* Dot */}
+                  <div className="mt-1 w-4 h-4 bg-surface border-4 border-primary rounded-full z-10 shrink-0" />
+                  {/* Content */}
+                  <div>
+                    <h3 className="text-2xl font-bold text-primary">{item.year}</h3>
+                    <h4 className="text-xl font-bold text-foreground mt-1">{item.title}</h4>
+                    <p className="text-foreground-muted mt-2">{item.description}</p>
+                  </div>
                 </div>
 
-                {/* Center dot */}
-                <div className="w-4 h-4 bg-surface border-4 border-primary rounded-full z-10 shrink-0" />
+                {/* Desktop layout: zigzag */}
+                <div className="hidden md:flex md:items-center md:justify-between">
+                  {/* Left side content (even indexes: 0, 2, 4...) */}
+                  <div className={`w-5/12 ${index % 2 === 0 ? "text-right pr-8" : ""}`}>
+                    {index % 2 === 0 && (
+                      <>
+                        <h3 className="text-2xl font-bold text-primary">{item.year}</h3>
+                        <h4 className="text-xl font-bold text-foreground mt-1">{item.title}</h4>
+                        <p className="text-foreground-muted mt-2">{item.description}</p>
+                      </>
+                    )}
+                  </div>
 
-                {/* Right side content (odd indexes: 1, 3, 5...) */}
-                <div className={`w-5/12 ${index % 2 === 1 ? "text-left pl-8" : ""}`}>
-                  {index % 2 === 1 && (
-                    <>
-                      <h3 className="text-2xl font-bold text-primary">{item.year}</h3>
-                      <h4 className="text-xl font-bold text-foreground mt-1">{item.title}</h4>
-                      <p className="text-foreground-muted mt-2">{item.description}</p>
-                    </>
-                  )}
+                  {/* Center dot */}
+                  <div className="w-4 h-4 bg-surface border-4 border-primary rounded-full z-10 shrink-0" />
+
+                  {/* Right side content (odd indexes: 1, 3, 5...) */}
+                  <div className={`w-5/12 ${index % 2 === 1 ? "text-left pl-8" : ""}`}>
+                    {index % 2 === 1 && (
+                      <>
+                        <h3 className="text-2xl font-bold text-primary">{item.year}</h3>
+                        <h4 className="text-xl font-bold text-foreground mt-1">{item.title}</h4>
+                        <p className="text-foreground-muted mt-2">{item.description}</p>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
