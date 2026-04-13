@@ -760,14 +760,13 @@ export default function ImpactClientPage() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    minHeight: 152,
                   }}
                 >
                   <BrushStroke 
                     color="#8B8DD4" 
                     animate={true} 
                     animationDuration={1.2}
-                    style={{ width: '100%', minHeight: 200, maxWidth: 900 }}
+                    style={{ width: '100%', maxWidth: 900 }}
                   >
                     {/* Text content — on top of paint stroke */}
                     <motion.div
@@ -779,13 +778,12 @@ export default function ImpactClientPage() {
                         position: "relative",
                         zIndex: 2,
                         textAlign: "center",
-                        padding: "0 24px",
                       }}
                     >
                       <h3
                         style={{
                           fontFamily: "'Georgia', serif",
-                          fontSize: "clamp(26px, 3.5vw, 34px)",
+                          fontSize: "clamp(22px, 3.5vw, 34px)",
                           fontWeight: 800,
                           color: "#ffffff",
                           lineHeight: 1.2,
@@ -799,7 +797,7 @@ export default function ImpactClientPage() {
                       <p
                         style={{
                           fontFamily: "'DM Sans', system-ui, sans-serif",
-                          fontSize: "clamp(16px, 2vw, 18px)",
+                          fontSize: "clamp(14px, 2vw, 18px)",
                           fontWeight: 400,
                           color: "#ffffff",
                           opacity: 0.95,

@@ -67,106 +67,128 @@ export const BrushStroke: React.FC<BrushStrokeProps> = ({
   const usePremiumPurple = color === '#8B8DD4';
 
   return (
-    <div
-      ref={containerRef}
-      className={`brush-stroke-container ${className}`}
-      style={{
-        position: 'relative',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width,
-        height,
-        // Soft ambient glow around the whole painted section
-        filter: usePremiumPurple ? 'drop-shadow(0px 10px 25px rgba(139, 141, 212, 0.25))' : 'none',
-        ...style,
-      }}
-    >
+    <>
+      {/* Mobile-only padding override — does NOT affect desktop (≥768px) at all */}
+      <style>{`
+        @media (max-width: 767px) {
+          .brush-content-inner {
+            padding-top: 2.5rem !important;
+            padding-bottom: 2.5rem !important;
+            padding-left: 1.25rem !important;
+            padding-right: 1.25rem !important;
+          }
+        }
+      `}</style>
       <div
-        ref={brushRef}
-        className="brush-stroke-background"
+        ref={containerRef}
+        className={`brush-stroke-container ${className}`}
         style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 0,
-          willChange: 'transform, opacity'
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width,
+          // Soft ambient glow around the whole painted section
+          filter: usePremiumPurple ? 'drop-shadow(0px 10px 25px rgba(139, 141, 212, 0.25))' : 'none',
+          ...style,
         }}
       >
-        <svg
-          preserveAspectRatio="none"
-          viewBox="0 0 1000 200"
-          xmlns="http://www.w3.org/2000/svg"
-          style={{ width: '100%', height: '100%', display: 'block', overflow: 'visible' }}
+        {/* SVG background — absolute, fills the container entirely */}
+        <div
+          ref={brushRef}
+          className="brush-stroke-background"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 0,
+            willChange: 'transform, opacity',
+            pointerEvents: 'none',
+          }}
         >
-          <defs>
-            {/* Multi-tone purple gradients for realistic paint depth */}
-            <linearGradient id="brush-grad-base" x1="0%" y1="0%" x2="100%" y2="10%">
-              <stop offset="0%" stopColor="#5A5CA8" />
-              <stop offset="50%" stopColor="#6f72c6" />
-              <stop offset="100%" stopColor="#4A4C88" />
-            </linearGradient>
-            
-            <linearGradient id="brush-grad-mid" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#7E80CA" />
-              <stop offset="60%" stopColor="#8B8DD4" />
-              <stop offset="100%" stopColor="#6D6FBC" />
-            </linearGradient>
-            
-            <linearGradient id="brush-grad-top" x1="0%" y1="50%" x2="100%" y2="50%">
-              <stop offset="0%" stopColor="#B3B5EB" />
-              <stop offset="50%" stopColor="#9C9EE3" />
-              <stop offset="100%" stopColor="#8B8DD4" />
-            </linearGradient>
+          <svg
+            preserveAspectRatio="none"
+            viewBox="0 0 1000 200"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ width: '100%', height: '100%', display: 'block', overflow: 'visible' }}
+          >
+            <defs>
+              {/* Multi-tone purple gradients for realistic paint depth */}
+              <linearGradient id="brush-grad-base" x1="0%" y1="0%" x2="100%" y2="10%">
+                <stop offset="0%" stopColor="#5A5CA8" />
+                <stop offset="50%" stopColor="#6f72c6" />
+                <stop offset="100%" stopColor="#4A4C88" />
+              </linearGradient>
+              
+              <linearGradient id="brush-grad-mid" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#7E80CA" />
+                <stop offset="60%" stopColor="#8B8DD4" />
+                <stop offset="100%" stopColor="#6D6FBC" />
+              </linearGradient>
+              
+              <linearGradient id="brush-grad-top" x1="0%" y1="50%" x2="100%" y2="50%">
+                <stop offset="0%" stopColor="#B3B5EB" />
+                <stop offset="50%" stopColor="#9C9EE3" />
+                <stop offset="100%" stopColor="#8B8DD4" />
+              </linearGradient>
 
-            {/* Premium organic roughness filter with noise */}
-            <filter id="premium-roughness" x="-20%" y="-20%" width="140%" height="140%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.04 0.12" numOctaves="5" result="noise" seed="22"/>
-              <feDisplacementMap in="SourceGraphic" in2="noise" scale="16" xChannelSelector="R" yChannelSelector="G" />
-            </filter>
-          </defs>
+              {/* Premium organic roughness filter with noise */}
+              <filter id="premium-roughness" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.04 0.12" numOctaves="5" result="noise" seed="22"/>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="16" xChannelSelector="R" yChannelSelector="G" />
+              </filter>
+            </defs>
 
-          {/* Layered brush strokes for depth, opacity variance, and realistic texture */}
-          <g filter="url(#premium-roughness)">
-            {/* Layer 1: Darker, wider base stroke (spreads further) */}
-            <path
-              className="brush-layer"
-              data-target-opacity="0.85"
-              fill={usePremiumPurple ? "url(#brush-grad-base)" : color}
-              d="M 15,100 C 40,80 80,60 150,55 C 300,50 600,45 750,48 C 850,50 930,65 960,85 C 980,95 990,120 985,140 C 975,160 930,175 850,170 C 600,160 300,165 250,165 C 150,165 80,155 40,145 C 10,135 -10,125 15,100 Z M 15,100 C 25,120 50,75 10,95 Z M 950,135 C 930,155 970,165 980,145 Z"
-            />
-            
-            {/* Layer 2: Main, highly opaque stroke body */}
-            <path
-              className="brush-layer"
-              data-target-opacity="0.95"
-              fill={usePremiumPurple ? "url(#brush-grad-mid)" : color}
-              d="M 25,105 C 50,85 100,70 200,65 C 400,60 700,55 800,60 C 900,65 940,75 960,90 C 975,100 980,115 975,130 C 965,150 920,160 850,155 C 700,150 400,155 250,155 C 150,155 100,150 50,140 C 20,130 5,120 25,105 Z M 60,65 C 80,45 95,60 85,80 Z"
-            />
-            
-            {/* Layer 3: Subtle top highlight streaks inside the paint */}
-            <path
-              className="brush-layer"
-              data-target-opacity="0.65"
-              fill={usePremiumPurple ? "url(#brush-grad-top)" : color}
-              d="M 40,110 C 150,85 450,80 850,85 C 920,85 945,95 950,110 C 945,125 900,135 800,130 C 400,120 150,125 60,135 C 30,140 20,125 40,110 Z M 320,40 C 310,25 330,15 340,35 Z M 890,135 C 860,145 880,165 900,155 Z"
-            />
-          </g>
-        </svg>
+            {/* 
+              PATHS span the FULL viewBox (y≈2 → y≈198).
+              This ensures paint covers the entire container height regardless
+              of how tall the container becomes on mobile with wrapped text.
+            */}
+            <g filter="url(#premium-roughness)">
+              {/* Layer 1: Wide base stroke — spans full viewBox height */}
+              <path
+                className="brush-layer"
+                data-target-opacity="0.85"
+                fill={usePremiumPurple ? "url(#brush-grad-base)" : color}
+                d="M 8,100 C 35,4 80,2 155,5 C 310,3 600,2 755,4 C 855,5 935,15 965,45 C 985,70 995,110 990,148 C 980,178 935,196 855,196 C 605,195 310,197 255,197 C 155,196 82,188 42,176 C 10,162 -10,140 8,100 Z"
+              />
+              
+              {/* Layer 2: Main stroke body — spans full viewBox height */}
+              <path
+                className="brush-layer"
+                data-target-opacity="0.95"
+                fill={usePremiumPurple ? "url(#brush-grad-mid)" : color}
+                d="M 18,100 C 48,8 102,3 205,6 C 408,4 705,3 808,6 C 908,10 948,22 968,55 C 984,82 990,118 984,152 C 974,182 928,197 858,194 C 708,190 408,193 255,193 C 155,190 104,181 52,168 C 18,152 2,128 18,100 Z"
+              />
+              
+              {/* Layer 3: Top highlight — spans full viewBox height */}
+              <path
+                className="brush-layer"
+                data-target-opacity="0.65"
+                fill={usePremiumPurple ? "url(#brush-grad-top)" : color}
+                d="M 38,100 C 152,12 455,5 858,10 C 928,11 952,24 958,65 C 954,110 908,180 808,178 C 455,172 152,178 62,186 C 28,188 18,150 38,100 Z"
+              />
+            </g>
+          </svg>
+        </div>
+
+        {/* Text Content Wrapper */}
+        <div 
+          className="brush-content-inner"
+          style={{ 
+            position: 'relative', 
+            zIndex: 1, 
+            padding: '3rem 4rem',
+            width: '100%',
+            boxSizing: 'border-box',
+            textShadow: '0px 2px 10px rgba(0,0,0,0.15)' 
+          }}
+        >
+          {children}
+        </div>
       </div>
-
-      {/* Text Content Wrapper */}
-      <div 
-        style={{ 
-          position: 'relative', 
-          zIndex: 1, 
-          padding: '3rem 4rem', 
-          width: '100%',
-          // Ensures text pops beautifully off the busy paint texture
-          textShadow: '0px 2px 10px rgba(0,0,0,0.15)' 
-        }}
-      >
-        {children}
-      </div>
-    </div>
+    </>
   );
 };

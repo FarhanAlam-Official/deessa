@@ -199,7 +199,7 @@ export default function OurStoryPage() {
           <h2 className="text-center text-3xl font-bold sm:text-4xl">The Birth of a Vision</h2>
 
           <div className="relative mx-auto mt-16 max-w-5xl space-y-9">
-            <div className="bg-border absolute bottom-0 left-8 top-0 w-px md:left-1/2 md:-translate-x-1/2" />
+            <div className="bg-border absolute bottom-0 left-6 top-0 w-px md:left-1/2 md:-translate-x-1/2" />
 
             {timelineItems.map((item, index) => {
               const Icon = item.icon
