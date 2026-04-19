@@ -19,10 +19,11 @@ import { Button } from "@/components/ui/button"
 import { getPublishedTeamMembers } from "@/lib/data/team"
 import { timeline } from "@/data/timeline"
 import { ResourceDownloads } from "@/components/resource-downloads"
+import { AboutHero } from "@/components/about-hero"
 
 export const metadata: Metadata = {
-  title: "About Us - Dessa Foundation",
-  description: "Learn about our mission, vision, and the team behind Dessa Foundation working to empower Nepal.",
+  title: "Who We Are - Deessa Foundation",
+  description: "Learn about our mission, vision, and the team behind Deessa Foundation working to empower Nepal.",
 }
 
 export default async function AboutPage() {
@@ -30,45 +31,11 @@ export default async function AboutPage() {
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="relative">
-        <div className="w-full h-150 relative overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url("https://lh3.googleusercontent.com/aida-public/AB6AXuC5xzHfv2hii0hZm5knPtqnBhBXuF43kiNX-3L6bPoaNWoNJhuaBEp0UnvkJbxD_8jxmQHLjE0b1j-TMOJq_VOIrW9983EZgYM46P8MAwn7PzfzaLz2HsWKlKvt5lKXcXf_b6vms2V8NcnXaz9-_X8SNQsr6s7_GyimSfmkpcQ4Oh5YRcHnl1A7tisgSR5H6pZkE2H_RJ7Ed4vN8OmKIZ2WhCp5LlGraRVM17Ryo2wWWdRDFec31aYUj8Kv479a7Hlv2NIwScl7Eek")`,
-            }}
-          />
-          <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto">
-            <span className="bg-primary/90 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
-              Transparency & Results
-            </span>
-            <h1 className="text-white text-4xl md:text-6xl font-black leading-tight tracking-tight mb-6">
-              Our Story, Your Impact.
-            </h1>
-            <p className="text-white/90 text-lg md:text-xl font-medium max-w-2xl leading-relaxed mb-8">
-              We are dedicated to bridging the gap between potential and opportunity in Nepal&apos;s most remote
-              communities.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button asChild size="lg" className="rounded-full h-12 px-8 shadow-xl shadow-primary/20">
-                <Link href="#journey">Read Our Story</Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="rounded-full h-12 px-8 bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20"
-              >
-                <Link href="/impact#reports">View Annual Reports</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero Section — Split layout with Framer Motion */}
+      <AboutHero />
 
       {/* Introduction */}
-      <Section className="bg-surface">
+      <Section className="bg-[#f8f6f1]">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-primary font-bold tracking-wide uppercase text-sm mb-3">Who We Are</h2>
           <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-6">

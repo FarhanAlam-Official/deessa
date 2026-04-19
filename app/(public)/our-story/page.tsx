@@ -87,31 +87,99 @@ export default function OurStoryPage() {
   return (
     <main className="bg-background text-foreground">
       <section className="relative flex min-h-[82svh] items-center justify-center overflow-hidden px-6 pb-24 pt-20 md:px-8">
-        <div className="absolute inset-0">
+        {/* BACKGROUND IMAGE WITH FILTER */}
+        <div className="absolute inset-0 z-0">
           <Image
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtIw3lxyqsi7g4yxWVS90AUPG70Whm-tk5v2o2_aQaW8mqet5RDTIhmDJVSBySqRw2wKBhZ9auU-76Y8Tu-kNwMmmwOMEpR-46oevYoykoebZkqbdgEuC702d5XBx3S9VHXHEbxYjYdWHx8tTJA0zjnyTMTlfqW5EfNvNTPCnW4sX9kKsMCrFsUZoiU080I9MFODtZvHRKNLZ0XBlRnQh5q1vZEjpxQz161QA-D169NGV2utYyh4HCC3QJ6a7bjyyCer5vnJbtv24"
-            alt="Soft mountain silhouette in warm light"
+            src="/OurStoryHeroImage.png"
+            alt="Our Story hero background"
             fill
-            className="object-cover opacity-15 mix-blend-multiply"
+            className="object-cover"
+            style={{ 
+              objectPosition: "center center",
+              filter: "brightness(0.65) saturate(1.1)",
+            }}
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
+          {/* DARK GRADIENT SCRIM OVERLAY */}
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: "linear-gradient(to bottom, rgba(10, 15, 35, 0.55) 0%, rgba(10, 15, 35, 0.35) 50%, rgba(10, 15, 35, 0.70) 100%)"
+            }} 
+          />
         </div>
 
+        {/* TEXT CONTENT */}
         <div className="relative z-10 mx-auto max-w-5xl text-center">
-          <span className="inline-block rounded-full bg-primary/12 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary sm:text-sm">
+          <span 
+            className="inline-block rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider sm:text-sm"
+            style={{ color: "#29b6c8", backgroundColor: "rgba(41, 182, 200, 0.12)" }}
+          >
             Our Origins
           </span>
-          <h1 className="mt-6 text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-6xl md:text-7xl">
+          <h1 
+            className="mt-6 text-4xl font-extrabold leading-tight tracking-tight sm:text-6xl md:text-7xl"
+            style={{ color: "white" }}
+          >
             The Story Behind
             <br />
             deessa Foundation
           </h1>
-          <p className="text-foreground-muted mx-auto mt-7 max-w-3xl text-lg leading-relaxed md:text-2xl">
+          <p 
+            className="mx-auto mt-7 max-w-3xl text-lg leading-relaxed md:text-2xl"
+            style={{ color: "rgba(255, 255, 255, 0.82)" }}
+          >
             From personal struggles to a mission of inclusion and hope.
             <br className="hidden md:block" />
             Discover the heart of our journey.
           </p>
+        </div>
+
+        {/* BRUSH STROKE SVG DIVIDER */}
+        <div
+          className="absolute bottom-[-2px] left-0 w-full pointer-events-none"
+          style={{ zIndex: 20, lineHeight: 0 }}
+        >
+          <svg
+            viewBox="0 0 1440 100"
+            preserveAspectRatio="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ display: "block", width: "100%", height: "clamp(50px, 6vw, 90px)" }}
+          >
+            {/* Main brush edge */}
+            <path
+              d="M0,38 C120,72 240,18 380,52 C500,80 620,12 760,44 C880,70 1000,8 1140,38 C1260,62 1360,22 1440,42 L1440,100 L0,100 Z"
+              fill="#f8f6f1"
+            />
+            {/* Texture layer, semi-transparent */}
+            <path
+              d="M0,55 C150,28 300,68 440,38 C570,10 700,62 840,35 C970,10 1100,58 1240,30 C1330,12 1400,48 1440,32 L1440,100 L0,100 Z"
+              fill="#f8f6f1"
+              opacity="0.55"
+            />
+            {/* Bristle marks left edge */}
+            <path
+              d="M0,38 C-8,32 -12,42 -6,50 C-2,55 8,52 0,58"
+              fill="#f8f6f1"
+              opacity="0.6"
+            />
+            {/* Bristle marks right edge */}
+            <path
+              d="M1440,42 C1448,36 1452,46 1446,54 C1442,59 1432,56 1440,62"
+              fill="#f8f6f1"
+              opacity="0.6"
+            />
+            {/* Top bristle drips */}
+            <path d="M320,52 C318,38 322,28 325,24 C323,32 324,44 320,52" fill="#f8f6f1" opacity="0.35" />
+            <path d="M740,44 C738,28 742,16 745,12 C743,22 744,36 740,44" fill="#f8f6f1" opacity="0.3" />
+            <path d="M1100,38 C1098,24 1102,14 1105,10 C1103,20 1104,32 1100,38" fill="#f8f6f1" opacity="0.32" />
+            {/* Splatter dots */}
+            <circle cx="210" cy="42" r="2.5" fill="#f8f6f1" opacity="0.4" />
+            <circle cx="580" cy="22" r="2" fill="#f8f6f1" opacity="0.35" />
+            <circle cx="980" cy="18" r="2" fill="#f8f6f1" opacity="0.32" />
+            <circle cx="1320" cy="30" r="2.5" fill="#f8f6f1" opacity="0.38" />
+            <ellipse cx="440" cy="35" rx="3" ry="1.5" fill="#f8f6f1" opacity="0.3" />
+          </svg>
         </div>
       </section>
 
