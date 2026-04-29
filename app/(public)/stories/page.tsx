@@ -72,6 +72,9 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
 
   return (
     <>
+      {/* ═══════════════════════════════════════════
+          SECTION 1 — HERO (Original Design)
+      ═══════════════════════════════════════════ */}
       <section className="relative isolate flex min-h-[100svh] overflow-hidden bg-[linear-gradient(180deg,#fbf8f2_0%,#f4efe5_100%)]">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
@@ -159,6 +162,9 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
         </div>
       </section>
 
+      {/* ═══════════════════════════════════════════
+          SECTION 2 — FEATURED STORY (Improved Layout)
+      ═══════════════════════════════════════════ */}
       <section id="featured" className="bg-[linear-gradient(180deg,#f7f2ea_0%,#fbf8f3_100%)] py-12 md:py-16">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
@@ -219,6 +225,9 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
         </div>
       </section>
 
+      {/* ═══════════════════════════════════════════
+          SECTION 3 — WRITTEN STORIES GRID (Improved Cards)
+      ═══════════════════════════════════════════ */}
       <section id="stories" className="bg-background py-12 md:py-16">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -369,7 +378,7 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <div className="rounded-[2.25rem] bg-primary px-6 py-10 text-center text-white shadow-[0_22px_60px_-40px_rgba(54,69,122,0.85)] md:px-10 md:py-14">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-white/70">Take action</p>
-            <h2 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">Be part of someone’s story.</h2>
+            <h2 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">Be part of someone's story.</h2>
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-white/85">
               Your support helps families access therapy, inclusive education, and patient guidance that change daily life for children and caregivers.
             </p>
