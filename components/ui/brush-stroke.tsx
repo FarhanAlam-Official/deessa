@@ -18,7 +18,7 @@ interface BrushStrokeProps {
 }
 
 export const BrushStroke: React.FC<BrushStrokeProps> = ({
-  color = '#8B8DD4', 
+  color = '#8B8DD4',
   width = '100%',
   height = '100%',
   animate = true,
@@ -37,13 +37,13 @@ export const BrushStroke: React.FC<BrushStrokeProps> = ({
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
-        start: "top 85%", 
+        start: "top 85%",
         toggleActions: "play none none none"
       }
     });
 
     const layers = brushRef.current.querySelectorAll('.brush-layer');
-    
+
     tl.fromTo(
       layers,
       { scaleX: 0, opacity: 0 },
@@ -121,13 +121,13 @@ export const BrushStroke: React.FC<BrushStrokeProps> = ({
                 <stop offset="50%" stopColor="#6f72c6" />
                 <stop offset="100%" stopColor="#4A4C88" />
               </linearGradient>
-              
+
               <linearGradient id="brush-grad-mid" x1="0%" y1="100%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#7E80CA" />
                 <stop offset="60%" stopColor="#8B8DD4" />
                 <stop offset="100%" stopColor="#6D6FBC" />
               </linearGradient>
-              
+
               <linearGradient id="brush-grad-top" x1="0%" y1="50%" x2="100%" y2="50%">
                 <stop offset="0%" stopColor="#B3B5EB" />
                 <stop offset="50%" stopColor="#9C9EE3" />
@@ -141,7 +141,7 @@ export const BrushStroke: React.FC<BrushStrokeProps> = ({
               </filter>
             </defs>
 
-            {/* 
+            {/*
               PATHS span the FULL viewBox (y≈2 → y≈198).
               This ensures paint covers the entire container height regardless
               of how tall the container becomes on mobile with wrapped text.
@@ -154,7 +154,7 @@ export const BrushStroke: React.FC<BrushStrokeProps> = ({
                 fill={usePremiumPurple ? "url(#brush-grad-base)" : color}
                 d="M 8,100 C 35,4 80,2 155,5 C 310,3 600,2 755,4 C 855,5 935,15 965,45 C 985,70 995,110 990,148 C 980,178 935,196 855,196 C 605,195 310,197 255,197 C 155,196 82,188 42,176 C 10,162 -10,140 8,100 Z"
               />
-              
+
               {/* Layer 2: Main stroke body — spans full viewBox height */}
               <path
                 className="brush-layer"
@@ -162,7 +162,7 @@ export const BrushStroke: React.FC<BrushStrokeProps> = ({
                 fill={usePremiumPurple ? "url(#brush-grad-mid)" : color}
                 d="M 18,100 C 48,8 102,3 205,6 C 408,4 705,3 808,6 C 908,10 948,22 968,55 C 984,82 990,118 984,152 C 974,182 928,197 858,194 C 708,190 408,193 255,193 C 155,190 104,181 52,168 C 18,152 2,128 18,100 Z"
               />
-              
+
               {/* Layer 3: Top highlight — spans full viewBox height */}
               <path
                 className="brush-layer"
@@ -175,15 +175,15 @@ export const BrushStroke: React.FC<BrushStrokeProps> = ({
         </div>
 
         {/* Text Content Wrapper */}
-        <div 
+        <div
           className="brush-content-inner"
-          style={{ 
-            position: 'relative', 
-            zIndex: 1, 
+          style={{
+            position: 'relative',
+            zIndex: 1,
             padding: '3rem 4rem',
             width: '100%',
             boxSizing: 'border-box',
-            textShadow: '0px 2px 10px rgba(0,0,0,0.15)' 
+            textShadow: '0px 2px 10px rgba(0,0,0,0.15)'
           }}
         >
           {children}

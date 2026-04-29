@@ -85,12 +85,8 @@ export function OurStorySection() {
                   animate={true}
                   animationDuration={1.2}
                   className="mx-auto"
-                  style={{
-                    padding: '28px 48px',
-                    minHeight: 0
-                  }}
                 >
-                  <div className="py-0 px-0">
+                  <div className="py-2 px-3 md:px-8">
                     <h2 className="font-marissa text-3xl md:text-[42px] text-white text-center" style={{ lineHeight: 1.2 }}>
                       How Deesha Started
                     </h2>
