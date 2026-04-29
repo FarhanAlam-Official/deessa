@@ -16,6 +16,7 @@ interface Story {
   published_at: string | null
   created_at: string | null
   read_time: string | null
+  formattedDate?: string
 }
 
 interface StoriesSectionsProps {
@@ -24,7 +25,6 @@ interface StoriesSectionsProps {
   spotlightMainStory: Story | null
   spotlightSideStories: Story[]
   remainingStories: Story[]
-  formatStoryDate: (story: { published_at?: string | null; created_at?: string | null }) => string
 }
 
 export function StoriesSections({
@@ -33,7 +33,6 @@ export function StoriesSections({
   spotlightMainStory,
   spotlightSideStories,
   remainingStories,
-  formatStoryDate,
 }: StoriesSectionsProps) {
   // Animation variants for featured story
   const imageVariants = {
@@ -268,7 +267,7 @@ export function StoriesSections({
                         {spotlightMainStory.excerpt}
                       </p>
                       <div className="mt-4 flex items-center justify-between">
-                        <span className="font-dm text-xs text-gray-500">{formatStoryDate(spotlightMainStory)}</span>
+                        <span className="font-dm text-xs text-gray-500">{spotlightMainStory.formattedDate}</span>
                         <span className="font-comic text-teal text-sm font-bold">Read story →</span>
                       </div>
                     </div>
@@ -305,7 +304,7 @@ export function StoriesSections({
                           {story.title}
                         </h3>
                         <div className="mt-2 flex items-center justify-between">
-                          <span className="font-dm text-xs text-gray-500">{formatStoryDate(story)}</span>
+                          <span className="font-dm text-xs text-gray-500">{story.formattedDate}</span>
                           <span className="font-comic text-teal text-xs font-bold">READ ↗</span>
                         </div>
                       </div>
@@ -363,7 +362,7 @@ export function StoriesSections({
                           {story.excerpt}
                         </p>
                         <div className="mt-4 flex items-center justify-between">
-                          <span className="font-dm text-xs text-gray-500">{formatStoryDate(story)}</span>
+                          <span className="font-dm text-xs text-gray-500">{story.formattedDate}</span>
                           <span className="font-comic text-teal text-sm font-bold">Read story →</span>
                         </div>
                       </div>
@@ -416,7 +415,7 @@ export function StoriesSections({
                           {story.excerpt}
                         </p>
                         <div className="mt-4 flex items-center justify-between">
-                          <span className="font-dm text-xs text-gray-500">{formatStoryDate(story)}</span>
+                          <span className="font-dm text-xs text-gray-500">{story.formattedDate}</span>
                           <span className="font-comic text-teal text-sm font-bold">Read story →</span>
                         </div>
                       </div>

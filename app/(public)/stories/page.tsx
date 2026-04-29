@@ -70,6 +70,22 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
   const categoryCount = new Set(allStories.map((story) => story.category || "General")).size
   const latestStory = allStories.find((story) => story.published_at || story.created_at) ?? null
 
+  // Format dates on the server side
+  const formattedStories = {
+    spotlightMainStory: spotlightMainStory ? {
+      ...spotlightMainStory,
+      formattedDate: formatStoryDate(spotlightMainStory)
+    } : null,
+    spotlightSideStories: spotlightSideStories.map(story => ({
+      ...story,
+      formattedDate: formatStoryDate(story)
+    })),
+    remainingStories: remainingStories.map(story => ({
+      ...story,
+      formattedDate: formatStoryDate(story)
+    }))
+  }
+
   return (
     <>
       {/* ═══════════════════════════════════════════
@@ -166,10 +182,9 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
       <StoriesSections
         primaryStory={primaryStory}
         activeFilter={activeFilter}
-        spotlightMainStory={spotlightMainStory}
-        spotlightSideStories={spotlightSideStories}
-        remainingStories={remainingStories}
-        formatStoryDate={formatStoryDate}
+        spotlightMainStory={formattedStories.spotlightMainStory}
+        spotlightSideStories={formattedStories.spotlightSideStories}
+        remainingStories={formattedStories.remainingStories}
       />
 
       {/* CTA Section */}
