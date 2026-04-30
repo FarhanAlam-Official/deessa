@@ -7,7 +7,7 @@ export const metadata = {
   description: "View and manage system alerts",
 }
 
-async function getAlerts(supabase: ReturnType<typeof createClient>) {
+async function getAlerts(supabase: Awaited<ReturnType<typeof createClient>>) {
   // Get recent payment events that indicate issues
   const { data: recentEvents } = await supabase
     .from("payment_events")
